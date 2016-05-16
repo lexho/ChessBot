@@ -1,5 +1,9 @@
 package test;
 
+import java.util.Scanner;
+
+import board.Board;
+import board.Move;
 import board.Position;
 import engine.ChessBot;
 
@@ -13,11 +17,26 @@ public class ChessBotTest {
 		
 		System.out.println("create initial Position...");
 		Position position = new Position();
+		Board board = new Board(position); // Create new (internal) Board by position argument
+		
+		Scanner terminalInput = new Scanner(System.in);
+		
 		System.out.println("create new ChessBot...");
-		ChessBot chessBot = new ChessBot(position);
-		System.out.println("get next move...");
-		String nextMove = chessBot.getNextMove();
-		System.out.println(nextMove);
+		
+		while(true) {
+			System.out.println();
+			System.out.println(board.toString());
+			System.out.print("Your move: ");
+			String move = terminalInput.nextLine(); // read user input
+			board.makeMove(new Move(move));
+			
+			ChessBot chessBot = new ChessBot(board.getPosition());
+			String nextMove = chessBot.getNextMove();
+			System.out.println(nextMove);
+			board.makeMove(new Move(nextMove));
+		}
+
+
 	}
 
 }

@@ -1,21 +1,84 @@
 package engine;
 
+import java.util.Random;
+import java.util.function.Predicate;
+
+import search.functions.BoardPredicate;
+import search.nodes.BoardNode;
+import search.Node;
 import board.Board;
+import board.Move;
 import board.Position;
+import board.pieces.Piece;
+import search.algorithms.RS;
 
 public class ChessBot {
-
+	private Board board;
+	
+	public ChessBot() {
+		board = new Board(new Position()); // Create new (internal) Board with initial position
+		init();
+	}
+	
 	public ChessBot(Position position) {
-		System.out.println("Hello from ChessBot!");
-		System.out.println();
-		System.out.println(position.toString());
 		board = new Board(position); // Create new (internal) Board by position argument
+		init();
+	}
+	
+	private void init() {
+		System.out.println("ChessBot by Alexander Hoertenhuber | May 2016");
 	}
 	
 	public String getNextMove() {
-		return "";
+		board.setColor(board.getActiveColor());
+
+		/* Random Search */
+		RS random = new RS();
+		//b.getPosition().getPieces().getBlackPieces().size() < b.getPosition().getPieces().getWhitePieces().size();
+		Predicate<Node> endReached = new BoardPredicate(b -> b.getPosition().getMoveNr() > 50);
+		
+		BoardNode endNode = null;
+		int i = 0;
+		while(endNode == null && i < 10) {
+			//System.out.println("search " + i);
+			//System.out.println(board.toString());
+			BoardNode start = new BoardNode(board.copy());
+			endNode = (BoardNode) random.search(start, endReached);
+			i++;
+		}
+		Move nextMove;
+		if(endNode == null) {
+
+		}
+		
+		Node node = endNode;
+		try {
+			while(!node.parent().isRoot()) {
+				node = node.parent();
+			}
+		} catch (NullPointerException e) {
+			System.err.println("Random Search returned null");
+			Random rand = new Random();
+			nextMove = board.getPossibleMoves().get(rand.nextInt(board.getPossibleMoves().size()));
+			return nextMove.toString();
+		}
+		/*System.out.println(node.parent());
+		for(Node n : node.parent().adjacent()) {
+			System.out.println(n.getAction().toString());
+		}
+		System.out.println(node);*/
+		nextMove = node.getAction();
+
+		return nextMove.toString();
 	}
 	
-	private Board board;
+	public boolean makeMove(String movecmd) {
+		//System.out.println("Bot: MakeMove: " + movecmd);
+		return board.makeMove(new Move(movecmd));
+	}
+	
+	public void printBoard() {
+		board.print();
+	}
 
 }
