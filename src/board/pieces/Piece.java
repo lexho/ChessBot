@@ -68,12 +68,18 @@ public class Piece {
 	}
 	
 	public List<Move> getPossibleMoves() {
+		//System.out.println("possible moves piece");
+		//System.out.println("actions: " + actions.size());
 		List<Move> moves = new ArrayList<Move>();
 		for(Action action : actions) {
 			int[] target = action.apply(coord);
 			
 			/* Validate target position */
+			//System.out.print(new Move(coord, action.apply(coord)));
 			boolean isValid = MoveValidator.validateSquare(target);
+			//if(!isValid) System.out.print("invalid ");
+			//System.out.println();
+
 			if(isValid) moves.add(new Move(coord, action.apply(coord)));
 		}
 		return moves;

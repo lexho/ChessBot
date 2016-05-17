@@ -36,7 +36,7 @@ public class PieceList extends ArrayList<Piece> {
 	
 	public Piece getPieceAt(int[] coord) {
 		for(Piece p : this) {
-			if(p.getPosition().equals(coord)) return p;
+			if(p.getPosition()[0] == coord[0] && p.getPosition()[1] == coord[1]) return p;
 		}
 		return null;
 	}

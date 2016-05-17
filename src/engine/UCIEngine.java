@@ -75,7 +75,7 @@ public class UCIEngine {
 			System.out.println(subcmd.substring(0, end));*/
 			//System.out.println(cmds.get(1));
 			if(cmds.get(1).equals("startpos")) {
-				bot = new ChessBot();
+				bot.init();
 				//System.out.println("eq startpos");
 				if(cmds.size() > 2)
 					if(cmds.get(2).equals("moves")) {

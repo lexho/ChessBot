@@ -16,26 +16,26 @@ public class ChessBot {
 	private Board board;
 	
 	public ChessBot() {
-		board = new Board(new Position()); // Create new (internal) Board with initial position
+		System.out.println("ChessBot by Alexander Hoertenhuber | May 2016");
 		init();
 	}
 	
 	public ChessBot(Position position) {
 		board = new Board(position); // Create new (internal) Board by position argument
-		init();
 	}
 	
-	private void init() {
-		System.out.println("ChessBot by Alexander Hoertenhuber | May 2016");
+	public void init() {
+		board = new Board(new Position()); // Create new (internal) Board with initial position
 	}
 	
 	public String getNextMove() {
 		board.setColor(board.getActiveColor());
+		System.out.println(board.getPossibleMoves());
 
 		/* Random Search */
 		RS random = new RS();
 		//b.getPosition().getPieces().getBlackPieces().size() < b.getPosition().getPieces().getWhitePieces().size();
-		Predicate<Node> endReached = new BoardPredicate(b -> b.getPosition().getMoveNr() > 50);
+		Predicate<Node> endReached = new BoardPredicate(b -> (b.getPossibleMoves().size() == 0 || b.getMoveNr() > 200));
 		
 		BoardNode endNode = null;
 		int i = 0;
@@ -59,16 +59,20 @@ public class ChessBot {
 		} catch (NullPointerException e) {
 			System.err.println("Random Search returned null");
 			Random rand = new Random();
-			nextMove = board.getPossibleMoves().get(rand.nextInt(board.getPossibleMoves().size()));
+			//nextMove = board.getPossibleMoves().get(rand.nextInt(board.getPossibleMoves().size()));
+			nextMove = null;
 			return nextMove.toString();
 		}
 		/*System.out.println(node.parent());
 		for(Node n : node.parent().adjacent()) {
 			System.out.println(n.getAction().toString());
-		}
-		System.out.println(node);*/
+		}*/
+		System.out.println(node);
 		nextMove = node.getAction();
 
+		/*Piece p = board.getPosition().getPieces().getPieceAt(nextMove.getSource());
+		System.out.println(board.getPossibleMoves());*/
+		
 		return nextMove.toString();
 	}
 	

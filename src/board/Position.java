@@ -175,6 +175,23 @@ public class Position {
 		List<Piece> opponentsPieces = getPieces().getPieces(getUnactiveColor());
 		for(Piece p : opponentsPieces) {
 			for(Move m : p.getPossibleMoves()) {
+				if(MoveValidator.validate(this, m)) 
+				if(m.getTarget()[0] == king.getPosition()[0] && m.getTarget()[1] == king.getPosition()[1]) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	public boolean isInCheck(char color) {
+		Piece king = getPieces().getByID(Piece.KING);
+		List<Piece> opponentsPieces;
+		if(color == getActiveColor()) opponentsPieces = getPieces().getPieces(getUnactiveColor());
+		else opponentsPieces = getPieces().getPieces(getActiveColor());
+		for(Piece p : opponentsPieces) {
+			for(Move m : p.getPossibleMoves()) {
+				if(MoveValidator.validate(this, m)) 
 				if(m.getTarget()[0] == king.getPosition()[0] && m.getTarget()[1] == king.getPosition()[1]) {
 					return true;
 				}

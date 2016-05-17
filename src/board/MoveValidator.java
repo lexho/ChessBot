@@ -18,16 +18,22 @@ public class MoveValidator {
 		boolean valid = false;
 		for(Action action : piece.getActions()) {
 			int[] trg = action.apply(m.getSource());
+			
 			/* Action target is the same as move target */
 			if(trg[0] == m.getTarget()[0] && trg[1] == m.getTarget()[1]) {
-				//System.out.println("equal target");
 				boolean isAllowed = action.validate(m.getSource(), position);
-				if(isAllowed) { valid = true; break; }
+				if(isAllowed) { 
+					//System.out.println(piece + " " + m + " is valid");
+					valid = true; 
+					break; 
+				}
 				//System.out.println(allowed.toString() + " vs. " + m);
-				//if(allowed.toString().equals(m.toString())) { valid = true; break; }
 			}
 		}
-		if(!valid) return false;
+		
+		if(!valid) {
+			return false;
+		}
 		
 		/*Action action = m.getAction();
 		action.setTakes(!target.isFree());
