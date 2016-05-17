@@ -23,7 +23,6 @@ public class Rook extends Piece {
 			actions.add(new Action(0 * d, -1 * d, true));
 			actions.add(new Action(1 * d, 0 * d, true));
 		}
-		//actions.clear(); // TODO remove that line
 	}
 
 }

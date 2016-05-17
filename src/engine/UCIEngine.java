@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Scanner;
 
 import board.Move;
+import exceptions.InvalidMoveException;
 
 public class UCIEngine {
 	static ChessBot bot;
@@ -81,14 +82,18 @@ public class UCIEngine {
 					if(cmds.get(2).equals("moves")) {
 						//System.out.println("eq moves");
 						for(int i = 3; i < cmds.size(); i++) {
-							bot.makeMove(cmds.get(i));
+							try {
+								bot.makeMove(cmds.get(i));
+							} catch (InvalidMoveException e) {
+								System.out.println(e.getMessage());
+							}
 						}
 					}
 			}
 			break;
 		case "go":
 			String nextMove = bot.getNextMove();
-			System.out.println("bestmove " + nextMove + " ponder");
+			System.out.println("bestmove " + nextMove + " ponder");	
 			break;
 		case "stop":
 			break;

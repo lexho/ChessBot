@@ -14,6 +14,7 @@ public class MoveValidator {
 		Square target = position.getSquareAt(m.getTarget());
 		
 		/* Compare the move to the moves the piece is able to make */
+		//TODO validate castle
 		Piece piece = start.getPiece();
 		boolean valid = false;
 		for(Action action : piece.getActions()) {

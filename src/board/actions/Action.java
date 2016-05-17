@@ -45,62 +45,114 @@ public class Action {
 		boolean distance = false;
 		int dx = Math.abs(target[0] - source[0]);
 		int dy = Math.abs(target[1] - source[1]);
-		if(blockable && (dx > 1 || dy > 1)) {		
+		if(blockable && (dx > 1 || dy > 1)) {	
 			Move move = new Move(source, target);
 			//System.out.print(move + ": ");
 			/*//System.out.print("blockable check " + source[0] + "/" + source[1]);
 			//System.out.println(" --> " + target[0] + "/" + target[1]);*/
 			
-			// Up
-			if(target[1] > source[1]) {
-				//System.out.print("dir: UP, ");
-				for(int y = source[1] + 1; y < target[1]; y++) {
-					//System.out.print(y + ", ");
-					if(!(pos.getPieces().getPieceAt(new int[]{source[0], y}) == null)) {
-						//System.out.println();
-						return false;
+			if(srcPiece.getID() == Piece.ROOK || (srcPiece.getID() == Piece.QUEEN && dx != dy)) {
+				// Up
+				if(target[1] > source[1]) {
+					//System.out.print("dir: UP, ");
+					for(int y = source[1] + 1; y < target[1]; y++) {
+						//System.out.print(y + ", ");
+						if(!(pos.getPieces().getPieceAt(new int[]{source[0], y}) == null)) {
+							//System.out.println();
+							return false;
+						}
+						//if(!pos.getSquareAt(new int[]{source[0], y}).isFree()) return false;
 					}
-					//if(!pos.getSquareAt(new int[]{source[0], y}).isFree()) return false;
+				}
+				
+				// Down
+				if(target[1] < source[1]) {
+					//System.out.print("dir: DOWN, ");
+					for(int y = source[1] - 1; y > target[1]; y--) {
+						//System.out.print(y + ", ");
+						if(!(pos.getPieces().getPieceAt(new int[]{source[0], y}) == null)) {
+							//System.out.println();
+							return false;
+						}
+						//if(!pos.getSquareAt(new int[]{source[0], y}).isFree()) return false;
+					}
+	
+				}
+				
+				// Left
+				if(target[0] < source[0]) {
+					//System.out.print("dir: LEFT, ");
+					for(int x = source[0] - 1; x > target[0]; x--) {
+						//System.out.print(x + ", ");
+						if(!(pos.getPieces().getPieceAt(new int[]{x, source[1]}) == null)) {
+							//System.out.println();
+							return false;
+						}
+						//if(!pos.getSquareAt(new int[]{x, source[1]}).isFree()) return false;
+					}
+				}
+				
+				// Right
+				if(target[0] > source[0]) {
+					//System.out.print("dir: RIGHT, ");
+					for(int x = source[0] + 1; x < target[0]; x++) {
+						//System.out.print(x + ", ");
+						if(!(pos.getPieces().getPieceAt(new int[]{x, source[1]}) == null)) {
+							//System.out.println();
+							return false;
+						}
+						//if(!pos.getSquareAt(new int[]{x, source[1]}).isFree()) return false;
+					}
 				}
 			}
-			
-			// Down
-			if(target[1] < source[1]) {
-				//System.out.print("dir: DOWN, ");
-				for(int y = source[1] - 1; y > target[1]; y--) {
-					//System.out.print(y + ", ");
-					if(!(pos.getPieces().getPieceAt(new int[]{source[0], y}) == null)) {
-						//System.out.println();
-						return false;
+			if(srcPiece.getID() == Piece.BISHOP || (srcPiece.getID() == Piece.QUEEN && dx == dy)) {
+				// Up Right
+				if(target[0] > source[0] && target[1] > source[1]) {
+					//System.out.print("dir: UP, ");
+					for(int x = source[0] + 1, y = source[1] + 1; x < target[0]; x++,y++) {
+						//System.out.print(y + ", ");
+						if(!(pos.getPieces().getPieceAt(new int[]{x, y}) == null)) {
+							//System.out.println();
+							return false;
+						}
+						//if(!pos.getSquareAt(new int[]{source[0], y}).isFree()) return false;
 					}
-					//if(!pos.getSquareAt(new int[]{source[0], y}).isFree()) return false;
 				}
-
-			}
-			
-			// Left
-			if(target[0] < source[0]) {
-				//System.out.print("dir: LEFT, ");
-				for(int x = source[0] - 1; x > target[0]; x--) {
-					//System.out.print(x + ", ");
-					if(!(pos.getPieces().getPieceAt(new int[]{x, source[1]}) == null)) {
-						//System.out.println();
-						return false;
+				
+				// Down Right
+				if(target[0] > source[0] && target[1] < source[1]) {
+					for(int x = source[0] + 1, y = source[1] - 1; x < target[0]; x++,y--) {
+						//System.out.print(y + ", ");
+						if(!(pos.getPieces().getPieceAt(new int[]{x, y}) == null)) {
+							//System.out.println();
+							return false;
+						}
+						//if(!pos.getSquareAt(new int[]{source[0], y}).isFree()) return false;
 					}
-					//if(!pos.getSquareAt(new int[]{x, source[1]}).isFree()) return false;
 				}
-			}
-			
-			// Right
-			if(target[0] > source[0]) {
-				//System.out.print("dir: RIGHT, ");
-				for(int x = source[0] + 1; x < target[0]; x++) {
-					//System.out.print(x + ", ");
-					if(!(pos.getPieces().getPieceAt(new int[]{x, source[1]}) == null)) {
-						//System.out.println();
-						return false;
+				
+				// Down Left
+				if(target[0] < source[0] && target[1] < source[1]) {
+					for(int x = source[0] - 1, y = source[1] - 1; x > target[0]; x--,y--) {
+						//System.out.print(y + ", ");
+						if(!(pos.getPieces().getPieceAt(new int[]{x, y}) == null)) {
+							//System.out.println();
+							return false;
+						}
+						//if(!pos.getSquareAt(new int[]{source[0], y}).isFree()) return false;
 					}
-					//if(!pos.getSquareAt(new int[]{x, source[1]}).isFree()) return false;
+				}
+				
+				// Up Left
+				if(target[0] < source[0] && target[1] > source[1]) {
+					for(int x = source[0] - 1, y = source[1] + 1; x > target[0]; x--,y++) {
+						//System.out.print(y + ", ");
+						if(!(pos.getPieces().getPieceAt(new int[]{x, y}) == null)) {
+							//System.out.println();
+							return false;
+						}
+						//if(!pos.getSquareAt(new int[]{source[0], y}).isFree()) return false;
+					}
 				}
 			}
 			

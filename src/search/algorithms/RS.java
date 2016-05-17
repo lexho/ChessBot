@@ -21,7 +21,7 @@ public class RS implements Search
 	{
 		// first we will need some randomness
 		@SuppressWarnings("unused")
-		Random random = new Random(42L);
+		Random random = new Random(17L);
 
 		// we will go in random directions for as long as is necessary
 		Node current = start;

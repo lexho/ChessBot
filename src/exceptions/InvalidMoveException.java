@@ -34,8 +34,9 @@ public class InvalidMoveException extends RuntimeException {
 		//printErrorMessage(m, pos);
 	}
 	
+	@Override
 	public String getMessage() {
-		return msg;
+		return this.getClass().getName().toString() + ": " + msg;
 	}
 	
 	private void printErrorMessage(Move m, Position pos) {

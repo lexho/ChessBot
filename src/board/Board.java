@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import board.pieces.Piece;
+import board.pieces.Queen;
 import exceptions.InvalidMoveException;
 
 public class Board {
@@ -29,8 +30,7 @@ public class Board {
 	
 	/* Executes valid moves */
 	public boolean makeMove(Move m) {
-		// TODO remove the next line
-		//if(m.getSource()[0] == 7 && m.getSource()[1] == 0 && m.getTarget()[0] == 7 && m.getTarget()[1] == 5) throw new InvalidMoveException(m, currentPosition);
+
 		boolean moveIsValid = MoveValidator.validate(currentPosition, m);
 		if(!moveIsValid) throw new InvalidMoveException(m, currentPosition);
 		if(moveIsValid) return executeMove(m);
@@ -45,6 +45,7 @@ public class Board {
 	
 	/* Executes move m on the current board */
 	private boolean executeMove(Move m) {
+		//TODO detect castle
 		//System.out.println("executing move: " + m.toString());
 		int[] src = m.getSource();
 		int[] trg = m.getTarget();
@@ -52,6 +53,18 @@ public class Board {
 		/* Move piece to target */
 		Piece piece = currentPosition.getSquareAt(src[0], src[1]).getPiece();
 		pieces.removePieceAt(trg);	// remove token piece
+
+		/* Promotion (P -> Q,N,R,B on 8th rank)*/
+		if(piece.getID() == Piece.WHITE_PAWN && trg[1] == 7) {
+			pieces.removePieceAt(src);
+			pieces.add(new Queen("Q", new int[]{trg[0],trg[1]}));
+			piece = pieces.getPieceAt(trg);
+		}
+		else if(piece.getID() == Piece.BLACK_PAWN && trg[1] == 0) {
+			pieces.removePieceAt(src);
+			pieces.add(new Queen("q", new int[]{trg[0],trg[1]}));
+			piece = pieces.getPieceAt(trg);
+		}
 		currentPosition.getSquareAt(trg[0], trg[1]).setPiece(piece); // update position table
 		piece.setPosition(trg[0], trg[1]); // update piece
 		
@@ -86,53 +99,19 @@ public class Board {
 	}
 	
 	public List<Move> getPossibleMoves() {
-		boolean inCheck = currentPosition.isInCheck();
-		
 		List<Move> possibleMoves = new ArrayList<Move>();
-		
-		/*if(inCheck) {
-			System.out.println("Check!");
-			Piece king = pieces.getByID(Piece.KING);
-			
-			// get all moves where the result is not a check
-			Board testBoard = new Board(this.copy());
-			
-			for(Piece piece : pieces) {
-				for(Move m : piece.getPossibleMoves()) {
-					if(MoveValidator.validate(currentPosition, m)) {
-						testBoard.makeMove(m);
-						if(!testBoard.getPosition().isInCheck(testBoard.getPosition().getUnactiveColor())) {
-							possibleMoves.add(m);
-						}
+		for(Piece piece : pieces) {
+			for(Move m : piece.getPossibleMoves()) {
+				if(MoveValidator.validate(currentPosition, m)) {
+					Board testBoard = new Board(this.copy());
+					testBoard.makeMove(m);
+					//char opponent = testBoard.getPosition().getUnactiveColor();
+					if(!testBoard.getPosition().isInCheck(color)) {
+						possibleMoves.add(m);
 					}
 				}
 			}
-			
-			/* king's escape moves */
-			/*for(Move m : king.getPossibleMoves()) {
-				Board testBoard = this.copy();
-				testBoard.makeMove(m);
-				if(!testBoard.currentPosition.isInCheck()) {
-					possibleMoves.add(m); // with this move we can safe the king
-				}
-			}*/
-			// TODO restore king's safety, clear threat
-			
-		/*} else {*/
-			for(Piece piece : pieces) {
-				for(Move m : piece.getPossibleMoves()) {
-					boolean moveIsValid = false;
-					moveIsValid = MoveValidator.validate(currentPosition, m);
-					if(moveIsValid) {
-						Board testBoard = new Board(this.copy());
-						testBoard.makeMove(m);
-						if(!testBoard.getPosition().isInCheck(testBoard.getPosition().getUnactiveColor())) {
-							possibleMoves.add(m);
-						}
-					}
-				}
-			}
-		//}
+		}
 		return possibleMoves;
 	}
 	

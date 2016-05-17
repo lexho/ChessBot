@@ -35,6 +35,7 @@ public class ChessBot {
 		/* Random Search */
 		RS random = new RS();
 		//b.getPosition().getPieces().getBlackPieces().size() < b.getPosition().getPieces().getWhitePieces().size();
+		// TODO change Predicate to real goal of the game
 		Predicate<Node> endReached = new BoardPredicate(b -> (b.getPossibleMoves().size() == 0 || b.getMoveNr() > 200));
 		
 		BoardNode endNode = null;

@@ -6,6 +6,20 @@ public class Knight extends Piece {
 	
 	public Knight(String rep, int[] coord) {
 		super(rep, coord);
+		ID = 5;
+		
+		/* without taking */
+		actions.add(new Action(1, 2, false)); // one step to the right and two steps forward
+		actions.add(new Action(-1, 2, false)); // one step to the left and two steps forward
+		actions.add(new Action(1, -2, false)); // ...
+		actions.add(new Action(-1, -2, false));
+		
+		actions.add(new Action(2, 1, false)); // two steps to the right and one step forward
+		actions.add(new Action(2, -1, false)); // two steps to the left and one step forward
+		actions.add(new Action(-2, 1, false)); // ...
+		actions.add(new Action(-2, -1, false));
+		
+		/* with taking */
 		actions.add(new Action(1, 2, true)); // one step to the right and two steps forward
 		actions.add(new Action(-1, 2, true)); // one step to the left and two steps forward
 		actions.add(new Action(1, -2, true)); // ...
@@ -15,10 +29,11 @@ public class Knight extends Piece {
 		actions.add(new Action(2, -1, true)); // two steps to the left and one step forward
 		actions.add(new Action(-2, 1, true)); // ...
 		actions.add(new Action(-2, -1, true));
+		
 		for(Action action : actions) {
 			action.setBlockable(false);
 		}
-		ID = 5;
+
 	}
 
 }
