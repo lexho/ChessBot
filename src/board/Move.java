@@ -8,6 +8,11 @@ public class Move {
 		this.command = cmd;
 	}
 	
+	/**
+	 * create a new move
+	 * @param src the source coordinates
+	 * @param trg the target coordinates
+	 * */
 	public Move(int[]src, int[] trg) {
 		char alpha = (char) ((char) src[0] + 'a');
 		char num = (char) ((char) src[1] + '0' + 1);
@@ -17,6 +22,10 @@ public class Move {
 		this.command = Character.toString(alpha) + Character.toString(num) + Character.toString(alpha1) + Character.toString(num1);
 	}
 	
+	/**
+	 * get the source coordinates of the move
+	 * @return the source coordinates
+	 */
 	public int[] getSource() {
 		/* Convert ascii to int */
 		int x = (int) command.charAt(0) - 'a';
@@ -27,6 +36,10 @@ public class Move {
 		return coord;
 	}
 	
+	/**
+	 * get the target coordinates of the move
+	 * @return the target coordinates
+	 */
 	public int[] getTarget() {
 		/* Convert ascii to int */
 		int x = (int) command.charAt(2) - 'a';
@@ -37,6 +50,11 @@ public class Move {
 		return coord;
 	}
 	
+	/**
+	 * convert the move into an action
+	 * @return an action that can be applied
+	 */
+	//TODO fix this: this method always returns actions where taking is not allowed
 	public Action getAction() {
 		int[] src = getSource();
 		int[] trg = getTarget();
@@ -45,6 +63,9 @@ public class Move {
 		return new Action(delta, false);
 	}
 	
+	/**
+	 * @return the move in long algebraic notation
+	 */
 	public String toString() {
 		return command;
 	}

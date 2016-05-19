@@ -14,10 +14,16 @@ public class UCIEngine {
 	static ChessBot bot;
 	static PrintWriter log;
 	
+	// TODO remove this unused constructor in static context
 	public UCIEngine() {
 		
 	}
 	
+	/**
+	 * parse UCI commands from system standard input
+	 * and apply them on ChessBot
+	 * @param args
+	 */
 	public static void main(String[] args) {
 		bot = new ChessBot();
 		
@@ -46,6 +52,10 @@ public class UCIEngine {
 		}
 	}
 	
+	/**
+	 * parse command string and apply the appropriate action
+	 * @param cmd UCI command to be parsed
+	 */
 	private static void parseCommand(String cmd) {
 		
 		int sep = cmd.indexOf(' '); // index of separator (first space-Character)
@@ -108,6 +118,11 @@ public class UCIEngine {
 		}
 	}
 	
+	/**
+	 * split a command string into single commands
+	 * @param cmd the command string that should be splitted
+	 * @return a list of string commands
+	 */
 	private static List<String> splitCommand(String cmd) {
 		List<String> cmd_splitted= new ArrayList<String>();
 		

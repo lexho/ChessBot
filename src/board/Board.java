@@ -12,13 +12,20 @@ public class Board {
 	PieceList pieces;
 	char color; // our color (white or black)
 	
-	/* Create a Board by Position */
+	/**
+	 *  Create a Board by Position 
+	 *  
+	 *  @param position the position that should be on the board
+	 *  */
 	public Board(Position position) {
 		this.currentPosition = position;
 		pieces = position.getPieces();
 	}
 	
-	/* Create a Board by another Board */
+	/** Create a Board by another Board (clone)
+	 * 
+	 * @param b the blueprint board for the new board
+	 * */
 	public Board(Board b) {
 		this.currentPosition = new Position(b.getPosition());
 		//pieces = new PieceList<Piece>();
@@ -28,7 +35,10 @@ public class Board {
 		}*/
 	}
 	
-	/* Executes valid moves */
+	/** Executes valid moves 
+	 * 
+	 * @param m the move that should be executed
+	 * */
 	public boolean makeMove(Move m) {
 
 		boolean moveIsValid = MoveValidator.validate(currentPosition, m);
@@ -43,7 +53,11 @@ public class Board {
 		return false;
 	}
 	
-	/* Executes move m on the current board */
+	/**
+	 *  Executes move m on the current board 
+	 *  
+	 *  @param m the move that will be executed
+	 *  */
 	private boolean executeMove(Move m) {
 		//TODO detect castle
 		//System.out.println("executing move: " + m.toString());
@@ -86,6 +100,10 @@ public class Board {
 		else return true;*/
 	}
 	
+	/**
+	 * 
+	 * @return the current position
+	 */
 	public Position getPosition() {
 		return currentPosition;
 	}
@@ -94,10 +112,18 @@ public class Board {
 		return currentPosition.getActiveColor();
 	}
 	
+	/**
+	 * Get the current move number
+	 * @return the current move number
+	 */
 	public int getMoveNr() {
 		return currentPosition.getMoveNr();
 	}
 	
+	/**
+	 * Get a list of all possible moves in the current position
+	 * @return a list of all possible moves in the current position
+	 */
 	public List<Move> getPossibleMoves() {
 		List<Move> possibleMoves = new ArrayList<Move>();
 		for(Piece piece : pieces) {
@@ -119,14 +145,27 @@ public class Board {
 		this.color = color;
 	}
 	
+	/**
+	 * 
+	 * @return a new Board which is a clone of the current Board
+	 */
 	public Board copy() {
 		return new Board(this);
 	}
 	
+	/**
+	 * print the current board to the standard output
+	 */
 	public void print() {
 		System.out.println(this.toString());
 	}
 	
+	/**
+	 * create a human-readable representation of the current board and
+	 * some additional information about the pieces and possible moves
+	 * 
+	 * @return the current board representation
+	 */
 	public String toString() {
 		String piecesstr = pieces.size() + " Pieces on the board: \n" + pieces.toString() + "\n";
 		String moves = new String();

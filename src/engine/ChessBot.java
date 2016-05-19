@@ -12,22 +12,43 @@ import board.Position;
 import board.pieces.Piece;
 import search.algorithms.RS;
 
+/**
+ * ChessBot is a UCI compatible chess engine
+ * 
+ * @author Alexander Hoertenhuber
+ * @version 0.0
+ */
 public class ChessBot {
 	private Board board;
 	
+	/**
+	 * Create a new (internal) board with initial position
+	 */
 	public ChessBot() {
 		System.out.println("ChessBot by Alexander Hoertenhuber | May 2016");
 		init();
 	}
 	
+	/**
+	 * Create a new (internal) board with the given position
+	 * @param position the position that should be on the board
+	 */
 	public ChessBot(Position position) {
-		board = new Board(position); // Create new (internal) Board by position argument
+		board = new Board(position);
 	}
 	
+	/**
+	 * Create new (internal) Board with initial position
+	 */
 	public void init() {
-		board = new Board(new Position()); // Create new (internal) Board with initial position
+		board = new Board(new Position());
 	}
 	
+	/**
+	 * ask the engine to think about the current position and 
+	 * return the next move
+	 * @return the next move to be played
+	 */
 	public String getNextMove() {
 		board.setColor(board.getActiveColor());
 		System.out.println(board.getPossibleMoves());
@@ -77,11 +98,19 @@ public class ChessBot {
 		return nextMove.toString();
 	}
 	
+	/**
+	 * 
+	 * @param movecmd the move to be made
+	 * @return the move is valid and has been executed
+	 */
 	public boolean makeMove(String movecmd) {
 		//System.out.println("Bot: MakeMove: " + movecmd);
 		return board.makeMove(new Move(movecmd));
 	}
 	
+	/**
+	 * prints a human-readable board to the commandline
+	 */
 	public void printBoard() {
 		board.print();
 	}
