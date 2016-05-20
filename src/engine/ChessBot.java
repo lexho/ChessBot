@@ -1,8 +1,13 @@
 package engine;
 
 import java.util.Random;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
+import search.evalfunctions.ScoreBoard;
+import search.datastructures.Pair;
+import search.algorithms.AlphaBetaSearch;
+import search.functions.BoardFunction;
 import search.functions.BoardPredicate;
 import search.nodes.BoardNode;
 import search.Node;
@@ -51,9 +56,20 @@ public class ChessBot {
 	 */
 	public String getNextMove() {
 		board.setColor(board.getActiveColor());
-		System.out.println(board.getPossibleMoves());
-
-		/* Random Search */
+		//System.out.println(board.getPossibleMoves());
+		Move nextMove;
+		nextMove = alphaBetaSearch();
+		//nextMove = randomSearch();
+		//System.out.println(nextMove);
+		return nextMove.toString();
+	}
+	
+	/** use Random Search as search engine 
+	 * @return best move found
+	 * */
+	private Move randomSearch() {
+		Move nextMove;
+		
 		RS random = new RS();
 		//b.getPosition().getPieces().getBlackPieces().size() < b.getPosition().getPieces().getWhitePieces().size();
 		// TODO change Predicate to real goal of the game
@@ -68,7 +84,7 @@ public class ChessBot {
 			endNode = (BoardNode) random.search(start, endReached);
 			i++;
 		}
-		Move nextMove;
+
 		if(endNode == null) {
 
 		}
@@ -83,7 +99,7 @@ public class ChessBot {
 			Random rand = new Random();
 			//nextMove = board.getPossibleMoves().get(rand.nextInt(board.getPossibleMoves().size()));
 			nextMove = null;
-			return nextMove.toString();
+			return nextMove;
 		}
 		/*System.out.println(node.parent());
 		for(Node n : node.parent().adjacent()) {
@@ -91,13 +107,25 @@ public class ChessBot {
 		}*/
 		System.out.println(node);
 		nextMove = node.getAction();
-
-		/*Piece p = board.getPosition().getPieces().getPieceAt(nextMove.getSource());
-		System.out.println(board.getPossibleMoves());*/
-		
-		return nextMove.toString();
+		return nextMove;
 	}
 	
+	/** use AlphaBeta Search as search engine
+	 * @return best move found
+	 * */
+	private Move alphaBetaSearch() {
+		Move nextMove;
+		
+		/* AlphaBeta Search */
+		AlphaBetaSearch alphabeta = new AlphaBetaSearch((d, current) -> d < 2);
+		Function<Node, Double> evalFunction = new BoardFunction(new ScoreBoard(board.copy()));
+		Pair<Node, Double> result = alphabeta.search(
+				new BoardNode(board.copy()),
+				evalFunction);
+		nextMove = result.f.getAction();
+		System.out.println(nextMove + " " + result.s);
+		return nextMove;
+	}
 	/**
 	 * 
 	 * @param movecmd the move to be made

@@ -6,6 +6,7 @@ import java.util.List;
 import board.pieces.Piece;
 import board.pieces.Queen;
 import exceptions.InvalidMoveException;
+import search.endconditions.EndCondition;
 
 public class Board {
 	Position currentPosition;
@@ -33,6 +34,7 @@ public class Board {
 		/*for(Piece p : b.getPosition().getPieces()) {
 			pieces.add(p);
 		}*/
+		this.color = b.getColor();
 	}
 	
 	/** Executes valid moves 
@@ -112,6 +114,21 @@ public class Board {
 		return currentPosition.getActiveColor();
 	}
 	
+	/** Get our color 
+	 * @return our color
+	 * */
+	public char getColor() {
+		return color;
+	}
+	
+	/** Get opponents color 
+	 * @return opponents color
+	 * */
+	public char getOpponentsColor() {
+		if(color == 'w') return 'b';
+		else if(color == 'b') return 'w';
+		else return 'x'; //TODO invalid color (throw Exception?)
+	}
 	/**
 	 * Get the current move number
 	 * @return the current move number
@@ -145,6 +162,10 @@ public class Board {
 		this.color = color;
 	}
 	
+	// TODO implement EndCondition
+	public EndCondition getEndCondition() {
+		return null;
+	}
 	/**
 	 * 
 	 * @return a new Board which is a clone of the current Board
