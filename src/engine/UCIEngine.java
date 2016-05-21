@@ -1,6 +1,8 @@
 package engine;
 
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -12,7 +14,7 @@ import exceptions.InvalidMoveException;
 
 public class UCIEngine {
 	static ChessBot bot;
-	static PrintWriter log;
+	static PrintWriter cmdlog;
 	
 	// TODO remove this unused constructor in static context
 	public UCIEngine() {
@@ -25,30 +27,23 @@ public class UCIEngine {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		bot = new ChessBot();
-		
 		Scanner terminalInput = new Scanner(System.in);
 		try {
-			log = new PrintWriter("/home/alex/Code/java/ChessBot/log.txt", "UTF-8");
+			cmdlog = new PrintWriter("/home/alex/Code/java/ChessBot/log/cmds.txt", "UTF-8");
 			
-		} catch (FileNotFoundException e) {
-			try {
-				log = new PrintWriter("log.txt", "UTF-8");
-			} catch (FileNotFoundException e1) {
-				e1.printStackTrace();
-			} catch (UnsupportedEncodingException e1) {
-				e1.printStackTrace();
-			}
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		}
+			//System.setOut(new PrintStream(new File("/home/alex/Code/java/ChessBot/log/output.txt")));
+			System.setErr(new PrintStream(new File("/home/alex/Code/java/ChessBot/log/error.txt")));
+			bot = new ChessBot();
 		
-		/* Wait for commands */
-		while(true) {
-			String command = terminalInput.nextLine(); // read user input
-			log.println(command);
-			log.flush();
-			parseCommand(command);
+			/* Wait for commands */
+			while(true) {
+				String command = terminalInput.nextLine(); // read user input
+				cmdlog.println(command);
+				cmdlog.flush();
+				parseCommand(command);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 	
@@ -67,6 +62,8 @@ public class UCIEngine {
 		List<String> cmds = splitCommand(cmd);
 		switch(cmds.get(0)) {
 		case "uci":
+			System.out.println("id name ChessBot");
+			System.out.println("id author Alexander Hoertenhuber");
 			System.out.println("uciok");
 			break;
 		case "debug":

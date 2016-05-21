@@ -56,6 +56,7 @@ public class ChessBot {
 	 */
 	public String getNextMove() {
 		board.setColor(board.getActiveColor());
+		//System.out.println(board);
 		//System.out.println(board.getPossibleMoves());
 		Move nextMove;
 		nextMove = alphaBetaSearch();
@@ -124,6 +125,7 @@ public class ChessBot {
 				evalFunction);
 		nextMove = result.f.getAction();
 		System.out.println(nextMove + " " + result.s);
+		//System.out.println(result.f); // print board
 		return nextMove;
 	}
 	/**

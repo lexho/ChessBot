@@ -202,7 +202,9 @@ public class Position {
 	
 	public String toString() {
 		String outstr = new String();
-		outstr += moveNr + " " + activeColor + ", " + pieces.size() + " pieces on the board, " + pieces.getWhitePieces().size() + " white, " + pieces.getBlackPieces().size() + " black\n";
+		String check = new String();
+		if(isInCheck()) check = " ch ";
+		outstr += moveNr + " " + activeColor + check + ", " + pieces.size() + " pieces on the board, " + pieces.getWhitePieces().size() + " white, " + pieces.getBlackPieces().size() + " black\n";
 		for(int y = 7; y >= 0; y--) {
 			for(int x = 0; x < 8; x++) {
 				outstr += squares[x][y].toString() + " ";

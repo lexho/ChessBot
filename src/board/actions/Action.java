@@ -155,45 +155,6 @@ public class Action {
 					}
 				}
 			}
-			
-			////System.out.println("blockable");
-			/*int x; int y;
-			if(source[0] == target[0]) { // x is constant; up/down
-				x = 0;
-				y = 1;
-			} else if(source[1] == target[1]){ // y is constant left/right
-				x = 1;
-				y = 0;
-			} else {
-				return false;
-			}
-
-			// move direction
-			int dir;
-			if(target[y] > source[y]) {
-				dir = 1; // up
-			} else {
-				dir = -1; // down
-			}
-			
-			int test = source[y] + dir; // exclude start position
-			
-			while(dir * test < target[y]) {
-				test += dir;
-				if(test < dir*target[y]) break;
-				////System.out.println(test + " " + source[y]);
-				if(!pos.getSquareAt(new int[]{test, source[y]}).isFree()) {
-					//System.out.println(pos.getPieces().getPieceAt(new int[]{test, source[y]}) + " ("+ test + "/" + source[y] + ") is not Free");
-					return false;
-				}
-			}
-			/*for(int d = 1; d <= 8; d++) {
-				int[] test = new int[2];
-				test[0] = source[0] + delta_x * d;
-				test[1] = source[1] + delta_y * d;
-				if(test[0] == target[0] && test[1] == target[1]) break;
-				if(!pos.getSquareAt(target).isFree()) return false;
-			}*/
 		}
 		
 		if(!takes && targetIsFree) return true;

@@ -32,7 +32,24 @@ public class MoveValidator {
 			}
 		}
 		
+		//TODO maybe this rule should be implemented in action context
+		// Pawn: two-square initial move rule
+		if(piece.getID() == Piece.WHITE_PAWN && m.getSource()[1] == 1 && m.getTarget()[1] == 3) {
+			// don't jump over other pieces
+			if(position.getSquareAt(new int[]{ m.getSource()[0], 2 }).isFree() &&
+			   position.getSquareAt(new int[]{ m.getSource()[0], 3 }).isFree()) {
+				return true;
+			}
+		} else if(piece.getID() == Piece.BLACK_PAWN && m.getSource()[1] == 6 && m.getTarget()[1] == 4) {
+			// don't jump over other pieces
+			if(position.getSquareAt(new int[]{ m.getSource()[0], 5 }).isFree() &&
+			   position.getSquareAt(new int[]{ m.getSource()[0], 4 }).isFree()) {
+				return true;
+			}
+		}
+		
 		if(!valid) {
+			//System.out.println(piece + " " + m + " is invalid");
 			return false;
 		}
 		

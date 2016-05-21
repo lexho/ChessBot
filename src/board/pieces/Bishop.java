@@ -13,7 +13,7 @@ public class Bishop extends Piece {
 			actions.add(new Action(1 * d, 1 * d, false));
 			actions.add(new Action(-1 * d, 1 * d, false));
 			actions.add(new Action(1 * d, -1 * d, false));
-			actions.add(new Action(1 * d, -1 * d, false));
+			actions.add(new Action(-1 * d, -1 * d, false));
 		}
 		
 		/* move diagonally and take */
@@ -21,7 +21,7 @@ public class Bishop extends Piece {
 			actions.add(new Action(1 * d, 1 * d, true));
 			actions.add(new Action(-1 * d, 1 * d, true));
 			actions.add(new Action(1 * d, -1 * d, true));
-			actions.add(new Action(1 * d, -1 * d, true));
+			actions.add(new Action(-1 * d, -1 * d, true));
 		}
 	}
 
