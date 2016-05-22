@@ -14,6 +14,8 @@ import board.pieces.WhitePawn;
 import board.square.InvalidSquare;
 import board.square.Square;
 import board.square.ValidSquare;
+import position.Fen;
+import util.StringUtils;
 
 public class Position {
 	Square squares[][];
@@ -105,7 +107,40 @@ public class Position {
 
 	}
 	
-	/* Init Squares */
+	public Position(Fen fen) {
+		squares = new Square[8][8];
+		
+		activeColor = new Character(fen.getActiveColor());
+		moveNr = 0; //new Integer(fen.getFullMove()); //TODO no compliant!?
+		
+		//TODO convert piece-placement-string to piece list
+		// rnbqkbnr/pppp1ppp/8/8/8/8/PPPPQPPP/RNB1KBNR
+		String piecestr = fen.getPiecePlacement();
+		List<String> rows = StringUtils.splitString(piecestr, '/');
+
+		pieces = new PieceList();
+		for(int y = 7; y >= 0; y--) {
+			String row = rows.get(7 - y);
+			for(int x = 0, i = 0; x < 8; x++, i++) {
+				char p = row.charAt(i);
+				if(Character.isDigit(p)) {
+					x += Character.getNumericValue(p); 
+					continue;
+				}
+				pieces.add(new Piece(Character.toString(p), new int[]{x,y}));
+			}
+		}
+		/* Build Square Array */
+		initSquares();
+		for(Piece p : pieces) {
+			int x = p.getPosition()[0];
+			int y = p.getPosition()[1];
+			//System.out.println(p + " " + x + " " + y);
+			squares[x][y] = new ValidSquare(p);
+		}
+	}
+	
+	/** Init Squares */
 	private void initSquares() {
 		for(int y = 0; y < 8; y++) {
 			for(int x = 0; x < 8; x++) {

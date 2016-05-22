@@ -15,6 +15,7 @@ import board.Board;
 import board.Move;
 import board.Position;
 import board.pieces.Piece;
+import position.Fen;
 import search.algorithms.RS;
 
 /**
@@ -40,6 +41,11 @@ public class ChessBot {
 	 */
 	public ChessBot(Position position) {
 		board = new Board(position);
+	}
+	
+	/** Create a new (internal) board with the given fenstring */
+	public ChessBot(String fenstr) {
+		board = new Board(new Position(new Fen(fenstr)));
 	}
 	
 	/**

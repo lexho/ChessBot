@@ -1,16 +1,13 @@
 package engine;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-import board.Move;
 import exceptions.InvalidMoveException;
+import util.StringUtils;
 
 public class UCIEngine {
 	static ChessBot bot;
@@ -59,7 +56,7 @@ public class UCIEngine {
 		if(sep == -1) subcmd = cmd;
 		else subcmd = cmd.substring(0, sep);
 		
-		List<String> cmds = splitCommand(cmd);
+		List<String> cmds = StringUtils.splitString(cmd, ' ');
 		switch(cmds.get(0)) {
 		case "uci":
 			System.out.println("id name ChessBot");
@@ -96,6 +93,8 @@ public class UCIEngine {
 							}
 						}
 					}
+			} else if(cmds.get(1).equals("fen")) {
+				bot = new ChessBot(cmds.get(2));
 			}
 			break;
 		case "go":
@@ -114,29 +113,4 @@ public class UCIEngine {
 			break;
 		}
 	}
-	
-	/**
-	 * split a command string into single commands
-	 * @param cmd the command string that should be splitted
-	 * @return a list of string commands
-	 */
-	private static List<String> splitCommand(String cmd) {
-		List<String> cmd_splitted= new ArrayList<String>();
-		
-		int e = cmd.indexOf(' ');
-		
-		while(e != -1) {
-			cmd_splitted.add(cmd.substring(0, e));
-			//System.out.println("add: " + cmd.substring(0, e));
-			cmd = cmd.substring(e + 1);
-			e = cmd.indexOf(' ');
-		}
-		
-		/* Add last word */
-		//System.out.println("add: " + cmd);
-		cmd_splitted.add(cmd);
-		
-		return cmd_splitted;
-	}
-
 }
