@@ -64,18 +64,20 @@ public class TestCheckSituations {
 		if(inCheck) {
 			Position pos = b.getPosition();
 			List<Piece> opponentsPieces = pos.getPieces().getPieces(pos.getUnactiveColor());
-			for(Piece p : opponentsPieces) {
+			/*for(Piece p : opponentsPieces) {
 				System.out.println(p + " " + p.getPossibleMoves());
-				/*for(Move m : p.getPossibleMoves()) {
-					/*if(MoveValidator.validate(pos, m)) 
-					if(m.getTarget()[0] == king.getPosition()[0] && m.getTarget()[1] == king.getPosition()[1]) {
-						
-					}
-				}*/
-			}
+				for(Move m : p.getPossibleMoves()) {
+					System.out.print(m + " ");
+					if(MoveValidator.validate(pos, m)) System.out.print("valid");
+					else System.out.print("invalid");
+					System.out.println();	
+				}
+			}*/
+			//pos.printPieceLocationList();
+			
 			assertTrue(pos.isInCheck());
 		} else {
-			//assertFalse(b.getPosition().isInCheck());
+			assertFalse(b.getPosition().isInCheck());
 		}
 	}
 }

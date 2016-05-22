@@ -113,7 +113,6 @@ public class Position {
 		activeColor = new Character(fen.getActiveColor());
 		moveNr = 0; //new Integer(fen.getFullMove()); //TODO no compliant!?
 		
-		//TODO convert piece-placement-string to piece list
 		// rnbqkbnr/pppp1ppp/8/8/8/8/PPPPQPPP/RNB1KBNR
 		String piecestr = fen.getPiecePlacement();
 		List<String> rows = StringUtils.splitString(piecestr, '/');
@@ -127,7 +126,7 @@ public class Position {
 					x += Character.getNumericValue(p); 
 					continue;
 				}
-				pieces.add(new Piece(Character.toString(p), new int[]{x,y}));
+				pieces.add(PieceCreator.createPiece(Character.toString(p), new int[]{x,y}));
 			}
 		}
 		/* Build Square Array */
@@ -187,6 +186,10 @@ public class Position {
 		else System.err.println("Error: no active color");
 	}
 	
+	public void setActiveColor(char color) {
+		activeColor = color;
+	}
+	
 	public char getUnactiveColor() {
 		if(getActiveColor() == 'w') return 'b';
 		else if(getActiveColor() == 'b') return 'w';
@@ -210,7 +213,9 @@ public class Position {
 		List<Piece> opponentsPieces = getPieces().getPieces(getUnactiveColor());
 		for(Piece p : opponentsPieces) {
 			for(Move m : p.getPossibleMoves()) {
-				if(MoveValidator.validate(this, m)) 
+				Position temp = new Position(this);
+				temp.setActiveColor(p.getColor());
+				if(MoveValidator.validate(temp, m)) 
 				if(m.getTarget()[0] == king.getPosition()[0] && m.getTarget()[1] == king.getPosition()[1]) {
 					return true;
 				}
@@ -226,13 +231,22 @@ public class Position {
 		else opponentsPieces = getPieces().getPieces(getActiveColor());
 		for(Piece p : opponentsPieces) {
 			for(Move m : p.getPossibleMoves()) {
-				if(MoveValidator.validate(this, m)) 
+				Position temp = new Position(this);
+				temp.setActiveColor(p.getColor());
+				if(MoveValidator.validate(temp, m)) 
 				if(m.getTarget()[0] == king.getPosition()[0] && m.getTarget()[1] == king.getPosition()[1]) {
 					return true;
 				}
 			}
 		}
 		return false;
+	}
+	
+	/** Prints a list of all pieces and their location (for Debugging) */
+	public void printPieceLocationList() {
+		for(Piece p : getPieces()) {
+			System.out.println(p.getRepresentation() + " " + p.getPosition()[0] + "/" + p.getPosition()[1]);
+		}
 	}
 	
 	public String toString() {

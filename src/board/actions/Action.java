@@ -40,6 +40,18 @@ public class Action {
 		Piece targetPiece = pos.getSquareAt(target).getPiece();
 		
 		Piece srcPiece = pos.getSquareAt(source).getPiece();
+		
+		/* Is the source piece's color of the active player? */
+		if(srcPiece.getColor() != pos.getActiveColor()) return false;
+		
+		// TODO remove
+		/*System.out.print(new Move(source, target) + " ");
+		if(targetIsFree) System.out.print("is Free ");
+		if(takes) System.out.print("takes ");
+		System.out.print(pos.getActiveColor() + " != ");
+		if(!targetIsFree) System.out.print(targetPiece.getColor() + " ");
+		if(!targetIsFree && targetPiece.getColor() != pos.getActiveColor()) System.out.print("target is opponent ");
+		System.out.println();*/
 
 		/* Check if any piece is blocking the action */
 		boolean distance = false;

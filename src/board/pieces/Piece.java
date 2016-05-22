@@ -9,7 +9,7 @@ import board.Rule;
 import board.actions.Action;
 
 public class Piece {
-	String representation;
+	String rep;
 	int[] coord; // x / y on the board
 	protected int ID = 0;
 	
@@ -33,7 +33,7 @@ public class Piece {
 	
 	public Piece(String rep, int[] coord) {
 		this.coord = new int[2];
-		this.representation = rep;
+		this.rep = rep;
 		this.coord[0] = coord[0];
 		this.coord[1] = coord[1];
 		actions = new ArrayList<Action>();
@@ -41,7 +41,7 @@ public class Piece {
 	
 	public Piece(Piece p) {
 		this.coord = new int[2];
-		this.representation = new String(p.representation);
+		this.rep = new String(p.rep);
 		this.coord[0] = p.coord[0];
 		this.coord[1] = p.coord[1];
 		actions = new ArrayList<Action>();
@@ -55,7 +55,7 @@ public class Piece {
 	}
 	
 	public String getRepresentation() {
-		return representation;
+		return rep;
 	}
 	
 	public int[] getPosition() {
@@ -63,7 +63,7 @@ public class Piece {
 	}
 	
 	public char getColor() {
-		if((int) representation.charAt(0) < 'Z') return 'w';
+		if((int) rep.charAt(0) < 'Z') return 'w';
 		else return 'b';
 	}
 	
@@ -71,13 +71,14 @@ public class Piece {
 		//System.out.println("possible moves piece");
 		//System.out.println("actions: " + actions.size());
 		List<Move> moves = new ArrayList<Move>();
+		//System.out.println(rep + " actions: " + actions.size());
 		for(Action action : actions) {
 			int[] target = action.apply(coord);
 			
 			/* Validate target position */
 			//System.out.print(new Move(coord, action.apply(coord)));
 			boolean isValid = MoveValidator.validateSquare(target);
-			//if(!isValid) System.out.print("invalid ");
+			if(!isValid) System.out.print("invalid ");
 			//System.out.println();
 
 			if(isValid) moves.add(new Move(coord, action.apply(coord)));
@@ -105,6 +106,6 @@ public class Piece {
 	}
 	
 	public String toString() {
-		return representation;
+		return rep;
 	}
 }
