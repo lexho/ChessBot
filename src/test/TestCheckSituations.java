@@ -21,7 +21,7 @@ import board.MoveValidator;
 import board.PieceList;
 import board.Position;
 import board.pieces.Piece;
-import position.Fen;
+import board.position.Fen;
 
 @RunWith(Parameterized.class)
 public class TestCheckSituations {
@@ -32,6 +32,8 @@ public class TestCheckSituations {
 		try {
 			List<String> positions = Files.readAllLines(
 			Paths.get("assets/positions/check.txt"), StandardCharsets.UTF_8);
+			positions.addAll(Files.readAllLines(
+					Paths.get("assets/positions/notCheck.txt"), StandardCharsets.UTF_8));
 			for (int i = 0; i < positions.size(); i++) {
 				params.add(new Object[] { new Integer(i) });
 			}
@@ -49,8 +51,11 @@ public class TestCheckSituations {
 		try {
 			List<String> positions = Files.readAllLines(
 				Paths.get("assets/positions/check.txt"), StandardCharsets.UTF_8);
+			int sw = positions.size();
+			positions.addAll(Files.readAllLines(
+					Paths.get("assets/positions/notCheck.txt"), StandardCharsets.UTF_8));
 			fenstring = positions.get(i);
-			inCheck = true;
+			if(i >= sw) inCheck = false; else inCheck = true;
 		} catch (Exception e)
 		{
 			throw new RuntimeException(e);

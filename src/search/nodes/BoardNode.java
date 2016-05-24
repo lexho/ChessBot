@@ -52,11 +52,15 @@ public class BoardNode implements Node
 
 	@Override
 	public boolean isLeaf() {
-		if(board.getPossibleMoves().size() == 0)
+		//if(board.getPossibleMoves().size() == 0)
+		if(board.isMate()) {
+			/*board.print();
+			System.out.println("Player is Mate");*/
 			return true;
-		else 
+		} else {
 			return false;
 		//return !board.isRunning();
+		}
 	}
 	
 	@Override

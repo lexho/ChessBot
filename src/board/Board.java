@@ -2,6 +2,14 @@ package board;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
+import com.sun.corba.se.spi.orbutil.fsm.Input;
 
 import board.pieces.Piece;
 import board.pieces.Queen;
@@ -49,7 +57,7 @@ public class Board {
 
 		System.err.println(m.getSource()[0]+ " "+m.getSource()[1]);
 		for(Piece p : currentPosition.getPieces()) {
-			System.err.println(p.getRepresentation() + " " + p.getPosition()[0] + " "+ p.getPosition()[1]);
+			System.err.println(p.getRep() + " " + p.getPosition()[0] + " "+ p.getPosition()[1]);
 		}
 		System.err.println(currentPosition.getPieces().getPieceAt(m.getSource()).toString());
 		return false;
@@ -60,8 +68,8 @@ public class Board {
 	 *  
 	 *  @param m the move that will be executed
 	 *  */
-	private boolean executeMove(Move m) {
-		//TODO detect castle
+	public boolean executeMove(Move m) {
+		//TODO detect and handle castle (e8g8 --> e8g8 and h8f8)
 		//System.out.println("executing move: " + m.toString());
 		int[] src = m.getSource();
 		int[] trg = m.getTarget();
@@ -97,9 +105,33 @@ public class Board {
 	}
 	
 	public boolean isRunning() {
-		return true;
+		//System.out.println("Board is running");
+		return !isMate();
 		/*if(getPossibleMoves().size() == 0) return false;
 		else return true;*/
+	}
+	
+	public boolean isMate() {
+		Piece king = currentPosition.getPieces().getByID(Piece.KING, getActiveColor());
+		if(king == null) return true; //TODO handle no king error
+		//System.out.println(king.getPossibleMoves());
+		/* Are we in check? */
+		if(!currentPosition.isInCheck()) return false;
+		
+		/* Is the king able to escape? */
+		for(Move m : king.getPossibleMoves()) {
+			//System.out.println(m);
+			if(MoveValidator.validate(currentPosition, m)) {
+				//System.out.println("is not mate");
+				return true;
+			}
+			/*if(!temp.getPosition().isInCheck(king.getColor())) {
+				System.out.println("is not mate");
+				return false;
+			}*/
+		}
+		//System.out.println("is mate");
+		return true;
 	}
 	
 	/**
@@ -137,13 +169,58 @@ public class Board {
 		return currentPosition.getMoveNr();
 	}
 	
+	//TODO this is not nice
+	static Board b; // current instance
+	
 	/**
 	 * Get a list of all possible moves in the current position
 	 * @return a list of all possible moves in the current position
 	 */
 	public List<Move> getPossibleMoves() {
 		List<Move> possibleMoves = new ArrayList<Move>();
-		for(Piece piece : pieces) {
+		
+		 int threads = Runtime.getRuntime().availableProcessors();
+		    ExecutorService service = Executors.newFixedThreadPool(threads);
+		    b = this;
+		    
+		    List<Future<List<Move>>> futures = new ArrayList<Future<List<Move>>>();
+		    for (final Piece piece : pieces) {
+		        Callable<List<Move>> callable = new Callable<List<Move>>() {
+		            public List<Move> call() throws Exception {
+		            	List<Move> possibleMoves = new ArrayList<Move>();
+		            	for(Move m : piece.getPossibleMoves()) {
+		    				if(MoveValidator.validate(currentPosition, m)) {
+		    					Board testBoard = new Board(Board.b.copy());
+		    					testBoard.makeMove(m);
+		    					//char opponent = testBoard.getPosition().getUnactiveColor();
+		    					if(!testBoard.getPosition().isInCheck(color)) {
+		    						possibleMoves.add(m);
+		    					}
+		    				}
+		    			}
+		            	return possibleMoves;
+		            }
+		        };
+		        futures.add(service.submit(callable));
+		    }
+
+		    service.shutdown();
+
+		    List<Move> outputs = new ArrayList<Move>();
+		    for (Future<List<Move>> future : futures) {
+		        try {
+					outputs.addAll(future.get());
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (ExecutionException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+		    }
+		    return outputs;
+	    
+		/*for(Piece piece : pieces) {
 			for(Move m : piece.getPossibleMoves()) {
 				if(MoveValidator.validate(currentPosition, m)) {
 					Board testBoard = new Board(this.copy());
@@ -156,6 +233,7 @@ public class Board {
 			}
 		}
 		return possibleMoves;
+		*/
 	}
 	
 	public void setColor(char color) {

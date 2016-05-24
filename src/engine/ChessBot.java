@@ -15,7 +15,7 @@ import board.Board;
 import board.Move;
 import board.Position;
 import board.pieces.Piece;
-import position.Fen;
+import board.position.Fen;
 import search.algorithms.RS;
 
 /**
@@ -122,14 +122,21 @@ public class ChessBot {
 	 * */
 	private Move alphaBetaSearch() {
 		Move nextMove;
+		long searchtime = System.currentTimeMillis(); // current time in milliseconds
 		
 		/* AlphaBeta Search */
 		AlphaBetaSearch alphabeta = new AlphaBetaSearch((d, current) -> d < 2);
-		Function<Node, Double> evalFunction = new BoardFunction(new ScoreBoard(board.copy()));
+		ScoreBoard scoreboard = new ScoreBoard(board.copy());
+		Function<Node, Double> evalFunction = new BoardFunction(scoreboard);
 		Pair<Node, Double> result = alphabeta.search(
 				new BoardNode(board.copy()),
 				evalFunction);
 		nextMove = result.f.getAction();
+		
+		searchtime = System.currentTimeMillis() - searchtime;
+		System.out.println(alphabeta.nodecount/(searchtime / 60) + " nodes per second");
+		System.out.println("searchtime: " + searchtime + " ms");
+		System.out.println(scoreboard.scores + " scores");
 		System.out.println(nextMove + " " + result.s);
 		//System.out.println(result.f); // print board
 		return nextMove;
@@ -141,7 +148,7 @@ public class ChessBot {
 	 */
 	public boolean makeMove(String movecmd) {
 		//System.out.println("Bot: MakeMove: " + movecmd);
-		return board.makeMove(new Move(movecmd));
+		return board.executeMove(new Move(movecmd)); //TODO change to makeMove to enable move validation
 	}
 	
 	/**

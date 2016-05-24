@@ -22,6 +22,7 @@ public class ScoreBoard<V> implements Function<Board, Double>
 	private char unicorn_id;
 	private char opponent_id;
 	private Board start;
+	public int scores;
 
 	/**
 	 * This particular scoring function will get constructed each time a search is run.
@@ -36,11 +37,13 @@ public class ScoreBoard<V> implements Function<Board, Double>
 		this.start = start;
 		this.unicorn_id = start.getColor();
 		this.opponent_id = start.getOpponentsColor();
+		this.scores = 0;
 	}
 
 	@Override
 	public Double apply(Board board)
 	{
+		scores++;
 		// nobody won or lost so far
 		if (board.isRunning())
 		{
@@ -54,7 +57,7 @@ public class ScoreBoard<V> implements Function<Board, Double>
 			score -= distanceToOpponent(board);*/
 			
 			score += getPieceDifference(board);
-			score += possibleMoves(board);
+			//score += possibleMoves(board);
 			//System.out.println(score);
 			
 			return score;

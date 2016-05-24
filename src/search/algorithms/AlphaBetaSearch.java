@@ -52,6 +52,7 @@ public class AlphaBetaSearch implements AdversarialSearch {
 	}
 	
 	private int depth = 0;
+	public long nodecount = 0;
 	
 	/* Debug*/
 	//Printwriter writer;
@@ -60,8 +61,10 @@ public class AlphaBetaSearch implements AdversarialSearch {
 		double alpha = Double.POSITIVE_INFINITY;
 		double beta = Double.NEGATIVE_INFINITY;
 		Node current = start;
+		nodecount++;
 		
 		//if(depth != d) System.out.println("Depth-Error!");
+		//System.out.println("alphabeta search depth: " + depth);
 		
 		/* Recursively score nodes up to start node */
 		if(current.isLeaf() || !searchLimitingPredicate.test(depth, current)) {

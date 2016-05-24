@@ -11,10 +11,10 @@ import board.pieces.Piece;
 import board.pieces.Queen;
 import board.pieces.Rook;
 import board.pieces.WhitePawn;
+import board.position.Fen;
 import board.square.InvalidSquare;
 import board.square.Square;
 import board.square.ValidSquare;
-import position.Fen;
 import util.StringUtils;
 
 public class Position {
@@ -72,25 +72,25 @@ public class Position {
 		for(Piece p : position.getPieces()) {
 			switch(p.getID()) {
 			case Piece.WHITE_PAWN:
-				pieces.add(new WhitePawn(p.getRepresentation(), new int[]{p.getPosition()[0],p.getPosition()[1]}));
+				pieces.add(new WhitePawn(p.getRep(), new int[]{p.getPosition()[0],p.getPosition()[1]}));
 				break;
 			case Piece.BLACK_PAWN:
-				pieces.add(new BlackPawn(p.getRepresentation(), new int[]{p.getPosition()[0],p.getPosition()[1]}));
+				pieces.add(new BlackPawn(p.getRep(), new int[]{p.getPosition()[0],p.getPosition()[1]}));
 				break;
 			case Piece.KING:
-				pieces.add(new King(p.getRepresentation(), new int[]{p.getPosition()[0],p.getPosition()[1]}));
+				pieces.add(new King(p.getRep(), new int[]{p.getPosition()[0],p.getPosition()[1]}));
 				break;
 			case Piece.QUEEN:
-				pieces.add(new Queen(p.getRepresentation(), new int[]{p.getPosition()[0],p.getPosition()[1]}));
+				pieces.add(new Queen(p.getRep(), new int[]{p.getPosition()[0],p.getPosition()[1]}));
 				break;
 			case Piece.BISHOP:
-				pieces.add(new Bishop(p.getRepresentation(), new int[]{p.getPosition()[0],p.getPosition()[1]}));
+				pieces.add(new Bishop(p.getRep(), new int[]{p.getPosition()[0],p.getPosition()[1]}));
 				break;
 			case Piece.KNIGHT:
-				pieces.add(new Knight(p.getRepresentation(), new int[]{p.getPosition()[0],p.getPosition()[1]}));
+				pieces.add(new Knight(p.getRep(), new int[]{p.getPosition()[0],p.getPosition()[1]}));
 				break;
 			case Piece.ROOK:
-				pieces.add(new Rook(p.getRepresentation(), new int[]{p.getPosition()[0],p.getPosition()[1]}));
+				pieces.add(new Rook(p.getRep(), new int[]{p.getPosition()[0],p.getPosition()[1]}));
 				break;	
 			}
 			//pieces.add(new Piece(p));
@@ -209,7 +209,9 @@ public class Position {
 	}
 	
 	public boolean isInCheck() {
-		Piece king = getPieces().getByID(Piece.KING);
+		// TODO check if board is running (?)
+		Piece king = getPieces().getByID(Piece.KING, getActiveColor());
+		if(king == null) return true; // game over
 		List<Piece> opponentsPieces = getPieces().getPieces(getUnactiveColor());
 		for(Piece p : opponentsPieces) {
 			for(Move m : p.getPossibleMoves()) {
@@ -225,7 +227,9 @@ public class Position {
 	}
 	
 	public boolean isInCheck(char color) {
-		Piece king = getPieces().getByID(Piece.KING);
+		// TODO check if board is running (?)
+		Piece king = getPieces().getByID(Piece.KING, getActiveColor());
+		if(king == null) return true; //TODO handle no king error
 		List<Piece> opponentsPieces;
 		if(color == getActiveColor()) opponentsPieces = getPieces().getPieces(getUnactiveColor());
 		else opponentsPieces = getPieces().getPieces(getActiveColor());
@@ -245,14 +249,14 @@ public class Position {
 	/** Prints a list of all pieces and their location (for Debugging) */
 	public void printPieceLocationList() {
 		for(Piece p : getPieces()) {
-			System.out.println(p.getRepresentation() + " " + p.getPosition()[0] + "/" + p.getPosition()[1]);
+			System.out.println(p.getRep() + " " + p.getPosition()[0] + "/" + p.getPosition()[1]);
 		}
 	}
 	
 	public String toString() {
 		String outstr = new String();
 		String check = new String();
-		if(isInCheck()) check = " ch ";
+		if(isInCheck()) check = " ch";
 		outstr += moveNr + " " + activeColor + check + ", " + pieces.size() + " pieces on the board, " + pieces.getWhitePieces().size() + " white, " + pieces.getBlackPieces().size() + " black\n";
 		for(int y = 7; y >= 0; y--) {
 			for(int x = 0; x < 8; x++) {

@@ -12,7 +12,7 @@ import org.junit.runners.Parameterized.Parameters;
 
 import board.Board;
 import board.Position;
-import position.Fen;
+import board.position.Fen;
 
 public class TestBoard {
 

@@ -54,7 +54,7 @@ public class Piece {
 		return ID;
 	}
 	
-	public String getRepresentation() {
+	public String getRep() {
 		return rep;
 	}
 	
@@ -78,7 +78,7 @@ public class Piece {
 			/* Validate target position */
 			//System.out.print(new Move(coord, action.apply(coord)));
 			boolean isValid = MoveValidator.validateSquare(target);
-			if(!isValid) System.out.print("invalid ");
+			//if(!isValid) System.out.print("invalid ");
 			//System.out.println();
 
 			if(isValid) moves.add(new Move(coord, action.apply(coord)));

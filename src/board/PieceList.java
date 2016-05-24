@@ -58,9 +58,9 @@ public class PieceList extends ArrayList<Piece> {
 		return false;
 	}
 	
-	public Piece getByID(int pieceID) {
+	public Piece getByID(int pieceID, char color) {
 		for(Piece p : this) {
-			if(p.getID() == pieceID) return p;
+			if(p.getID() == pieceID && p.getColor() == color) return p;
 		}
 		return null;
 	}

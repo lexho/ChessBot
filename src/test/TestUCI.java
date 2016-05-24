@@ -15,8 +15,8 @@ import org.junit.Test;
 
 import board.Board;
 import board.Position;
+import board.position.Fen;
 import engine.UCIEngine;
-import position.Fen;
 
 public class TestUCI {
 

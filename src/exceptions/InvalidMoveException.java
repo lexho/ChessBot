@@ -50,7 +50,7 @@ public class InvalidMoveException extends RuntimeException {
 		System.err.println("target: " + p_trg + " ("+ m.getTarget()[0] + "/" + m.getTarget()[1] + ")");
 		
 		for(Piece p : pos.getPieces()) {
-			System.err.print(p.getRepresentation() + " (" + p.getPosition()[0] + "/"+ p.getPosition()[1] + "), ");
+			System.err.print(p.getRep() + " (" + p.getPosition()[0] + "/"+ p.getPosition()[1] + "), ");
 		}
 		System.err.println();
 		
