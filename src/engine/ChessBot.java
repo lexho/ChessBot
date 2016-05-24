@@ -27,6 +27,9 @@ import search.algorithms.RS;
 public class ChessBot {
 	private Board board;
 	
+	public static int NR_OF_THREADS;
+	int depthLimit = 1;
+	
 	/**
 	 * Create a new (internal) board with initial position
 	 */
@@ -52,6 +55,7 @@ public class ChessBot {
 	 * Create new (internal) Board with initial position
 	 */
 	public void init() {
+		NR_OF_THREADS = Runtime.getRuntime().availableProcessors();
 		board = new Board(new Position());
 	}
 	
@@ -125,7 +129,7 @@ public class ChessBot {
 		long searchtime = System.currentTimeMillis(); // current time in milliseconds
 		
 		/* AlphaBeta Search */
-		AlphaBetaSearch alphabeta = new AlphaBetaSearch((d, current) -> d < 2);
+		AlphaBetaSearch alphabeta = new AlphaBetaSearch((d, current) -> d < depthLimit);
 		ScoreBoard scoreboard = new ScoreBoard(board.copy());
 		Function<Node, Double> evalFunction = new BoardFunction(scoreboard);
 		Pair<Node, Double> result = alphabeta.search(
@@ -134,10 +138,12 @@ public class ChessBot {
 		nextMove = result.f.getAction();
 		
 		searchtime = System.currentTimeMillis() - searchtime;
-		System.out.println(alphabeta.nodecount/(searchtime / 60) + " nodes per second");
-		System.out.println("searchtime: " + searchtime + " ms");
+		System.out.println(board.getPossibleMoves());
+		//System.out.println(alphabeta.nodecount/(searchtime / 60) + " nodes per second");
+		System.out.println("searchtime: " + searchtime / 60 + " s");
 		System.out.println(scoreboard.scores + " scores");
 		System.out.println(nextMove + " " + result.s);
+		System.out.println();
 		//System.out.println(result.f); // print board
 		return nextMove;
 	}
@@ -148,7 +154,7 @@ public class ChessBot {
 	 */
 	public boolean makeMove(String movecmd) {
 		//System.out.println("Bot: MakeMove: " + movecmd);
-		return board.executeMove(new Move(movecmd)); //TODO change to makeMove to enable move validation
+		return board.makeMove(new Move(movecmd)); //TODO change to makeMove to enable move validation
 	}
 	
 	/**

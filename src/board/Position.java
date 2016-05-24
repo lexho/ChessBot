@@ -60,6 +60,7 @@ public class Position {
 		
 		/* Build Square Array */
 		buildSquareArray();
+		pieces.setSquareArray(squares);
 	}
 	
 	public Position(Position position) {
@@ -104,6 +105,7 @@ public class Position {
 			//System.out.println(p + " " + x + " " + y);
 			squares[x][y] = new ValidSquare(p);
 		}
+		pieces.setSquareArray(squares);
 
 	}
 	
@@ -137,6 +139,7 @@ public class Position {
 			//System.out.println(p + " " + x + " " + y);
 			squares[x][y] = new ValidSquare(p);
 		}
+		pieces.setSquareArray(squares);
 	}
 	
 	/** Init Squares */
@@ -228,7 +231,8 @@ public class Position {
 	
 	public boolean isInCheck(char color) {
 		// TODO check if board is running (?)
-		Piece king = getPieces().getByID(Piece.KING, getActiveColor());
+		Piece king = getPieces().getByID(Piece.KING, color);
+		//System.out.println(color + " king is at " + king.getPosition()[0] + "/" + king.getPosition()[1]);
 		if(king == null) return true; //TODO handle no king error
 		List<Piece> opponentsPieces;
 		if(color == getActiveColor()) opponentsPieces = getPieces().getPieces(getUnactiveColor());
@@ -237,9 +241,10 @@ public class Position {
 			for(Move m : p.getPossibleMoves()) {
 				Position temp = new Position(this);
 				temp.setActiveColor(p.getColor());
-				if(MoveValidator.validate(temp, m)) 
-				if(m.getTarget()[0] == king.getPosition()[0] && m.getTarget()[1] == king.getPosition()[1]) {
-					return true;
+				if(MoveValidator.validate(temp, m)) {
+					if(m.getTarget()[0] == king.getPosition()[0] && m.getTarget()[1] == king.getPosition()[1]) {
+						return true;
+					}
 				}
 			}
 		}

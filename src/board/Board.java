@@ -13,13 +13,14 @@ import com.sun.corba.se.spi.orbutil.fsm.Input;
 
 import board.pieces.Piece;
 import board.pieces.Queen;
+import engine.ChessBot;
 import exceptions.InvalidMoveException;
 import search.endconditions.EndCondition;
 
 public class Board {
 	Position currentPosition;
 	PieceList pieces;
-	char color; // our color (white or black)
+	char color; // our color (white or black) TODO this is probably buggy
 	
 	/**
 	 *  Create a Board by Position 
@@ -80,17 +81,26 @@ public class Board {
 
 		/* Promotion (P -> Q,N,R,B on 8th rank)*/
 		if(piece.getID() == Piece.WHITE_PAWN && trg[1] == 7) {
+			System.out.println("promotion white");
+			print();
 			pieces.removePieceAt(src);
 			pieces.add(new Queen("Q", new int[]{trg[0],trg[1]}));
 			piece = pieces.getPieceAt(trg);
+			currentPosition.getSquareAt(trg).clear();
+			print();
+			
 		}
 		else if(piece.getID() == Piece.BLACK_PAWN && trg[1] == 0) {
+			System.out.println("promotion black");
+			print();
 			pieces.removePieceAt(src);
 			pieces.add(new Queen("q", new int[]{trg[0],trg[1]}));
 			piece = pieces.getPieceAt(trg);
+			currentPosition.getSquareAt(trg).clear();
+			print();
 		}
-		currentPosition.getSquareAt(trg[0], trg[1]).setPiece(piece); // update position table
-		piece.setPosition(trg[0], trg[1]); // update piece
+		currentPosition.getSquareAt(trg).setPiece(piece); // update position table
+		piece.setPosition(trg); // update piece
 		
 		/* Clear source */
 		currentPosition.getSquareAt(src[0], src[1]).clear();
@@ -105,7 +115,7 @@ public class Board {
 	}
 	
 	public boolean isRunning() {
-		//System.out.println("Board is running");
+		//System.out.println("is running");
 		return !isMate();
 		/*if(getPossibleMoves().size() == 0) return false;
 		else return true;*/
@@ -118,20 +128,40 @@ public class Board {
 		/* Are we in check? */
 		if(!currentPosition.isInCheck()) return false;
 		
+		ExecutorService service = Executors.newFixedThreadPool(ChessBot.NR_OF_THREADS);
+	    b = this;
+	    
+	    for (final Move m : king.getPossibleMoves()) {
+	        Callable<Boolean> callable = new Callable<Boolean>() {
+	            public Boolean call() throws Exception {
+	            	if(MoveValidator.validate(currentPosition, m)) {
+	            		System.out.println("is certainly not mate");
+	    				return false; // is not mate for sure
+	    			} else
+	    				return true; // is probably mate
+	            }
+	        };
+	        try {
+				if(!service.submit(callable).get()) return false;
+			} catch (InterruptedException | ExecutionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	    }
+
+	    service.shutdown();
+	    return true;
+	    
 		/* Is the king able to escape? */
-		for(Move m : king.getPossibleMoves()) {
+		/*for(Move m : king.getPossibleMoves()) {
 			//System.out.println(m);
 			if(MoveValidator.validate(currentPosition, m)) {
 				//System.out.println("is not mate");
-				return true;
-			}
-			/*if(!temp.getPosition().isInCheck(king.getColor())) {
-				System.out.println("is not mate");
 				return false;
-			}*/
+			}
 		}
 		//System.out.println("is mate");
-		return true;
+		return true;*/
 	}
 	
 	/**
@@ -177,10 +207,10 @@ public class Board {
 	 * @return a list of all possible moves in the current position
 	 */
 	public List<Move> getPossibleMoves() {
+		char color = getActiveColor();
 		List<Move> possibleMoves = new ArrayList<Move>();
 		
-		 int threads = Runtime.getRuntime().availableProcessors();
-		    ExecutorService service = Executors.newFixedThreadPool(threads);
+		    ExecutorService service = Executors.newFixedThreadPool(ChessBot.NR_OF_THREADS);
 		    b = this;
 		    
 		    List<Future<List<Move>>> futures = new ArrayList<Future<List<Move>>>();
@@ -194,6 +224,7 @@ public class Board {
 		    					testBoard.makeMove(m);
 		    					//char opponent = testBoard.getPosition().getUnactiveColor();
 		    					if(!testBoard.getPosition().isInCheck(color)) {
+		    						System.out.println(color + " is not in check with " + m);
 		    						possibleMoves.add(m);
 		    					}
 		    				}

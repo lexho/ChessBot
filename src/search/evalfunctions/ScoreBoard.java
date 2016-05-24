@@ -46,7 +46,7 @@ public class ScoreBoard<V> implements Function<Board, Double>
 		scores++;
 		// nobody won or lost so far
 		if (board.isRunning())
-		{
+		  {
 			double score = 0d;
 
 			/*score += scoreFountains(board);
@@ -54,16 +54,17 @@ public class ScoreBoard<V> implements Function<Board, Double>
 			score += scoreClouds(board);
 			score -= getDistanceToFountain(board);
 			score += scoreSeeds(board);
-			score -= distanceToOpponent(board);*/
+			score -= distanceToOpponent(board); */
 			
-			score += getPieceDifference(board);
-			//score += possibleMoves(board);
+			//score += getPieceSize(board);
+			/*score += getPieceDifference(board);
+			score += possibleMoves(board);*/
 			//System.out.println(score);
 			
 			return score;
-		} else
+		  } else
 		{
-			/* Who is checkmate? */
+			// Who is checkmate?
 			if(board.getPosition().isInCheck(opponent_id)) {
 				return 10000d;
 			} else if (board.getPosition().isInCheck(unicorn_id)) {
@@ -85,6 +86,11 @@ public class ScoreBoard<V> implements Function<Board, Double>
 				return 0d; // it's a draw (boooooring!)
 			}*/
 		}
+	}
+	
+	private double getPieceSize(Board board) {
+		int NrMyPieces = board.getPosition().getPieces().getPieces(unicorn_id).size();
+		return NrMyPieces;
 	}
 	
 	private double getPieceDifference(Board board) {

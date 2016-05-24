@@ -29,8 +29,8 @@ public class BoardNode implements Node
 	@Override
 	public List<Node> adjacent()
 	{
-		if (!board.isRunning())
-			return Collections.emptyList();
+		/*if (!board.isRunning())
+			return Collections.emptyList();*/
 
 		List<Node> successors = new ArrayList<>();
 		List<Move> possible = board.getPossibleMoves();
