@@ -224,7 +224,7 @@ public class Board {
 		    					testBoard.makeMove(m);
 		    					//char opponent = testBoard.getPosition().getUnactiveColor();
 		    					if(!testBoard.getPosition().isInCheck(color)) {
-		    						System.out.println(color + " is not in check with " + m);
+		    						//System.out.println(color + " is not in check with " + m);
 		    						possibleMoves.add(m);
 		    					}
 		    				}

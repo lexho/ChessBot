@@ -10,6 +10,7 @@ import search.algorithms.AlphaBetaSearch;
 import search.functions.BoardFunction;
 import search.functions.BoardPredicate;
 import search.nodes.BoardNode;
+import search.nodes.LimitedNode;
 import search.Node;
 import board.Board;
 import board.Move;
@@ -28,7 +29,7 @@ public class ChessBot {
 	private Board board;
 	
 	public static int NR_OF_THREADS;
-	int depthLimit = 1;
+	int depthLimit = 2;
 	
 	/**
 	 * Create a new (internal) board with initial position
@@ -133,14 +134,15 @@ public class ChessBot {
 		ScoreBoard scoreboard = new ScoreBoard(board.copy());
 		Function<Node, Double> evalFunction = new BoardFunction(scoreboard);
 		Pair<Node, Double> result = alphabeta.search(
-				new BoardNode(board.copy()),
+				new LimitedNode(board.copy()),
 				evalFunction);
 		nextMove = result.f.getAction();
 		
 		searchtime = System.currentTimeMillis() - searchtime;
-		System.out.println(board.getPossibleMoves());
+		System.out.println("Possible moves: " + new LimitedNode(board.copy()).adjacent().size());
+		System.out.println("Possible moves: " + board.getPossibleMoves().size());
 		//System.out.println(alphabeta.nodecount/(searchtime / 60) + " nodes per second");
-		System.out.println("searchtime: " + searchtime / 60 + " s");
+		System.out.println("searchtime: " + searchtime / 1000 + " s");
 		System.out.println(scoreboard.scores + " scores");
 		System.out.println(nextMove + " " + result.s);
 		System.out.println();

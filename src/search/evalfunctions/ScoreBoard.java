@@ -3,6 +3,8 @@ package search.evalfunctions;
 import java.util.function.Function;
 
 import board.Board;
+import board.PieceList;
+import board.pieces.Piece;
 import search.endconditions.EndCondition;
 
 /**
@@ -19,7 +21,7 @@ import search.endconditions.EndCondition;
  */
 public class ScoreBoard<V> implements Function<Board, Double>
 {
-	private char unicorn_id;
+	private char player_id;
 	private char opponent_id;
 	private Board start;
 	public int scores;
@@ -29,13 +31,13 @@ public class ScoreBoard<V> implements Function<Board, Double>
 	 * It gets passed the starting state of the board, so it can judge wether a sequence
 	 * of moves during the search has led to a better state!
 	 * @param start
-	 * @param unicorn_id
+	 * @param player_id
 	 * @param opponent_id
 	 */
 	public ScoreBoard(Board start)
 	{
 		this.start = start;
-		this.unicorn_id = start.getColor();
+		this.player_id = start.getColor();
 		this.opponent_id = start.getOpponentsColor();
 		this.scores = 0;
 	}
@@ -57,8 +59,12 @@ public class ScoreBoard<V> implements Function<Board, Double>
 			score -= distanceToOpponent(board); */
 			
 			//score += getPieceSize(board);
-			/*score += getPieceDifference(board);
-			score += possibleMoves(board);*/
+			score += scoreMaterial(board);
+			//score += getPieceDifference(board);
+			score += possibleQueenMoves(board);
+			score += possibleRookMoves(board);
+			score += possibleBishopMoves(board);
+			score += possibleKnightMoves(board);
 			//System.out.println(score);
 			
 			return score;
@@ -67,7 +73,7 @@ public class ScoreBoard<V> implements Function<Board, Double>
 			// Who is checkmate?
 			if(board.getPosition().isInCheck(opponent_id)) {
 				return 10000d;
-			} else if (board.getPosition().isInCheck(unicorn_id)) {
+			} else if (board.getPosition().isInCheck(player_id)) {
 				return -10000d;
 			} else {
 				return 0d;
@@ -88,22 +94,95 @@ public class ScoreBoard<V> implements Function<Board, Double>
 		}
 	}
 	
+	private double scoreMaterial(Board board) {
+		double score = 0d;
+		PieceList pieces = board.getPosition().getPieces();
+		for(Piece p : pieces) {
+			switch(p.getID()) {
+			case Piece.QUEEN:
+				if(p.getColor() == player_id)
+					score += 900;
+				else 
+					score -= 900;
+				break;
+			case Piece.ROOK:
+				if(p.getColor() == player_id)
+					score += 465;
+				else 
+					score -= 465;
+				break;
+			case Piece.BISHOP:
+				if(p.getColor() == player_id)
+					score += 325;
+				else 
+					score -= 325;
+				break;
+			case Piece.KNIGHT:
+				if(p.getColor() == player_id)
+					score += 275;
+				else 
+					score -= 275;
+				break;
+			case Piece.WHITE_PAWN:
+				if(p.getColor() == player_id)
+					score += 100;
+				else 
+					score -= 100;
+				break;
+			case Piece.BLACK_PAWN:
+				if(p.getColor() == player_id)
+					score += 100;
+				else 
+					score -= 100;
+				break;
+			}
+		}
+		return score;
+	}
 	private double getPieceSize(Board board) {
-		int NrMyPieces = board.getPosition().getPieces().getPieces(unicorn_id).size();
+		int NrMyPieces = board.getPosition().getPieces().getPieces(player_id).size();
 		return NrMyPieces;
 	}
 	
 	private double getPieceDifference(Board board) {
-		int NrMyPieces = board.getPosition().getPieces().getPieces(unicorn_id).size();
+		int NrMyPieces = board.getPosition().getPieces().getPieces(player_id).size();
 		int NrOpponentPieces = board.getPosition().getPieces().getPieces(opponent_id).size();
 		return (NrMyPieces - NrOpponentPieces) * 312; // return points in the range of [-10000, 10000]
 	}
 	
 	private double possibleMoves(Board board) {
-		if(unicorn_id == board.getActiveColor())
+		if(player_id == board.getActiveColor())
 			return board.getPossibleMoves().size();
 		else
 			return board.getPossibleMoves().size() * -1;
+	}
+	
+	private double possibleQueenMoves(Board board) {
+		if(player_id == board.getActiveColor())
+			return board.getPosition().getPieces().getByID(Piece.QUEEN, player_id).getPossibleMoves().size();
+		else
+			return board.getPosition().getPieces().getByID(Piece.QUEEN, player_id).getPossibleMoves().size() * -1;
+	}
+	
+	private double possibleRookMoves(Board board) {
+		if(player_id == board.getActiveColor())
+			return board.getPosition().getPieces().getByID(Piece.ROOK, player_id).getPossibleMoves().size();
+		else
+			return board.getPosition().getPieces().getByID(Piece.ROOK, player_id).getPossibleMoves().size() * -1;
+	}
+	
+	private double possibleBishopMoves(Board board) {
+		if(player_id == board.getActiveColor())
+			return board.getPosition().getPieces().getByID(Piece.BISHOP, player_id).getPossibleMoves().size();
+		else
+			return board.getPosition().getPieces().getByID(Piece.BISHOP, player_id).getPossibleMoves().size() * -1;
+	}
+	
+	private double possibleKnightMoves(Board board) {
+		if(player_id == board.getActiveColor())
+			return board.getPosition().getPieces().getByID(Piece.KNIGHT, player_id).getPossibleMoves().size();
+		else
+			return board.getPosition().getPieces().getByID(Piece.KNIGHT, player_id).getPossibleMoves().size() * -1;
 	}
 
 }

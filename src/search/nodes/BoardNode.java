@@ -10,9 +10,9 @@ import search.Node;
 
 public class BoardNode implements Node
 {
-	private BoardNode parent;
-	private Board board;
-	private Move move;
+	protected BoardNode parent;
+	protected Board board;
+	protected Move move;
 	
 	public BoardNode(Board board)
 	{
@@ -66,6 +66,16 @@ public class BoardNode implements Node
 	@Override
 	public boolean isRoot() {
 		return parent == null;
+	}
+	
+	public int getDepth() {
+		int depth = 0;
+		Node node = new LimitedNode(this.board);
+		while(!node.isRoot()) {
+			depth++;
+			node = node.parent();
+		}
+		return depth;
 	}
 	
 	@SuppressWarnings("unchecked")

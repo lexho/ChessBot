@@ -8,9 +8,11 @@ import java.util.List;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 
+import board.Move;
 import search.AdversarialSearch;
 import search.Node;
 import search.datastructures.Pair;
+import search.nodes.LimitedNode;
 
 public class AlphaBetaSearch implements AdversarialSearch {
 	@SuppressWarnings("unused")
@@ -31,6 +33,7 @@ public class AlphaBetaSearch implements AdversarialSearch {
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}*/
+		lastinfo = System.currentTimeMillis();
 	}
 	
 	//private double alpha = Double.NEGATIVE_INFINITY;
@@ -53,6 +56,8 @@ public class AlphaBetaSearch implements AdversarialSearch {
 	
 	private int depth = 0;
 	public long nodecount = 0;
+	private long lastinfo = 0; // the last time a info message was printed
+	private long lastnodes = 0; // the number of processed nodes at the last time a info message was printed
 	
 	/* Debug*/
 	//Printwriter writer;
@@ -62,6 +67,11 @@ public class AlphaBetaSearch implements AdversarialSearch {
 		double beta = Double.NEGATIVE_INFINITY;
 		Node current = start;
 		nodecount++;
+		
+		/*if(depth != lastdepth) {
+			System.out.println("depth: " + depth);
+			lastdepth = depth;
+		}*/
 		
 		//if(depth != d) System.out.println("Depth-Error!");
 		//System.out.println("alphabeta search depth: " + depth);
@@ -80,6 +90,7 @@ public class AlphaBetaSearch implements AdversarialSearch {
 				depth = current_depth;
 				depth++;
 				double score = search(adjacent.get(i), evalFunction).s;
+				printInfoMessage(adjacent.get(i), score);
 				depth = current_depth;
 				//if(depth != getDepth(current)) System.out.println("Depth-Error! " + depth + " != " + getDepth(current));
 				
@@ -113,6 +124,15 @@ public class AlphaBetaSearch implements AdversarialSearch {
 				}
 			}
 			return bestNode; // return node with best minmax score
+		}
+	}
+
+	private void printInfoMessage(Node node, double score) {
+		if(System.currentTimeMillis() - lastinfo  > 1000) {
+			long nps = (nodecount - lastnodes); // Nodes per second
+			lastnodes = nodecount;
+			System.out.println("info " + "currmove "+ ((LimitedNode) node).getFullAction() + "score " + score + " depth " + depth + " nodes " + nodecount + " nps " + nps);
+			lastinfo = System.currentTimeMillis();
 		}
 	}
 }
