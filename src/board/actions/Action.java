@@ -2,6 +2,7 @@ package board.actions;
 
 import board.Move;
 import board.Position;
+import board.PositionInterface;
 import board.pieces.Piece;
 import exceptions.InvalidMoveException;
 
@@ -33,13 +34,13 @@ public class Action {
 	}
 	
 	/* Validate action in the given context */
-	public boolean validate(int[] source, Position pos) {
+	public boolean validate(int[] source, PositionInterface pos) {
 		int[] target = apply(source);
 		
-		boolean targetIsFree = pos.getSquareAt(target).isFree();
-		Piece targetPiece = pos.getSquareAt(target).getPiece();
+		boolean targetIsFree = pos.isFree(target);
+		Piece targetPiece = pos.getPieceAt(target);
 		
-		Piece srcPiece = pos.getSquareAt(source).getPiece();
+		Piece srcPiece = pos.getPieceAt(source);
 		
 		/* Is the source piece's color of the active player? */
 		if(srcPiece.getColor() != pos.getActiveColor()) return false;

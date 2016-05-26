@@ -15,6 +15,7 @@ import search.Node;
 import board.Board;
 import board.Move;
 import board.Position;
+import board.PositionInterface;
 import board.pieces.Piece;
 import board.position.Fen;
 import search.algorithms.RS;
@@ -43,7 +44,7 @@ public class ChessBot {
 	 * Create a new (internal) board with the given position
 	 * @param position the position that should be on the board
 	 */
-	public ChessBot(Position position) {
+	public ChessBot(PositionInterface position) {
 		board = new Board(position);
 	}
 	

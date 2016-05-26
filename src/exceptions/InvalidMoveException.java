@@ -3,6 +3,7 @@ package exceptions;
 import board.Board;
 import board.Move;
 import board.Position;
+import board.PositionInterface;
 import board.pieces.Piece;
 
 public class InvalidMoveException extends RuntimeException {
@@ -22,7 +23,7 @@ public class InvalidMoveException extends RuntimeException {
 		super(s);
 	}
 	
-	public InvalidMoveException(Move m, Position pos) {
+	public InvalidMoveException(Move m, PositionInterface pos) {
 		Piece p = pos.getPieces().getPieceAt(m.getSource());
 		msg = "\n" + pos.toString();
 		msg += "The piece " + p + " at (" + m.getSource()[0] + "/" + m.getSource()[1] + ") is not allowed to make the move " + m;

@@ -17,100 +17,52 @@ import board.square.Square;
 import board.square.ValidSquare;
 import util.StringUtils;
 
-public class Position implements PositionInterface {
-	Square squares[][];
+public class Position12x10 implements PositionInterface {
+	int [] board_12x10;
 	char activeColor;
 	int moveNr;
 	PieceList pieces;
 	
+	static final int WROOK = 'R';
+	static final int WKNIGHT = 'N';
+	static final int WBISHOP = 'B';
+	static final int WQUEEN = 'Q';
+	static final int WKING = 'K';
+	static final int WPAWN = 'P';
+	static final int BROOK = 'r';
+	static final int BKNIGHT = 'n';
+	static final int BBISHOP = 'b';
+	static final int BQUEEN = 'q';
+	static final int BKING = 'k';
+	static final int BPAWN = 'p';
 
 	
-	public Position() {
-		squares = new Square[8][8];
+	public Position12x10() {
 		
-		/* Initial Position */
+		/* Setup initial Position */
 		activeColor = 'w';
 		moveNr = 0;
-		
-		pieces = new PieceList();
-		pieces.add(new Rook("r", new int[]{0,7}));
-		pieces.add(new Knight("n", new int[]{1,7}));
-		pieces.add(new Bishop("b", new int[]{2,7}));
-		pieces.add(new Queen("q", new int[]{3,7}));
-		pieces.add(new King("k", new int[]{4,7}));
-		pieces.add(new Bishop("b", new int[]{5,7}));
-		pieces.add(new Knight("n", new int[]{6,7}));
-		pieces.add(new Rook("r", new int[]{7,7}));
-		
-		for(int x = 0; x < 8; x++) {
-			pieces.add(new BlackPawn("p", new int[]{x,6}));
-		}
-		for(int x = 0; x < 8; x++) {
-			pieces.add(new WhitePawn("P", new int[]{x,1}));
-		}
-		
-		pieces.add(new Rook("R", new int[]{0,0}));
-		pieces.add(new Knight("N", new int[]{1,0}));
-		pieces.add(new Bishop("B", new int[]{2,0}));
-		pieces.add(new Queen("Q", new int[]{3,0}));
-		pieces.add(new King("K", new int[]{4,0}));
-		pieces.add(new Bishop("B", new int[]{5,0}));
-		pieces.add(new Knight("N", new int[]{6,0}));
-		pieces.add(new Rook("R", new int[]{7,0}));
-		
-		/* Build Square Array */
-		buildSquareArray();
-		pieces.setSquareArray(squares);
+		init12x10();
 	}
 	
-	public Position(PositionInterface positionInterface) {
-		squares = new Square[8][8];
+	public Position12x10(Position12x10 position) {
 		
-		activeColor = new Character(positionInterface.getActiveColor());
-		moveNr = new Integer(positionInterface.getMoveNr());
+		activeColor = new Character(position.getActiveColor());
+		moveNr = new Integer(position.getMoveNr());
 		
-		pieces = new PieceList();
-		for(Piece p : positionInterface.getPieces()) {
-			switch(p.getID()) {
-			case Piece.WHITE_PAWN:
-				pieces.add(new WhitePawn(p.getRep(), new int[]{p.getPosition()[0],p.getPosition()[1]}));
-				break;
-			case Piece.BLACK_PAWN:
-				pieces.add(new BlackPawn(p.getRep(), new int[]{p.getPosition()[0],p.getPosition()[1]}));
-				break;
-			case Piece.KING:
-				pieces.add(new King(p.getRep(), new int[]{p.getPosition()[0],p.getPosition()[1]}));
-				break;
-			case Piece.QUEEN:
-				pieces.add(new Queen(p.getRep(), new int[]{p.getPosition()[0],p.getPosition()[1]}));
-				break;
-			case Piece.BISHOP:
-				pieces.add(new Bishop(p.getRep(), new int[]{p.getPosition()[0],p.getPosition()[1]}));
-				break;
-			case Piece.KNIGHT:
-				pieces.add(new Knight(p.getRep(), new int[]{p.getPosition()[0],p.getPosition()[1]}));
-				break;
-			case Piece.ROOK:
-				pieces.add(new Rook(p.getRep(), new int[]{p.getPosition()[0],p.getPosition()[1]}));
-				break;	
-			}
-			//pieces.add(new Piece(p));
-		}
-		
-		/* Build Square Array */
-		initSquares();
+		//TODO build 12x10 array
+		/*initSquares();
 		for(Piece p : pieces) {
 			int x = p.getPosition()[0];
 			int y = p.getPosition()[1];
 			//System.out.println(p + " " + x + " " + y);
 			squares[x][y] = new ValidSquare(p);
 		}
-		pieces.setSquareArray(squares);
+		pieces.setSquareArray(squares);*/
 
 	}
 	
-	public Position(Fen fen) {
-		squares = new Square[8][8];
+	public Position12x10(Fen fen) {
 		
 		activeColor = new Character(fen.getActiveColor());
 		moveNr = 0; //new Integer(fen.getFullMove()); //TODO no compliant!?
@@ -131,55 +83,54 @@ public class Position implements PositionInterface {
 				pieces.add(PieceCreator.createPiece(Character.toString(p), new int[]{x,y}));
 			}
 		}
-		/* Build Square Array */
-		initSquares();
+		//TODO build 12x10 array
+		/*initSquares();
 		for(Piece p : pieces) {
 			int x = p.getPosition()[0];
 			int y = p.getPosition()[1];
 			//System.out.println(p + " " + x + " " + y);
 			squares[x][y] = new ValidSquare(p);
 		}
-		pieces.setSquareArray(squares);
+		pieces.setSquareArray(squares);*/
 	}
 	
-	/** Init Squares */
-	private void initSquares() {
-		for(int y = 0; y < 8; y++) {
-			for(int x = 0; x < 8; x++) {
-				squares[x][y] = new ValidSquare();
-			}
-		}
-	}
-	
-	private void buildSquareArray() {
-		initSquares();
+	/** Init 12x10 board */
+	private boolean init12x10() {
+		board_12x10 = new int [120];
+		int [] org = {
+				-1,	-1,	-1,	-1,	-1,	-1,	-1,	-1,	-1,	-1,
+				-1,	-1,	-1,	-1,	-1,	-1,	-1,	-1,	-1,	-1,
+				-1,	BROOK,BKNIGHT,	BBISHOP,	BQUEEN,	BKING, BBISHOP,	BKNIGHT,	BROOK,-1,
+				-1,	BPAWN,	BPAWN,	BPAWN,	BPAWN,	BPAWN,	BPAWN,	BPAWN,	BPAWN,	-1,
+				-1,	46,	46,	46,	46,	46,	46,	46,	46,	-1,
+				-1,	46,	46,	46,	46,	46,	46,	46,	46,	-1,
+				-1,	46,	46,	46,	46,	46,	46,	46,	46,	-1,
+				-1,	46,	46,	46,	46,	46,	46,	46,	46,	-1,
+				-1,	WPAWN,	WPAWN,	WPAWN,	WPAWN,	WPAWN,	WPAWN,	WPAWN,	WPAWN,	-1,
+				-1,	WROOK,WKNIGHT,	WBISHOP,	WQUEEN,	WKING,	WBISHOP, WKNIGHT,	WROOK,-1,
+				-1,	-1,	-1,	-1,	-1,	-1,	-1,	-1,	-1,	-1,
+				-1,	-1,	-1,	-1,	-1,	-1,	-1,	-1,	-1,	-1 };
 		
-		int i = 0;
-		for(int y = 7; y >= 6; y--) {
-			for(int x = 0; x < 8; x++) {
-				squares[x][y] =  new ValidSquare(pieces.get(i));
-				i++;
-			}
-		}
-		for(int y = 1; y >= 0; y--) {
-			for(int x = 0; x < 8; x++) {
-				squares[x][y] =  new ValidSquare(pieces.get(i));
-				i++;
-			}
-		}
+		for (int i=0; i < 120; i++)
+			board_12x10 [i] = org [i];
+		
+		//color = 1;
+		
+		//beatenFigures.clear();
+		return true;
 	}
 	
-	public Square getSquareAt(int x, int y) {
-		/* Square is out of border range */
-		if(x > 7 || y > 7 || x < 0 || y < 0) return new InvalidSquare();
-		else return squares[x][y];
+	public Piece getPieceAt(int x, int y) {
+		return getPieceAt(new int[]{x,y});
 	}
 	
-	public Square getSquareAt(int[] coord) {
-		return getSquareAt(coord[0], coord[1]);
+	public Piece getPieceAt(int[] coord) {
+		int x = coord[0];
+		int y = coord[1];
+		int i = (7 - y) * 10 + 20 + 1 + x;
+		//System.out.println(coord[0] + "/" + coord[1] + " --> " + i + " " + board_12x10[i]);
+		return new Piece((char)board_12x10[i], coord);
 	}
-	
-	
 	
 	public char getActiveColor() {
 		return activeColor;
@@ -220,7 +171,7 @@ public class Position implements PositionInterface {
 		List<Piece> opponentsPieces = getPieces().getPieces(getUnactiveColor());
 		for(Piece p : opponentsPieces) {
 			for(Move m : p.getPossibleMoves()) {
-				Position temp = new Position(this);
+				Position12x10 temp = new Position12x10(this);
 				temp.setActiveColor(p.getColor());
 				if(MoveValidator.validate(temp, m)) 
 				if(m.getTarget()[0] == king.getPosition()[0] && m.getTarget()[1] == king.getPosition()[1]) {
@@ -241,7 +192,7 @@ public class Position implements PositionInterface {
 		else opponentsPieces = getPieces().getPieces(getActiveColor());
 		for(Piece p : opponentsPieces) {
 			for(Move m : p.getPossibleMoves()) {
-				Position temp = new Position(this);
+				Position12x10 temp = new Position12x10(this);
 				temp.setActiveColor(p.getColor());
 				if(MoveValidator.validate(temp, m)) {
 					if(m.getTarget()[0] == king.getPosition()[0] && m.getTarget()[1] == king.getPosition()[1]) {
@@ -265,42 +216,40 @@ public class Position implements PositionInterface {
 		String check = new String();
 		if(isInCheck()) check = " ch";
 		outstr += moveNr + " " + activeColor + check + ", " + pieces.size() + " pieces on the board, " + pieces.getWhitePieces().size() + " white, " + pieces.getBlackPieces().size() + " black\n";
-		for(int y = 7; y >= 0; y--) {
+		for(int i = 0; i < board_12x10.length; i++) {
+			outstr += board_12x10[i] + " ";
+			if(i % 12 == 0) outstr += '\n';
+		}
+		/*for(int y = 7; y >= 0; y--) {
 			for(int x = 0; x < 8; x++) {
 				outstr += squares[x][y].toString() + " ";
 			}
 			outstr += '\n';
-		}
+		}*/
 		return outstr;
 	}
 
 	@Override
-	public Piece getPieceAt(int x, int y) {
-		return getPieceAt(new int[] {x, y});
-	}
-
-	@Override
-	public Piece getPieceAt(int[] coord) {
-		return getSquareAt(coord).getPiece();
-	}
-
-	@Override
 	public void setPieceAt(Piece p, int[] coord) {
-		getSquareAt(coord).setPiece(p);
+		// TODO Auto-generated method stub
+		
 	}
 
 	@Override
 	public void clear(int[] coord) {
-		getSquareAt(coord).clear();
+		// TODO Auto-generated method stub
+		
 	}
 
 	@Override
 	public boolean isFree(int[] coord) {
-		return getSquareAt(coord).isFree();
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 	@Override
 	public boolean isValid(int[] coord) {
-		return getSquareAt(coord).isValid();
+		// TODO Auto-generated method stub
+		return false;
 	}
 }

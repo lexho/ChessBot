@@ -18,7 +18,7 @@ import exceptions.InvalidMoveException;
 import search.endconditions.EndCondition;
 
 public class Board {
-	Position currentPosition;
+	PositionInterface currentPosition;
 	PieceList pieces;
 	char color; // our color (white or black) TODO this is probably buggy
 	
@@ -27,7 +27,7 @@ public class Board {
 	 *  
 	 *  @param position the position that should be on the board
 	 *  */
-	public Board(Position position) {
+	public Board(PositionInterface position) {
 		this.currentPosition = position;
 		pieces = position.getPieces();
 	}
@@ -76,7 +76,7 @@ public class Board {
 		int[] trg = m.getTarget();
 		
 		/* Move piece to target */
-		Piece piece = currentPosition.getSquareAt(src[0], src[1]).getPiece();
+		Piece piece = currentPosition.getPieceAt(src[0], src[1]);
 		pieces.removePieceAt(trg);	// remove token piece
 
 		/* Promotion (P -> Q,N,R,B on 8th rank)*/
@@ -86,7 +86,7 @@ public class Board {
 			pieces.removePieceAt(src);
 			pieces.add(new Queen("Q", new int[]{trg[0],trg[1]}));
 			piece = pieces.getPieceAt(trg);
-			currentPosition.getSquareAt(trg).clear();
+			currentPosition.clear(trg);
 			print();
 			
 		}
@@ -96,14 +96,14 @@ public class Board {
 			pieces.removePieceAt(src);
 			pieces.add(new Queen("q", new int[]{trg[0],trg[1]}));
 			piece = pieces.getPieceAt(trg);
-			currentPosition.getSquareAt(trg).clear();
+			currentPosition.clear(trg);
 			print();
 		}
-		currentPosition.getSquareAt(trg).setPiece(piece); // update position table
+		currentPosition.setPieceAt(piece, trg); // update position table
 		piece.setPosition(trg); // update piece
 		
 		/* Clear source */
-		currentPosition.getSquareAt(src[0], src[1]).clear();
+		currentPosition.clear(src);
 		
 		/* Change Meta-Data */
 		currentPosition.switchActiveColor();
@@ -168,7 +168,7 @@ public class Board {
 	 * 
 	 * @return the current position
 	 */
-	public Position getPosition() {
+	public PositionInterface getPosition() {
 		return currentPosition;
 	}
 	

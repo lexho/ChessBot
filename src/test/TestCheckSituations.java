@@ -20,6 +20,7 @@ import board.Move;
 import board.MoveValidator;
 import board.PieceList;
 import board.Position;
+import board.PositionInterface;
 import board.pieces.Piece;
 import board.position.Fen;
 
@@ -67,7 +68,7 @@ public class TestCheckSituations {
 		Board b = new Board(new Position(new Fen(fenstring)));
 		b.print();
 		if(inCheck) {
-			Position pos = b.getPosition();
+			PositionInterface pos = b.getPosition();
 			List<Piece> opponentsPieces = pos.getPieces().getPieces(pos.getUnactiveColor());
 			/*for(Piece p : opponentsPieces) {
 				System.out.println(p + " " + p.getPossibleMoves());

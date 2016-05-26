@@ -31,6 +31,14 @@ public class Piece {
 	protected int direction_y;
 	int range;
 	
+	public Piece(char rep, int[] coord) {
+		this.coord = new int[2];
+		this.rep = Character.toString(rep);
+		this.coord[0] = coord[0];
+		this.coord[1] = coord[1];
+		actions = new ArrayList<Action>();
+	}
+	
 	public Piece(String rep, int[] coord) {
 		this.coord = new int[2];
 		this.rep = rep;
