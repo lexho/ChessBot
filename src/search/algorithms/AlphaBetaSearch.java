@@ -58,6 +58,7 @@ public class AlphaBetaSearch implements AdversarialSearch {
 	public long nodecount = 0;
 	private long lastinfo = 0; // the last time a info message was printed
 	private long lastnodes = 0; // the number of processed nodes at the last time a info message was printed
+	private int lastdepth = 0; // the depth at last depth message
 	
 	/* Debug*/
 	//Printwriter writer;

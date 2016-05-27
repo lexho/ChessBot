@@ -3,8 +3,9 @@ package search.evalfunctions;
 import java.util.function.Function;
 
 import board.Board;
-import board.PieceList;
+import board.Position12x10;
 import board.pieces.Piece;
+import board.pieces.PieceList;
 import search.endconditions.EndCondition;
 
 /**
@@ -24,7 +25,8 @@ public class ScoreBoard<V> implements Function<Board, Double>
 	private char player_id;
 	private char opponent_id;
 	private Board start;
-	public int scores;
+	public int scoreCounter;
+	private Position12x10 position;
 
 	/**
 	 * This particular scoring function will get constructed each time a search is run.
@@ -39,13 +41,14 @@ public class ScoreBoard<V> implements Function<Board, Double>
 		this.start = start;
 		this.player_id = start.getColor();
 		this.opponent_id = start.getOpponentsColor();
-		this.scores = 0;
+		this.scoreCounter = 0;
 	}
 
 	@Override
 	public Double apply(Board board)
 	{
-		scores++;
+		scoreCounter++;
+		this.position = (Position12x10) board.getPosition();
 		// nobody won or lost so far
 		if (board.isRunning())
 		  {
@@ -150,39 +153,47 @@ public class ScoreBoard<V> implements Function<Board, Double>
 		return (NrMyPieces - NrOpponentPieces) * 312; // return points in the range of [-10000, 10000]
 	}
 	
-	private double possibleMoves(Board board) {
+	/*private double possibleMoves(Board board) {
 		if(player_id == board.getActiveColor())
 			return board.getPossibleMoves().size();
 		else
 			return board.getPossibleMoves().size() * -1;
-	}
+	}*/
 	
 	private double possibleQueenMoves(Board board) {
+		return possibleMoves(board, Position12x10.WQUEEN);
+		
+		/*if(board.getPosition().getPieces().getByID(Piece.QUEEN, player_id) == null) return 0d; // no queen left
+		//TODO get possible moves of all queens
 		if(player_id == board.getActiveColor())
 			return board.getPosition().getPieces().getByID(Piece.QUEEN, player_id).getPossibleMoves().size();
 		else
 			return board.getPosition().getPieces().getByID(Piece.QUEEN, player_id).getPossibleMoves().size() * -1;
+			*/
 	}
 	
 	private double possibleRookMoves(Board board) {
-		if(player_id == board.getActiveColor())
-			return board.getPosition().getPieces().getByID(Piece.ROOK, player_id).getPossibleMoves().size();
-		else
-			return board.getPosition().getPieces().getByID(Piece.ROOK, player_id).getPossibleMoves().size() * -1;
+		return possibleMoves(board, Position12x10.WROOK);
 	}
 	
 	private double possibleBishopMoves(Board board) {
-		if(player_id == board.getActiveColor())
-			return board.getPosition().getPieces().getByID(Piece.BISHOP, player_id).getPossibleMoves().size();
-		else
-			return board.getPosition().getPieces().getByID(Piece.BISHOP, player_id).getPossibleMoves().size() * -1;
+		return possibleMoves(board, Position12x10.WBISHOP);
 	}
 	
 	private double possibleKnightMoves(Board board) {
-		if(player_id == board.getActiveColor())
-			return board.getPosition().getPieces().getByID(Piece.KNIGHT, player_id).getPossibleMoves().size();
-		else
-			return board.getPosition().getPieces().getByID(Piece.KNIGHT, player_id).getPossibleMoves().size() * -1;
+		return possibleMoves(board, Position12x10.WKNIGHT);
+	}
+	
+	private double possibleMoves(Board board, int piece) {
+		double score = 0d;
+		for(Piece queen : position.getPieceByID(piece)) {
+			score += queen.getPossibleMoves().size();
+		}
+		// TODO create method to convert white to black piece
+		for(Piece queen : position.getPieceByID(piece + 65)) {
+			score += queen.getPossibleMoves().size() * -1;
+		}
+		return score;
 	}
 
 }

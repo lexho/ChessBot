@@ -18,10 +18,10 @@ import org.junit.runners.Parameterized.Parameters;
 import board.Board;
 import board.Move;
 import board.MoveValidator;
-import board.PieceList;
 import board.Position;
 import board.PositionInterface;
 import board.pieces.Piece;
+import board.pieces.PieceList;
 import board.position.Fen;
 
 @RunWith(Parameterized.class)

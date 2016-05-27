@@ -1,11 +1,11 @@
-package board;
+package board.pieces;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import board.pieces.Piece;
+import board.Position12x10;
 import board.square.Square;
 
 public class PieceList extends ArrayList<Piece> {
@@ -13,6 +13,8 @@ public class PieceList extends ArrayList<Piece> {
 	private static final long serialVersionUID = 1L;
 	
 	Square squares[][];
+	int [] board_12x10;
+	Position12x10 pos;
 	Map<Integer, Piece> whitePieces;
 	Map<Integer, Piece> blackPieces;
 	
@@ -23,10 +25,16 @@ public class PieceList extends ArrayList<Piece> {
 		blackPieces = new HashMap<Integer, Piece>();
 	}
 	
+	public PieceList(Position12x10 pos) {
+		this.pos = pos;
+		whitePieces = new HashMap<Integer, Piece>();
+		blackPieces = new HashMap<Integer, Piece>();
+	}
+	
 	@Override
 	public boolean add(Piece p) {
 		
-		// TODO pieceID is not a unique id, it's more a piece class
+		// TODO pieceID is not a unique id, it's more like a piece class
 		// HashMap approach for faster check and mate testing
 		super.add(p);
 		if(p.getColor() == 'w') whitePieces.put(p.getID(), p);
@@ -68,7 +76,8 @@ public class PieceList extends ArrayList<Piece> {
 	}
 	
 	public Piece getPieceAt(int[] coord) {
-		return squares[coord[0]][coord[1]].getPiece();
+		return pos.getPieceAt(coord);
+		//return squares[coord[0]][coord[1]].getPiece();
 		//TODO remove (inefficient?)
 		/*for(Piece p : this) {
 			if(p.getPosition()[0] == coord[0] && p.getPosition()[1] == coord[1]) return p;
@@ -107,5 +116,17 @@ public class PieceList extends ArrayList<Piece> {
 			if(p.getID() == pieceID && p.getColor() == color) return p;
 		}
 		return null;*/
+	}
+	
+	public King getKing(char color) {
+		if(color == 'w')
+			return (King) whitePieces.get(Piece.KING);
+		else
+			return (King) blackPieces.get(Piece.KING);
+	}
+	
+	public List<Piece> getByID(int pieceID) {
+		// TODO return all pieces with that ID (not only one)
+		return null;
 	}
 }

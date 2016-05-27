@@ -15,6 +15,7 @@ import search.Node;
 import board.Board;
 import board.Move;
 import board.Position;
+import board.Position12x10;
 import board.PositionInterface;
 import board.pieces.Piece;
 import board.position.Fen;
@@ -30,7 +31,7 @@ public class ChessBot {
 	private Board board;
 	
 	public static int NR_OF_THREADS;
-	int depthLimit = 2;
+	int depthLimit = 3;
 	
 	/**
 	 * Create a new (internal) board with initial position
@@ -58,7 +59,7 @@ public class ChessBot {
 	 */
 	public void init() {
 		NR_OF_THREADS = Runtime.getRuntime().availableProcessors();
-		board = new Board(new Position());
+		board = new Board(new Position12x10());
 	}
 	
 	/**
@@ -144,7 +145,7 @@ public class ChessBot {
 		System.out.println("Possible moves: " + board.getPossibleMoves().size());
 		//System.out.println(alphabeta.nodecount/(searchtime / 60) + " nodes per second");
 		System.out.println("searchtime: " + searchtime / 1000 + " s");
-		System.out.println(scoreboard.scores + " scores");
+		System.out.println(scoreboard.scoreCounter + " scores");
 		System.out.println(nextMove + " " + result.s);
 		System.out.println();
 		//System.out.println(result.f); // print board

@@ -1,6 +1,7 @@
 package board;
 
 import board.pieces.Piece;
+import board.pieces.PieceList;
 import board.square.Square;
 
 public interface PositionInterface {

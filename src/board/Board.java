@@ -12,6 +12,7 @@ import java.util.concurrent.Future;
 import com.sun.corba.se.spi.orbutil.fsm.Input;
 
 import board.pieces.Piece;
+import board.pieces.PieceList;
 import board.pieces.Queen;
 import engine.ChessBot;
 import exceptions.InvalidMoveException;
@@ -37,7 +38,7 @@ public class Board {
 	 * @param b the blueprint board for the new board
 	 * */
 	public Board(Board b) {
-		this.currentPosition = new Position(b.getPosition());
+		this.currentPosition = new Position12x10(b.getPosition());
 		//pieces = new PieceList<Piece>();
 		this.pieces = currentPosition.getPieces();
 		/*for(Piece p : b.getPosition().getPieces()) {
@@ -77,15 +78,18 @@ public class Board {
 		
 		/* Move piece to target */
 		Piece piece = currentPosition.getPieceAt(src[0], src[1]);
-		pieces.removePieceAt(trg);	// remove token piece
+		//pieces.removePieceAt(trg);	// remove token piece
+		currentPosition.clear(trg);
 
 		/* Promotion (P -> Q,N,R,B on 8th rank)*/
 		if(piece.getID() == Piece.WHITE_PAWN && trg[1] == 7) {
 			System.out.println("promotion white");
 			print();
-			pieces.removePieceAt(src);
-			pieces.add(new Queen("Q", new int[]{trg[0],trg[1]}));
-			piece = pieces.getPieceAt(trg);
+			//pieces.removePieceAt(src);
+			currentPosition.clear(src);
+			currentPosition.setPieceAt(new Queen("Q", new int[]{trg[0],trg[1]}), trg);
+			//pieces.add(new Queen("Q", new int[]{trg[0],trg[1]}));
+			piece = currentPosition.getPieceAt(trg);
 			currentPosition.clear(trg);
 			print();
 			
@@ -93,9 +97,9 @@ public class Board {
 		else if(piece.getID() == Piece.BLACK_PAWN && trg[1] == 0) {
 			System.out.println("promotion black");
 			print();
-			pieces.removePieceAt(src);
-			pieces.add(new Queen("q", new int[]{trg[0],trg[1]}));
-			piece = pieces.getPieceAt(trg);
+			currentPosition.clear(src);
+			currentPosition.setPieceAt(new Queen("q", new int[]{trg[0],trg[1]}), trg);
+			piece = currentPosition.getPieceAt(trg);
 			currentPosition.clear(trg);
 			print();
 		}
@@ -122,7 +126,7 @@ public class Board {
 	}
 	
 	public boolean isMate() {
-		Piece king = currentPosition.getPieces().getByID(Piece.KING, getActiveColor());
+		Piece king = currentPosition.getPieces().getKing(getActiveColor());
 		if(king == null) return true; //TODO handle no king error
 		//System.out.println(king.getPossibleMoves());
 		/* Are we in check? */
@@ -219,6 +223,7 @@ public class Board {
 		            public List<Move> call() throws Exception {
 		            	List<Move> possibleMoves = new ArrayList<Move>();
 		            	for(Move m : piece.getPossibleMoves()) {
+		            		//System.out.print(m + " ");
 		    				if(MoveValidator.validate(currentPosition, m)) {
 		    					Board testBoard = new Board(Board.b.copy());
 		    					testBoard.makeMove(m);
@@ -227,6 +232,7 @@ public class Board {
 		    						//System.out.println(color + " is not in check with " + m);
 		    						possibleMoves.add(m);
 		    					}
+		    					//System.out.println(" valid");
 		    				}
 		    			}
 		            	return possibleMoves;

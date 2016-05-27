@@ -66,6 +66,10 @@ public class Piece {
 		return rep;
 	}
 	
+	public char getCharRep() {
+		return rep.charAt(0);
+	}
+	
 	public int[] getPosition() {
 		return coord;
 	}

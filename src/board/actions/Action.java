@@ -43,6 +43,7 @@ public class Action {
 		Piece srcPiece = pos.getPieceAt(source);
 		
 		/* Is the source piece's color of the active player? */
+		//System.out.println(srcPiece.getColor() + " != " + pos.getActiveColor());
 		if(srcPiece.getColor() != pos.getActiveColor()) return false;
 		
 		// TODO remove
@@ -70,7 +71,7 @@ public class Action {
 					//System.out.print("dir: UP, ");
 					for(int y = source[1] + 1; y < target[1]; y++) {
 						//System.out.print(y + ", ");
-						if(!(pos.getPieces().getPieceAt(new int[]{source[0], y}) == null)) {
+						if(!(pos.getPieceAt(new int[]{source[0], y}) == null)) {
 							//System.out.println();
 							return false;
 						}
@@ -83,7 +84,7 @@ public class Action {
 					//System.out.print("dir: DOWN, ");
 					for(int y = source[1] - 1; y > target[1]; y--) {
 						//System.out.print(y + ", ");
-						if(!(pos.getPieces().getPieceAt(new int[]{source[0], y}) == null)) {
+						if(!(pos.getPieceAt(new int[]{source[0], y}) == null)) {
 							//System.out.println();
 							return false;
 						}
@@ -97,7 +98,7 @@ public class Action {
 					//System.out.print("dir: LEFT, ");
 					for(int x = source[0] - 1; x > target[0]; x--) {
 						//System.out.print(x + ", ");
-						if(!(pos.getPieces().getPieceAt(new int[]{x, source[1]}) == null)) {
+						if(!(pos.getPieceAt(new int[]{x, source[1]}) == null)) {
 							//System.out.println();
 							return false;
 						}
@@ -110,7 +111,7 @@ public class Action {
 					//System.out.print("dir: RIGHT, ");
 					for(int x = source[0] + 1; x < target[0]; x++) {
 						//System.out.print(x + ", ");
-						if(!(pos.getPieces().getPieceAt(new int[]{x, source[1]}) == null)) {
+						if(!(pos.getPieceAt(new int[]{x, source[1]}) == null)) {
 							//System.out.println();
 							return false;
 						}
@@ -124,7 +125,7 @@ public class Action {
 					//System.out.print("dir: UP, ");
 					for(int x = source[0] + 1, y = source[1] + 1; x < target[0]; x++,y++) {
 						//System.out.print(y + ", ");
-						if(!(pos.getPieces().getPieceAt(new int[]{x, y}) == null)) {
+						if(!(pos.getPieceAt(new int[]{x, y}) == null)) {
 							//System.out.println();
 							return false;
 						}
@@ -136,7 +137,7 @@ public class Action {
 				if(target[0] > source[0] && target[1] < source[1]) {
 					for(int x = source[0] + 1, y = source[1] - 1; x < target[0]; x++,y--) {
 						//System.out.print(y + ", ");
-						if(!(pos.getPieces().getPieceAt(new int[]{x, y}) == null)) {
+						if(!(pos.getPieceAt(new int[]{x, y}) == null)) {
 							//System.out.println();
 							return false;
 						}
@@ -148,7 +149,7 @@ public class Action {
 				if(target[0] < source[0] && target[1] < source[1]) {
 					for(int x = source[0] - 1, y = source[1] - 1; x > target[0]; x--,y--) {
 						//System.out.print(y + ", ");
-						if(!(pos.getPieces().getPieceAt(new int[]{x, y}) == null)) {
+						if(!(pos.getPieceAt(new int[]{x, y}) == null)) {
 							//System.out.println();
 							return false;
 						}
@@ -160,7 +161,7 @@ public class Action {
 				if(target[0] < source[0] && target[1] > source[1]) {
 					for(int x = source[0] - 1, y = source[1] + 1; x > target[0]; x--,y++) {
 						//System.out.print(y + ", ");
-						if(!(pos.getPieces().getPieceAt(new int[]{x, y}) == null)) {
+						if(!(pos.getPieceAt(new int[]{x, y}) == null)) {
 							//System.out.println();
 							return false;
 						}
