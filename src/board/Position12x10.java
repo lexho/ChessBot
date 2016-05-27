@@ -48,30 +48,49 @@ public class Position12x10 implements PositionInterface {
 		
 		/* Create inital piece list */
 		pieces = new PieceList(this);
-		pieces.add(new Rook("r", new int[]{0,7}));
-		pieces.add(new Knight("n", new int[]{1,7}));
-		pieces.add(new Bishop("b", new int[]{2,7}));
-		pieces.add(new Queen("q", new int[]{3,7}));
-		pieces.add(new King("k", new int[]{4,7}));
-		pieces.add(new Bishop("b", new int[]{5,7}));
-		pieces.add(new Knight("n", new int[]{6,7}));
-		pieces.add(new Rook("r", new int[]{7,7}));
+		pieces.add(new Rook('r', coordToIndex(new int[]{0,7})));
+		pieces.add(new Knight('n', coordToIndex(new int[]{1,7})));
+		pieces.add(new Bishop('b', coordToIndex(new int[]{2,7})));
+		pieces.add(new Queen('q', coordToIndex(new int[]{3,7})));
+		pieces.add(new King('k', coordToIndex(new int[]{4,7})));
+		pieces.add(new Bishop('b', coordToIndex(new int[]{5,7})));
+		pieces.add(new Knight('n', coordToIndex(new int[]{6,7})));
+		pieces.add(new Rook('r', coordToIndex(new int[]{7,7})));
 		
 		for(int x = 0; x < 8; x++) {
-			pieces.add(new BlackPawn("p", new int[]{x,6}));
+			pieces.add(new BlackPawn('p', coordToIndex(new int[]{x,6})));
 		}
 		for(int x = 0; x < 8; x++) {
-			pieces.add(new WhitePawn("P", new int[]{x,1}));
+			pieces.add(new WhitePawn('P', coordToIndex(new int[]{x,1})));
 		}
 		
-		pieces.add(new Rook("R", new int[]{0,0}));
-		pieces.add(new Knight("N", new int[]{1,0}));
-		pieces.add(new Bishop("B", new int[]{2,0}));
-		pieces.add(new Queen("Q", new int[]{3,0}));
-		pieces.add(new King("K", new int[]{4,0}));
-		pieces.add(new Bishop("B", new int[]{5,0}));
-		pieces.add(new Knight("N", new int[]{6,0}));
-		pieces.add(new Rook("R", new int[]{7,0}));
+		pieces.add(new Rook('R', coordToIndex(new int[]{0,0})));
+		pieces.add(new Knight('N', coordToIndex(new int[]{1,0})));
+		pieces.add(new Bishop('B', coordToIndex(new int[]{2,0})));
+		pieces.add(new Queen('Q', coordToIndex(new int[]{3,0})));
+		pieces.add(new King('K', coordToIndex(new int[]{4,0})));
+		pieces.add(new Bishop('B', coordToIndex(new int[]{5,0})));
+		pieces.add(new Knight('N', coordToIndex(new int[]{6,0})));
+		pieces.add(new Rook('R', coordToIndex(new int[]{7,0})));
+	}
+	
+	public Position12x10(Position12x10 position) {
+		/* Init board and pieces */
+		this.board_12x10 = new int [120];
+		pieces = new PieceList(this);
+		
+		/* Copy 12x10 board */
+		for(int i = 0; i < position.board_12x10.length; i++) {
+			this.board_12x10[i] = position.board_12x10[i];
+		}
+		
+		/* Copy piece list */
+		for(Piece p : position.pieces) {
+			this.pieces.add(p);
+		}
+		
+		/* set active color */
+		this.activeColor = position.activeColor;
 	}
 	
 	public Position12x10(PositionInterface position) {
@@ -90,25 +109,25 @@ public class Position12x10 implements PositionInterface {
 		for(Piece p : position.getPieces()) {
 			switch(p.getID()) {
 			case Piece.WHITE_PAWN:
-				pieces.add(new WhitePawn(p.getRep(), new int[]{p.getPosition()[0],p.getPosition()[1]}));
+				pieces.add(new WhitePawn(p.getCharRep(), new int[]{p.getPosition()[0],p.getPosition()[1]}));
 				break;
 			case Piece.BLACK_PAWN:
-				pieces.add(new BlackPawn(p.getRep(), new int[]{p.getPosition()[0],p.getPosition()[1]}));
+				pieces.add(new BlackPawn(p.getCharRep(), new int[]{p.getPosition()[0],p.getPosition()[1]}));
 				break;
 			case Piece.KING:
-				pieces.add(new King(p.getRep(), new int[]{p.getPosition()[0],p.getPosition()[1]}));
+				pieces.add(new King(p.getCharRep(), new int[]{p.getPosition()[0],p.getPosition()[1]}));
 				break;
 			case Piece.QUEEN:
-				pieces.add(new Queen(p.getRep(), new int[]{p.getPosition()[0],p.getPosition()[1]}));
+				pieces.add(new Queen(p.getCharRep(), new int[]{p.getPosition()[0],p.getPosition()[1]}));
 				break;
 			case Piece.BISHOP:
-				pieces.add(new Bishop(p.getRep(), new int[]{p.getPosition()[0],p.getPosition()[1]}));
+				pieces.add(new Bishop(p.getCharRep(), new int[]{p.getPosition()[0],p.getPosition()[1]}));
 				break;
 			case Piece.KNIGHT:
-				pieces.add(new Knight(p.getRep(), new int[]{p.getPosition()[0],p.getPosition()[1]}));
+				pieces.add(new Knight(p.getCharRep(), new int[]{p.getPosition()[0],p.getPosition()[1]}));
 				break;
 			case Piece.ROOK:
-				pieces.add(new Rook(p.getRep(), new int[]{p.getPosition()[0],p.getPosition()[1]}));
+				pieces.add(new Rook(p.getCharRep(), new int[]{p.getPosition()[0],p.getPosition()[1]}));
 				break;	
 			}
 		}
@@ -226,6 +245,11 @@ public class Position12x10 implements PositionInterface {
 		else return true;
 	}
 	
+	public boolean isValid(int index) {
+		if(index > (board_12x10.length - 1)) return false; //TODO this should not happen!
+		return board_12x10[index] == INVALID;
+	}
+	
 	public int[] get12x10Board() {
 		return board_12x10;
 	}
@@ -252,8 +276,13 @@ public class Position12x10 implements PositionInterface {
 		return getPieceAt(new int[]{x,y});
 	}
 	
+	public Piece getPieceAt(int index) {
+		return PieceCreator.createPiece((char)board_12x10[index], index);
+	}
+	
 	public Piece getPieceAt(int[] coord) {
-		int x = coord[0];
+		return getPieceAt(coordToIndex(coord));
+		/*int x = coord[0];
 		int y = coord[1];
 		int i = (7 - y) * 10 + 20 + 1 + x;
 		//System.out.println(coord[0] + "/" + coord[1] + " --> " + i + " " + board_12x10[i]);
@@ -288,7 +317,7 @@ public class Position12x10 implements PositionInterface {
 		}
 		//pieces.add(new Piece(p));
 			
-		return new Piece((char)board_12x10[i], coord);
+		return new Piece((char)board_12x10[i], coord);*/
 	}
 	
 	public List<Piece> getPieceByID(int pieceID) {
@@ -351,7 +380,7 @@ public class Position12x10 implements PositionInterface {
 	}
 	
 	private Piece intToPiece(int p, int[] coord) {
-		String rep = Character.toString((char)p); // TODO don't use string as rep, use character
+		char rep = (char)p; // TODO don't use string as rep, use character
 		switch(p) {
 		case WPAWN:
 			return new WhitePawn(rep, coord);
@@ -383,16 +412,20 @@ public class Position12x10 implements PositionInterface {
 	}
 	
 	
-	private int[] indexToCoord(int index) {
-		int x = (index / 12) % 12;
-		int y = index / 12;
+	public static int[] indexToCoord(int index) {
+		//System.out.println("index: " + index);
+		int x = (index % 12) - 1;
+		int y = (11 - ((int)Math.floor((double)index / 12d)) - 2) ;
+		//System.out.println("x: " + x);
+		//System.out.println("y: " + y);
 		return new int[]{x,y};
 	}
 	
 	
 	
-	private int coordToIndex(int[] coord) {
-		int index = (7 - coord[1]) * 10 + 21 + coord[0];
+	public static int coordToIndex(int[] coord) {
+		//int index = (7 - coord[1]) * 10 + 21 + coord[0];
+		int index = ((7 - coord[1]) + 2) * 12 + coord[0] + 1;
 		return index;
 	}
 	

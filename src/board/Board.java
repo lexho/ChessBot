@@ -38,7 +38,7 @@ public class Board {
 	 * @param b the blueprint board for the new board
 	 * */
 	public Board(Board b) {
-		this.currentPosition = new Position12x10(b.getPosition());
+		this.currentPosition = new Position12x10((Position12x10)b.getPosition());
 		//pieces = new PieceList<Piece>();
 		this.pieces = currentPosition.getPieces();
 		/*for(Piece p : b.getPosition().getPieces()) {
@@ -87,7 +87,7 @@ public class Board {
 			print();
 			//pieces.removePieceAt(src);
 			currentPosition.clear(src);
-			currentPosition.setPieceAt(new Queen("Q", new int[]{trg[0],trg[1]}), trg);
+			currentPosition.setPieceAt(new Queen('Q', new int[]{trg[0],trg[1]}), trg);
 			//pieces.add(new Queen("Q", new int[]{trg[0],trg[1]}));
 			piece = currentPosition.getPieceAt(trg);
 			currentPosition.clear(trg);
@@ -98,7 +98,7 @@ public class Board {
 			System.out.println("promotion black");
 			print();
 			currentPosition.clear(src);
-			currentPosition.setPieceAt(new Queen("q", new int[]{trg[0],trg[1]}), trg);
+			currentPosition.setPieceAt(new Queen('q', new int[]{trg[0],trg[1]}), trg);
 			piece = currentPosition.getPieceAt(trg);
 			currentPosition.clear(trg);
 			print();
@@ -224,16 +224,17 @@ public class Board {
 		            	List<Move> possibleMoves = new ArrayList<Move>();
 		            	for(Move m : piece.getPossibleMoves()) {
 		            		//System.out.print(m + " ");
-		    				if(MoveValidator.validate(currentPosition, m)) {
+		    				if(MoveValidator.validate((Position12x10)currentPosition, m)) {
+		    					//TODO replace test board with 12x10 int-array test
 		    					Board testBoard = new Board(Board.b.copy());
-		    					testBoard.makeMove(m);
+		    					testBoard.executeMove(m);
 		    					//char opponent = testBoard.getPosition().getUnactiveColor();
 		    					if(!testBoard.getPosition().isInCheck(color)) {
 		    						//System.out.println(color + " is not in check with " + m);
 		    						possibleMoves.add(m);
 		    					}
-		    					//System.out.println(" valid");
-		    				}
+		    					System.out.println(" valid");
+		    				}// else System.out.println(" invalid");
 		    			}
 		            	return possibleMoves;
 		            }

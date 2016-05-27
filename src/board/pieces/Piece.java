@@ -5,12 +5,14 @@ import java.util.List;
 
 import board.Move;
 import board.MoveValidator;
+import board.Position12x10;
 import board.Rule;
 import board.actions.Action;
 
 public class Piece {
-	String rep;
+	char rep;
 	int[] coord; // x / y on the board
+	int index; // 12x10 board index
 	protected int ID = 0;
 	
 	public static final int WHITE_PAWN = 3;
@@ -23,35 +25,44 @@ public class Piece {
 	
 	/* actions */
 	protected List<Action> actions;
-	final static int LEFT = -1;
-	final static int RIGHT = 1;
-	final static int UP = 1;
-	final static int DOWN = -1;
+	
+	//static final int KNIGHT_ = -9;
+	// TODO add knight move constants
+	
 	protected int direction_x;
 	protected int direction_y;
 	int range;
 	
+	public Piece(char rep, int index) {
+		this.rep = rep;
+		this.index = index;
+		actions = new ArrayList<Action>();
+	}
+	
 	public Piece(char rep, int[] coord) {
 		this.coord = new int[2];
-		this.rep = Character.toString(rep);
+		this.rep = rep;
 		this.coord[0] = coord[0];
 		this.coord[1] = coord[1];
+		this.index = Position12x10.coordToIndex(coord);
 		actions = new ArrayList<Action>();
 	}
 	
 	public Piece(String rep, int[] coord) {
 		this.coord = new int[2];
-		this.rep = rep;
+		this.rep = rep.charAt(0);
 		this.coord[0] = coord[0];
 		this.coord[1] = coord[1];
+		this.index = Position12x10.coordToIndex(coord);
 		actions = new ArrayList<Action>();
 	}
 	
 	public Piece(Piece p) {
 		this.coord = new int[2];
-		this.rep = new String(p.rep);
+		this.rep = p.rep;
 		this.coord[0] = p.coord[0];
 		this.coord[1] = p.coord[1];
+		this.index = p.index;
 		actions = new ArrayList<Action>();
 		for(Action a : p.actions) {
 			actions.add(a);
@@ -63,37 +74,38 @@ public class Piece {
 	}
 	
 	public String getRep() {
-		return rep;
+		return Character.toString(rep);
 	}
 	
 	public char getCharRep() {
-		return rep.charAt(0);
+		return rep;
 	}
 	
 	public int[] getPosition() {
-		return coord;
+		return Position12x10.indexToCoord(index);
 	}
 	
 	public char getColor() {
-		if((int) rep.charAt(0) < 'Z') return 'w';
+		if((int) rep < 'Z') return 'w';
 		else return 'b';
 	}
 	
 	public List<Move> getPossibleMoves() {
-		//System.out.println("possible moves piece");
-		//System.out.println("actions: " + actions.size());
+
 		List<Move> moves = new ArrayList<Move>();
-		//System.out.println(rep + " actions: " + actions.size());
+		
+		/*for(Action action : actions) {
+			int target = action.apply(index);
+			
+			if(target != -1) moves.add(new Move(coord, action.apply(coord)));
+		}*/
+		
 		for(Action action : actions) {
-			int[] target = action.apply(coord);
+			//int[] target = action.apply(coord);
 			
 			/* Validate target position */
-			//System.out.print(new Move(coord, action.apply(coord)));
-			boolean isValid = MoveValidator.validateSquare(target);
-			//if(!isValid) System.out.print("invalid ");
-			//System.out.println();
-
-			if(isValid) moves.add(new Move(coord, action.apply(coord)));
+			//boolean isValid = MoveValidator.validateSquare(index);
+			moves.add(new Move(index, action.apply(index)));
 		}
 		return moves;
 	}
@@ -109,6 +121,7 @@ public class Piece {
 		/* Set position coordinates */
 		coord[0] = x;
 		coord[1] = y;
+		index = Position12x10.coordToIndex(coord);
 		
 		return true;
 	}
@@ -118,6 +131,6 @@ public class Piece {
 	}
 	
 	public String toString() {
-		return rep;
+		return Character.toString(rep);
 	}
 }

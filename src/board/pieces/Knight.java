@@ -1,14 +1,38 @@
 package board.pieces;
 
+import board.Position12x10;
 import board.actions.Action;
 
 public class Knight extends Piece {
 	
-	public Knight(String rep, int[] coord) {
-		super(rep, coord);
+	public Knight(char rep, int[] coord) {
+		this(rep, Position12x10.coordToIndex(coord));
+	}
+	
+	public Knight(char rep, int index) {
+		super(rep, index);
 		ID = 5;
 		
-		/* without taking */
+		actions.add(new Action(-21, false));
+		actions.add(new Action(21, false));
+		actions.add(new Action(-19, false));
+		actions.add(new Action(+19, false));
+		actions.add(new Action(-12, false));
+		actions.add(new Action(12, false));
+		actions.add(new Action(-8, false));
+		actions.add(new Action(8, false));
+		
+		
+		actions.add(new Action(-21, true));
+		actions.add(new Action(21, true));
+		actions.add(new Action(-19, true));
+		actions.add(new Action(+19, true));
+		actions.add(new Action(-12, true));
+		actions.add(new Action(12, true));
+		actions.add(new Action(-8, true));
+		actions.add(new Action(8, true));
+		
+		/* without taking 
 		actions.add(new Action(1, 2, false)); // one step to the right and two steps forward
 		actions.add(new Action(-1, 2, false)); // one step to the left and two steps forward
 		actions.add(new Action(1, -2, false)); // ...
@@ -19,7 +43,7 @@ public class Knight extends Piece {
 		actions.add(new Action(-2, 1, false)); // ...
 		actions.add(new Action(-2, -1, false));
 		
-		/* with taking */
+		/* with taking 
 		actions.add(new Action(1, 2, true)); // one step to the right and two steps forward
 		actions.add(new Action(-1, 2, true)); // one step to the left and two steps forward
 		actions.add(new Action(1, -2, true)); // ...
@@ -28,7 +52,7 @@ public class Knight extends Piece {
 		actions.add(new Action(2, 1, true)); // two steps to the right and one step forward
 		actions.add(new Action(2, -1, true)); // two steps to the left and one step forward
 		actions.add(new Action(-2, 1, true)); // ...
-		actions.add(new Action(-2, -1, true));
+		actions.add(new Action(-2, -1, true)); */
 		
 		for(Action action : actions) {
 			action.setBlockable(false);

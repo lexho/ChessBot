@@ -9,8 +9,26 @@ import exceptions.InvalidMoveException;
 public class Action {
 	protected int delta_x;
 	protected int delta_y;
+	protected int trans; // 12x10 board transformation
 	protected boolean takes;
 	protected boolean blockable = true; // piece is blockable by other pieces
+	
+	/* move constants */
+	public static final int UP = -10;
+	public static final int DOWN = 10;
+	public static final int LEFT = -1;
+	public static final int RIGHT = 1;
+	
+	public static final int UP_LEFT = -9;
+	public static final int UP_RIGHT = 9;
+	public static final int DOWN_LEFT = -11;
+	public static final int DOWN_RIGHT = 11;
+	
+	public Action(int trans, boolean takes) {
+		this.trans = trans;
+		this.takes = takes;
+		blockable = true;
+	}
 	
 	public Action(int[] delta, boolean takes) {
 		this.delta_x = delta[0];
@@ -186,6 +204,13 @@ public class Action {
 		coord_new[1] = coord[1] + delta_y;
 		//System.out.println(coord[0] + " " + coord[1] + " " + coord_new[0] + " " + coord_new[1]);
 		return coord_new;
+	}
+	
+	/** apply action 
+	 * @param index current index
+	 * @return new index after performed action */
+	public int apply(int index) {
+		return index + trans;
 	}
 	
 	public String toString() {

@@ -5,16 +5,24 @@ import java.util.List;
 
 import board.Move;
 import board.MoveValidator;
+import board.Position12x10;
 import board.actions.Action;
 
 abstract class Pawn extends Piece {
 
-	public Pawn(String rep, int[] coord) {
+	public Pawn(char rep, int index) {
+		super(rep, index);
+	}
+	
+	public Pawn(char rep, int[] coord) {
 		super(rep, coord);
 	}
 	
 	public List<Move> getPossibleMoves() {
 		List<Move> moves = new ArrayList<Move>();
+		
+		// TODO switch to index-based system (not coordinate-based)
+		coord = Position12x10.indexToCoord(index);
 		
 		// two-square initial move rule
 		if(coord[1] == 1) {

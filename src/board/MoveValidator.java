@@ -72,6 +72,12 @@ public class MoveValidator {
 	}
 	
 	public static boolean validate(Position12x10 position, Move m) {
+		boolean validSquares = position.isValid(m.getSourceIndex()) && position.isValid(m.getTargetIndex());
+		Piece piece = position.getPieceAt(m.getSourceIndex());
+		return position.isValid(m.getSourceIndex()) && position.isValid(m.getTargetIndex());
+	}
+	
+	public static boolean validateSquare(int index) {
 		return false;
 	}
 	
