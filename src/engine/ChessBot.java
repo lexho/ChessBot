@@ -14,6 +14,7 @@ import search.nodes.LimitedNode;
 import search.Node;
 import board.Board;
 import board.Move;
+import board.NullMove;
 import board.Position;
 import board.Position12x10;
 import board.PositionInterface;
@@ -75,6 +76,7 @@ public class ChessBot {
 		nextMove = alphaBetaSearch();
 		//nextMove = randomSearch();
 		//System.out.println(nextMove);
+		if(nextMove == null) nextMove = new NullMove();
 		return nextMove.toString();
 	}
 	
@@ -166,6 +168,21 @@ public class ChessBot {
 	 */
 	public void printBoard() {
 		board.print();
+	}
+	
+	public void printPossibleMoves() {
+		int[] prev = {-1, -1};
+		for(Move m : board.getPossibleMoves()) {
+			int[] src = m.getSource();
+			if(src != prev) {
+				System.out.println();
+				System.out.print(board.getPosition().getPieceAt(src).getCharRep() + " ");
+			}
+			m.getSourceIndex();
+			System.out.print(m);
+			prev = src;
+		}
+		//System.out.print(board.getPossibleMoves());
 	}
 
 }

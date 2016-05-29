@@ -17,6 +17,7 @@ public class MoveValidator {
 		
 		/* Compare the move to the moves the piece is able to make */
 		//TODO validate castle
+		
 		Piece piece = position.getPieceAt(m.getSource()) ;
 		boolean valid = false;
 		for(Action action : piece.getActions()) {
@@ -76,6 +77,22 @@ public class MoveValidator {
 	public static boolean validate(Position12x10 position, Move m) {
 		
 		boolean validSquares = position.isValid(m.getSourceIndex()) && position.isValid(m.getTargetIndex());
+		
+		if(position.castlingAllowed()) {
+			/* Castle Black */
+			if(m.getSourceIndex() == 25) {
+				if(m.getTargetIndex() == 23 || m.getTargetIndex() == 27) {
+					return true;
+				}
+			}
+			/* Castle White */
+			else if(m.getSourceIndex() == 95) {
+				if(m.getTargetIndex() == 93 || m.getTargetIndex() == 97) {
+					return true;
+				}
+			}
+		}
+		
 		Piece piece = position.getPieceAt(m.getSourceIndex());
 		
 		/* Source is not our piece */

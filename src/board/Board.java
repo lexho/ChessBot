@@ -19,7 +19,7 @@ import exceptions.InvalidMoveException;
 import search.endconditions.EndCondition;
 
 public class Board {
-	static boolean DEBUG = false;
+	public static boolean DEBUG = false;
 	PositionInterface currentPosition;
 	//PieceList pieces;
 	char color; // our color (white or black) TODO this is probably buggy
@@ -81,7 +81,32 @@ public class Board {
 		Piece piece = currentPosition.getPieceAt(src[0], src[1]);
 		//pieces.removePieceAt(trg);	// remove token piece
 		currentPosition.clear(trg);
-
+		
+		if(currentPosition.castlingAllowed()) {
+			/* Castling Black */
+			if(piece.getCharRep() == 'k') {
+				if(m.getTargetIndex() == 23) {
+					((Position12x10) currentPosition).setPieceAt('r', 24);
+					((Position12x10) currentPosition).clear(21);
+				}
+				if(m.getTargetIndex() == 27) {
+					((Position12x10) currentPosition).setPieceAt('r', 26);
+					((Position12x10) currentPosition).clear(28);
+				}	
+			} 
+			/* Castling White */
+			else if(piece.getCharRep() == 'K') {
+				if(m.getTargetIndex() == 93) {
+					((Position12x10) currentPosition).setPieceAt('r', 94);
+					((Position12x10) currentPosition).clear(91);
+				}
+				if(m.getTargetIndex() == 97) {
+					((Position12x10) currentPosition).setPieceAt('r', 96);
+					((Position12x10) currentPosition).clear(98);
+				}		
+			}
+		}
+		
 		/* Promotion (P -> Q,N,R,B on 8th rank)*/
 		if(piece.getID() == Piece.WHITE_PAWN && trg[1] == 7) {
 			System.out.println("promotion white");

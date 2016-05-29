@@ -254,6 +254,11 @@ public class Position12x10 implements PositionInterface {
 		return false;
 	}
 	
+	//TODO implement castling test
+	public boolean castlingAllowed() {
+		return true;
+	}
+	
 	public boolean isFree(int index) {
 		if(board_12x10[index] == EMPTY) {
 			return true;
@@ -286,10 +291,15 @@ public class Position12x10 implements PositionInterface {
 	/** test piece for color */
 	public boolean isColor(int index, char color) {
 		char p = (char) board_12x10[index];
-		boolean isWhite = Character.isLowerCase(p);
+		boolean isWhite = Character.isUpperCase(p);
 		if(isWhite && color == 'w') return true; 
 		else if(!isWhite && color == 'b') return true;
 		else return false;
+	}
+	
+	public char getColor(int index) {
+		if(Character.isUpperCase(board_12x10[index])) return 'w';
+		else return 'b';
 	}
 	
 	public int[] get12x10Board() {
@@ -386,6 +396,11 @@ public class Position12x10 implements PositionInterface {
 	
 	public void setActiveColor(char color) {
 		activeColor = color;
+	}
+	
+	public void movePiece(int src, int trg) {
+		setPieceAt(board_12x10[src], trg);
+		clear(src);
 	}
 	
 	//TODO method is not safe

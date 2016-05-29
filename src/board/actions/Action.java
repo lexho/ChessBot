@@ -24,9 +24,9 @@ public class Action {
 	public static final int LEFT = -1;
 	public static final int RIGHT = 1;
 	
-	public static final int UP_LEFT = -9;
-	public static final int UP_RIGHT = 9;
-	public static final int DOWN_LEFT = -11;
+	public static final int UP_LEFT = -11;
+	public static final int UP_RIGHT = -9;
+	public static final int DOWN_LEFT = 9;
 	public static final int DOWN_RIGHT = 11;
 	
 	public Action(int trans, boolean repeat, boolean takes) {
@@ -232,6 +232,14 @@ public class Action {
 		}
 	}
 	
+	/** Is any action possible in the given position */
+	public boolean possible(Position12x10 pos, int index) {
+		List<Integer> targets = new ArrayList<Integer>();
+		int i = index + trans;
+		if(pos.isValid(i) && ((!takes && pos.isFree(i)) || takes) ) return true;
+		else return false;
+	}
+	
 	public int[] apply(int[] coord) {
 		int[] coord_new = new int[2];
 		
@@ -242,25 +250,19 @@ public class Action {
 		return coord_new;
 	}
 	
-	/** Is any action possible in the given position */
-	public boolean possible(Position12x10 pos, int index) {
-		List<Integer> targets = new ArrayList<Integer>();
-		int i = index + trans;
-		if(pos.isValid(i) && ((!takes && pos.isFree(i)) || takes) ) return true;
-		else return false;
-	}
-	
 	/** apply action 
-	 * @param index current index
+	 * @param source current index
 	 * @return new index after performed action */
-	public List<Integer> apply(Position12x10 pos, int index) {
+	public List<Integer> apply(Position12x10 pos, int source) {
 		List<Integer> targets = new ArrayList<Integer>();
-		int i = index + trans;
+		int i = source + trans;
 		//TODO fix this loop
 		while(pos.isValid(i) && ((!takes && pos.isFree(i)) || takes) ) {
+			boolean takesPiece = takes && !pos.isFree(i);
+			if(takesPiece && pos.isColor(i, pos.getColor(source))) break; // do not take your own pieces
 			targets.add(i);
 			if(!repeatable) break;
-			if(takes && !pos.isFree(i) && pos.isColor(i, pos.getUnactiveColor())) break; // take and action is done
+			if(takesPiece && !pos.isColor(i, pos.getColor(source))) break; // take and action is done
 			i += trans;
 		}
 		
