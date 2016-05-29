@@ -3,6 +3,7 @@ package exceptions;
 import board.Board;
 import board.Move;
 import board.Position;
+import board.Position12x10;
 import board.PositionInterface;
 import board.pieces.Piece;
 
@@ -24,9 +25,9 @@ public class InvalidMoveException extends RuntimeException {
 	}
 	
 	public InvalidMoveException(Move m, PositionInterface pos) {
-		Piece p = pos.getPieces().getPieceAt(m.getSource());
-		msg = "\n" + pos.toString();
-		msg += "The piece " + p + " at (" + m.getSource()[0] + "/" + m.getSource()[1] + ") is not allowed to make the move " + m;
+		//Piece p = pos.getPieces().getPieceAt(m.getSource());
+		msg =  m + "\n" + pos.toString() + "\n";
+		//msg += "The piece " + p  + " " + (int) p.getCharRep() + " at " + m.getSourceIndex() + " ( " + m.getSource()[0] + "/" + m.getSource()[1] + ") is not allowed to make the move " + m;
 		//printErrorMessage(m, pos);
 	}
 	
@@ -40,15 +41,15 @@ public class InvalidMoveException extends RuntimeException {
 		return this.getClass().getName().toString() + ": " + msg;
 	}
 	
-	private void printErrorMessage(Move m, Position pos) {
+	private void printErrorMessage(Move m, PositionInterface pos) {
 		System.err.println("invalid move " + m);
 		System.err.println(pos);
 		Piece piece = pos.getPieces().getPieceAt(m.getSource());
 		String p_src = pos.getPieces().getPieceAt(m.getSource()).toString();
-		String p_trg = pos.getSquareAt(m.getTarget()).toString();
-		System.err.println("Possible moves piece: " + piece.getPossibleMoves());
+		//String p_trg = pos.getSquareAt(m.getTarget()).toString();
+		System.err.println("Possible moves piece: " + piece.getPossibleMoves((Position12x10)pos));
 		System.err.print("source: " + p_src + " ("+ m.getSource()[0] + "/" + m.getSource()[1] + "), ");
-		System.err.println("target: " + p_trg + " ("+ m.getTarget()[0] + "/" + m.getTarget()[1] + ")");
+		//System.err.println("target: " + p_trg + " ("+ m.getTarget()[0] + "/" + m.getTarget()[1] + ")");
 		
 		for(Piece p : pos.getPieces()) {
 			System.err.print(p.getRep() + " (" + p.getPosition()[0] + "/"+ p.getPosition()[1] + "), ");

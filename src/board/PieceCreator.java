@@ -13,7 +13,7 @@ import board.pieces.WhitePawn;
 public class PieceCreator {
 	
 	public static Piece createPiece(String rep, int[] coord) {
-		return createPiece('x', Position12x10.coordToIndex(coord));
+		return createPiece(rep.charAt(0), Position12x10.coordToIndex(coord));
 	}
 	
 	public static Piece createPiece(char rep, int index) {

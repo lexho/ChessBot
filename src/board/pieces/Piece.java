@@ -6,8 +6,10 @@ import java.util.List;
 import board.Move;
 import board.MoveValidator;
 import board.Position12x10;
+import board.PositionInterface;
 import board.Rule;
 import board.actions.Action;
+import exceptions.InvalidIndexException;
 
 public class Piece {
 	char rep;
@@ -34,6 +36,7 @@ public class Piece {
 	int range;
 	
 	public Piece(char rep, int index) {
+		//if(index == -1) throw new InvalidIndexException(index);
 		this.rep = rep;
 		this.index = index;
 		actions = new ArrayList<Action>();
@@ -45,15 +48,18 @@ public class Piece {
 		this.coord[0] = coord[0];
 		this.coord[1] = coord[1];
 		this.index = Position12x10.coordToIndex(coord);
+		//if(index == -1) throw new InvalidIndexException(index);
 		actions = new ArrayList<Action>();
 	}
 	
 	public Piece(String rep, int[] coord) {
+		
 		this.coord = new int[2];
 		this.rep = rep.charAt(0);
 		this.coord[0] = coord[0];
 		this.coord[1] = coord[1];
 		this.index = Position12x10.coordToIndex(coord);
+		//if(index == -1) throw new InvalidIndexException(index);
 		actions = new ArrayList<Action>();
 	}
 	
@@ -63,6 +69,7 @@ public class Piece {
 		this.coord[0] = p.coord[0];
 		this.coord[1] = p.coord[1];
 		this.index = p.index;
+		//if(index == -1) throw new InvalidIndexException(index);
 		actions = new ArrayList<Action>();
 		for(Action a : p.actions) {
 			actions.add(a);
@@ -81,6 +88,10 @@ public class Piece {
 		return rep;
 	}
 	
+	public int getPosIndex() {
+		return index;
+	}
+	
 	public int[] getPosition() {
 		return Position12x10.indexToCoord(index);
 	}
@@ -90,7 +101,16 @@ public class Piece {
 		else return 'b';
 	}
 	
-	public List<Move> getPossibleMoves() {
+	public boolean isMoveable(Position12x10 pos) {
+		/* test all actions for validity */
+		for(Action action : actions) {
+			/* Validate target position */
+			if(action.possible(pos, index)) return true;
+		}
+		return false;
+	}
+	
+	public List<Move> getPossibleMoves(Position12x10 pos) {
 
 		List<Move> moves = new ArrayList<Move>();
 		
@@ -104,8 +124,12 @@ public class Piece {
 			//int[] target = action.apply(coord);
 			
 			/* Validate target position */
-			//boolean isValid = MoveValidator.validateSquare(index);
-			moves.add(new Move(index, action.apply(index)));
+			//boolean isValid = MoveValidator.validateSquare(action.apply(index));
+			List<Integer> targets = action.apply(pos, index);
+			for(Integer target : targets) {
+				moves.add(new Move(index, target));
+			}
+			//moves.add(new Move(index, action.apply(index)));
 		}
 		return moves;
 	}
@@ -119,10 +143,11 @@ public class Piece {
 		if(x < 0 || x > 7 || y < 0 || y > 7) return false;
 		
 		/* Set position coordinates */
+		int[] coord = new int[2];
 		coord[0] = x;
 		coord[1] = y;
 		index = Position12x10.coordToIndex(coord);
-		
+		//if(index == -1) throw new InvalidIndexException(index);
 		return true;
 	}
 	

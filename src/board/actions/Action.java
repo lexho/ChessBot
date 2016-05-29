@@ -1,7 +1,11 @@
 package board.actions;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import board.Move;
 import board.Position;
+import board.Position12x10;
 import board.PositionInterface;
 import board.pieces.Piece;
 import exceptions.InvalidMoveException;
@@ -12,6 +16,7 @@ public class Action {
 	protected int trans; // 12x10 board transformation
 	protected boolean takes;
 	protected boolean blockable = true; // piece is blockable by other pieces
+	protected boolean repeatable = false; // the move is repeatable unti it's blocked by another piece
 	
 	/* move constants */
 	public static final int UP = -10;
@@ -23,6 +28,13 @@ public class Action {
 	public static final int UP_RIGHT = 9;
 	public static final int DOWN_LEFT = -11;
 	public static final int DOWN_RIGHT = 11;
+	
+	public Action(int trans, boolean repeat, boolean takes) {
+		this.trans = trans;
+		this.repeatable = repeat;
+		this.takes = takes;
+		blockable = true;
+	}
 	
 	public Action(int trans, boolean takes) {
 		this.trans = trans;
@@ -49,6 +61,30 @@ public class Action {
 	
 	public void setTakes(boolean takes) {
 		this.takes = takes;
+	}
+	
+	public boolean validate(int source, Position12x10 pos) {
+		boolean isValid = false;
+		int[] src = Position12x10.indexToCoord(source);
+		List<Integer> targets = apply(pos, source);
+		for(Integer target : targets) {
+			boolean targetIsFree = pos.isFree(target);
+			Piece targetPiece = pos.getPieceAt(target);
+			
+			Piece srcPiece = pos.getPieceAt(source);
+			
+			/* Is the source piece's color of the active player? */
+			//System.out.println(srcPiece.getColor() + " != " + pos.getActiveColor());
+			if(srcPiece.getColor() != pos.getActiveColor()) continue;
+			
+			if(!takes && targetIsFree) return true;
+			if(takes && !targetIsFree && targetPiece.getColor() != pos.getActiveColor()) return true;
+			else {
+				continue; // action is not allowed
+			}
+		}
+		return isValid;
+		//return validate(src, pos);
 	}
 	
 	/* Validate action in the given context */
@@ -79,9 +115,9 @@ public class Action {
 		int dy = Math.abs(target[1] - source[1]);
 		if(blockable && (dx > 1 || dy > 1)) {	
 			Move move = new Move(source, target);
-			//System.out.print(move + ": ");
-			/*//System.out.print("blockable check " + source[0] + "/" + source[1]);
-			//System.out.println(" --> " + target[0] + "/" + target[1]);*/
+			/*System.out.print(move + ": ");
+			System.out.print("blockable check " + source[0] + "/" + source[1]);
+			System.out.println(" --> " + target[0] + "/" + target[1]);*/
 			
 			if(srcPiece.getID() == Piece.ROOK || (srcPiece.getID() == Piece.QUEEN && dx != dy)) {
 				// Up
@@ -206,11 +242,29 @@ public class Action {
 		return coord_new;
 	}
 	
+	/** Is any action possible in the given position */
+	public boolean possible(Position12x10 pos, int index) {
+		List<Integer> targets = new ArrayList<Integer>();
+		int i = index + trans;
+		if(pos.isValid(i) && ((!takes && pos.isFree(i)) || takes) ) return true;
+		else return false;
+	}
+	
 	/** apply action 
 	 * @param index current index
 	 * @return new index after performed action */
-	public int apply(int index) {
-		return index + trans;
+	public List<Integer> apply(Position12x10 pos, int index) {
+		List<Integer> targets = new ArrayList<Integer>();
+		int i = index + trans;
+		//TODO fix this loop
+		while(pos.isValid(i) && ((!takes && pos.isFree(i)) || takes) ) {
+			targets.add(i);
+			if(!repeatable) break;
+			if(takes && !pos.isFree(i) && pos.isColor(i, pos.getUnactiveColor())) break; // take and action is done
+			i += trans;
+		}
+		
+		return targets;
 	}
 	
 	public String toString() {

@@ -50,10 +50,12 @@ public class BoardNode implements Node
 		return parent;
 	}
 
+	//TODO isLeaf() is faulty
 	@Override
 	public boolean isLeaf() {
-		//if(board.getPossibleMoves().size() == 0)
-		if(board.isMate()) {
+		//if(board.getPossibleMoves().size() == 0) // too slow
+		//board.isMate() // incomplete
+		if(!board.isRunning()) {
 			/*board.print();
 			System.out.println("Player is Mate");*/
 			return true;
@@ -118,6 +120,16 @@ public class BoardNode implements Node
 		} else if (!board.equals(other.board))
 			return false;
 		return true;
+	}
+	
+	public String getFullAction() {
+		String movestr = new String();
+		Node node = new BoardNode(this, this.getAction(), this.board);
+		while(!node.isRoot()) {
+			movestr = node.getAction().toString() + " " + movestr;
+			node = node.parent();
+		}
+		return movestr;
 	}
 	
 }

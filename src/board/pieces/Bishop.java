@@ -13,15 +13,15 @@ public class Bishop extends Piece {
 		super(rep, index);
 		ID = 6;
 		
-		actions.add(new Action(Action.DOWN_LEFT, false));
-		actions.add(new Action(Action.DOWN_RIGHT, false));
-		actions.add(new Action(Action.UP_LEFT, false));
-		actions.add(new Action(Action.UP_RIGHT, false));
+		actions.add(new Action(Action.DOWN_LEFT, true, false));
+		actions.add(new Action(Action.DOWN_RIGHT, true, false));
+		actions.add(new Action(Action.UP_LEFT, true, false));
+		actions.add(new Action(Action.UP_RIGHT, true, false));
 		
-		actions.add(new Action(Action.DOWN_LEFT, true));
-		actions.add(new Action(Action.DOWN_RIGHT, true));
-		actions.add(new Action(Action.UP_LEFT, true));
-		actions.add(new Action(Action.UP_RIGHT, true));
+		actions.add(new Action(Action.DOWN_LEFT, true, true));
+		actions.add(new Action(Action.DOWN_RIGHT, true, true));
+		actions.add(new Action(Action.UP_LEFT, true, true));
+		actions.add(new Action(Action.UP_RIGHT, true, true));
 		
 		//TODO some actions are still missing
 		

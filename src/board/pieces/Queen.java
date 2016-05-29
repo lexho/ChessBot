@@ -14,15 +14,15 @@ public class Queen extends Piece {
 		ID = 2;
 		
 		/* Bishop moves */
-		actions.add(new Action(Action.DOWN_LEFT, false));
-		actions.add(new Action(Action.DOWN_RIGHT, false));
-		actions.add(new Action(Action.UP_LEFT, false));
-		actions.add(new Action(Action.UP_RIGHT, false));
+		actions.add(new Action(Action.DOWN_LEFT, true, false));
+		actions.add(new Action(Action.DOWN_RIGHT, true, false));
+		actions.add(new Action(Action.UP_LEFT, true, false));
+		actions.add(new Action(Action.UP_RIGHT, true, false));
 		
-		actions.add(new Action(Action.DOWN_LEFT, true));
-		actions.add(new Action(Action.DOWN_RIGHT, true));
-		actions.add(new Action(Action.UP_LEFT, true));
-		actions.add(new Action(Action.UP_RIGHT, true));
+		actions.add(new Action(Action.DOWN_LEFT, true, true));
+		actions.add(new Action(Action.DOWN_RIGHT, true, true));
+		actions.add(new Action(Action.UP_LEFT, true, true));
+		actions.add(new Action(Action.UP_RIGHT, true, true));
 		
 		//TODO some actions are still missing
 		/* move diagonally (without taking) 
@@ -42,15 +42,15 @@ public class Queen extends Piece {
 		} */
 		
 		/* Rook moves */
-		actions.add(new Action(Action.UP, false));
-		actions.add(new Action(Action.DOWN, false));
-		actions.add(new Action(Action.LEFT, false));
-		actions.add(new Action(Action.RIGHT, false));
+		actions.add(new Action(Action.UP, true, false));
+		actions.add(new Action(Action.DOWN, true, false));
+		actions.add(new Action(Action.LEFT, true, false));
+		actions.add(new Action(Action.RIGHT, true, false));
 		
-		actions.add(new Action(Action.UP, true));
-		actions.add(new Action(Action.DOWN, true));
-		actions.add(new Action(Action.LEFT, true));
-		actions.add(new Action(Action.RIGHT, true));
+		actions.add(new Action(Action.UP, true, true));
+		actions.add(new Action(Action.DOWN, true, true));
+		actions.add(new Action(Action.LEFT, true, true));
+		actions.add(new Action(Action.RIGHT, true, true));
 		
 		//TODO some actions are still missing
 		/* move forward (without taking) 

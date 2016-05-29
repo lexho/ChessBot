@@ -141,7 +141,7 @@ public class ChessBot {
 		nextMove = result.f.getAction();
 		
 		searchtime = System.currentTimeMillis() - searchtime;
-		System.out.println("Possible moves: " + new LimitedNode(board.copy()).adjacent().size());
+		//System.out.println("Possible moves: " + new LimitedNode(board.copy()).adjacent().size());
 		System.out.println("Possible moves: " + board.getPossibleMoves().size());
 		//System.out.println(alphabeta.nodecount/(searchtime / 60) + " nodes per second");
 		System.out.println("searchtime: " + searchtime / 1000 + " s");

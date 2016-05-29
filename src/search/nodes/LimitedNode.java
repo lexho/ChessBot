@@ -6,6 +6,7 @@ import java.util.List;
 
 import board.Board;
 import board.Move;
+import board.Position12x10;
 import board.pieces.Piece;
 import search.Node;
 
@@ -36,11 +37,12 @@ public class LimitedNode extends BoardNode
 
 		for (Move move : possible)
 		{
-			Piece piece = board.getPosition().getPieces().getPieceAt(move.getSource());
+			//Piece piece = board.getPosition().getPieces().getPieceAt(move.getSource());
+			Piece piece = ((Position12x10)board.getPosition()).getPieceAt(move.getSourceIndex());
 			
 			/* Do not explore pawn moves in deep */
 			//System.out.println("depth in Node: " + depth);
-			if(getDepth() < 2 && piece.getID() == Piece.BLACK_PAWN || piece.getID() == Piece.WHITE_PAWN) {
+			if(getDepth() > 2 && piece.getID() == Piece.BLACK_PAWN || piece.getID() == Piece.WHITE_PAWN) {
 				if(getAction() != null)
 				//System.out.println("skip " + getFullAction());
 				continue;	

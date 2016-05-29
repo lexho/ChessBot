@@ -187,11 +187,11 @@ public class ScoreBoard<V> implements Function<Board, Double>
 	private double possibleMoves(Board board, int piece) {
 		double score = 0d;
 		for(Piece queen : position.getPieceByID(piece)) {
-			score += queen.getPossibleMoves().size();
+			score += queen.getPossibleMoves((Position12x10) board.getPosition()).size();
 		}
 		// TODO create method to convert white to black piece
 		for(Piece queen : position.getPieceByID(piece + 65)) {
-			score += queen.getPossibleMoves().size() * -1;
+			score += queen.getPossibleMoves((Position12x10) board.getPosition()).size() * -1;
 		}
 		return score;
 	}

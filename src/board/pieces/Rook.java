@@ -13,15 +13,15 @@ public class Rook extends Piece {
 		super(rep, index);
 		ID = 7;
 		
-		actions.add(new Action(Action.UP, false));
-		actions.add(new Action(Action.DOWN, false));
-		actions.add(new Action(Action.LEFT, false));
-		actions.add(new Action(Action.RIGHT, false));
+		actions.add(new Action(Action.UP, true, false));
+		actions.add(new Action(Action.DOWN, true, false));
+		actions.add(new Action(Action.LEFT, true, false));
+		actions.add(new Action(Action.RIGHT, true, false));
 		
-		actions.add(new Action(Action.UP, true));
-		actions.add(new Action(Action.DOWN, true));
-		actions.add(new Action(Action.LEFT, true));
-		actions.add(new Action(Action.RIGHT, true));
+		actions.add(new Action(Action.UP, true, true));
+		actions.add(new Action(Action.DOWN, true, true));
+		actions.add(new Action(Action.LEFT, true, true));
+		actions.add(new Action(Action.RIGHT, true, true));
 		
 		//TODO some actions are still missing
 		

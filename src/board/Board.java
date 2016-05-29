@@ -19,8 +19,9 @@ import exceptions.InvalidMoveException;
 import search.endconditions.EndCondition;
 
 public class Board {
+	static boolean DEBUG = false;
 	PositionInterface currentPosition;
-	PieceList pieces;
+	//PieceList pieces;
 	char color; // our color (white or black) TODO this is probably buggy
 	
 	/**
@@ -30,7 +31,7 @@ public class Board {
 	 *  */
 	public Board(PositionInterface position) {
 		this.currentPosition = position;
-		pieces = position.getPieces();
+		//pieces = position.getPieces();
 	}
 	
 	/** Create a Board by another Board (clone)
@@ -40,7 +41,7 @@ public class Board {
 	public Board(Board b) {
 		this.currentPosition = new Position12x10((Position12x10)b.getPosition());
 		//pieces = new PieceList<Piece>();
-		this.pieces = currentPosition.getPieces();
+		//this.pieces = currentPosition.getPieces();
 		/*for(Piece p : b.getPosition().getPieces()) {
 			pieces.add(p);
 		}*/
@@ -53,7 +54,7 @@ public class Board {
 	 * */
 	public boolean makeMove(Move m) {
 
-		boolean moveIsValid = MoveValidator.validate(currentPosition, m);
+		boolean moveIsValid = MoveValidator.validate((Position12x10)currentPosition, m);
 		if(!moveIsValid) throw new InvalidMoveException(m, currentPosition);
 		if(moveIsValid) return executeMove(m);
 
@@ -104,10 +105,11 @@ public class Board {
 			print();
 		}
 		currentPosition.setPieceAt(piece, trg); // update position table
-		piece.setPosition(trg); // update piece
+		//piece.setPosition(trg); // update piece
 		
 		/* Clear source */
 		currentPosition.clear(src);
+		currentPosition.updatePieceList();
 		
 		/* Change Meta-Data */
 		currentPosition.switchActiveColor();
@@ -119,8 +121,12 @@ public class Board {
 	}
 	
 	public boolean isRunning() {
+		 for (Piece piece : currentPosition.getPieces()) {
+			 if(piece.isMoveable((Position12x10)currentPosition)) return true;
+		 }
+		 return false;
 		//System.out.println("is running");
-		return !isMate();
+		//return !isMate();
 		/*if(getPossibleMoves().size() == 0) return false;
 		else return true;*/
 	}
@@ -135,7 +141,7 @@ public class Board {
 		ExecutorService service = Executors.newFixedThreadPool(ChessBot.NR_OF_THREADS);
 	    b = this;
 	    
-	    for (final Move m : king.getPossibleMoves()) {
+	    for (final Move m : king.getPossibleMoves((Position12x10)currentPosition)) {
 	        Callable<Boolean> callable = new Callable<Boolean>() {
 	            public Boolean call() throws Exception {
 	            	if(MoveValidator.validate(currentPosition, m)) {
@@ -213,32 +219,40 @@ public class Board {
 	public List<Move> getPossibleMoves() {
 		char color = getActiveColor();
 		List<Move> possibleMoves = new ArrayList<Move>();
-		
+		if(DEBUG) System.out.println("Possible Moves");
 		    ExecutorService service = Executors.newFixedThreadPool(ChessBot.NR_OF_THREADS);
 		    b = this;
 		    
 		    List<Future<List<Move>>> futures = new ArrayList<Future<List<Move>>>();
-		    for (final Piece piece : pieces) {
+		    
+		    for (final Piece piece : currentPosition.getPieces()) {
 		        Callable<List<Move>> callable = new Callable<List<Move>>() {
+		        	
 		            public List<Move> call() throws Exception {
 		            	List<Move> possibleMoves = new ArrayList<Move>();
-		            	for(Move m : piece.getPossibleMoves()) {
-		            		//System.out.print(m + " ");
+		            	if(DEBUG) System.out.print(piece + " ");
+		            	for(Move m : piece.getPossibleMoves((Position12x10)currentPosition)) {
+		            		if(DEBUG) System.out.print(m);
+		            		
 		    				if(MoveValidator.validate((Position12x10)currentPosition, m)) {
-		    					//TODO replace test board with 12x10 int-array test
-		    					Board testBoard = new Board(Board.b.copy());
-		    					testBoard.executeMove(m);
-		    					//char opponent = testBoard.getPosition().getUnactiveColor();
-		    					if(!testBoard.getPosition().isInCheck(color)) {
-		    						//System.out.println(color + " is not in check with " + m);
-		    						possibleMoves.add(m);
+		    					Position12x10 test = new Position12x10((Position12x10)currentPosition);
+		    					test.setPieceAt(piece.getCharRep(), m.getTargetIndex());
+		    					test.clear(m.getTargetIndex());
+		    					test.setActiveColor(currentPosition.getUnactiveColor());
+		    					
+		    		
+		    					if(!test.isInCheck(color)) {
+		    						if(m != null)
+		    							possibleMoves.add(m);
 		    					}
-		    					System.out.println(" valid");
-		    				}// else System.out.println(" invalid");
+		    					if(DEBUG) System.out.print("(+) ");
+		    				} else if(DEBUG)  System.out.print("(-) ");
 		    			}
+		            	if(DEBUG) System.out.println();
 		            	return possibleMoves;
 		            }
 		        };
+		        
 		        futures.add(service.submit(callable));
 		    }
 
@@ -304,12 +318,13 @@ public class Board {
 	 * @return the current board representation
 	 */
 	public String toString() {
+		PieceList pieces = currentPosition.getPieces();
 		String piecesstr = pieces.size() + " Pieces on the board: \n" + pieces.toString() + "\n";
 		String moves = new String();
 		int NrOfMoves = 0;
 		for(Piece piece : pieces) {
-			NrOfMoves += piece.getPossibleMoves().size();
-			for(Move m : piece.getPossibleMoves()) {
+			NrOfMoves += piece.getPossibleMoves((Position12x10)currentPosition).size();
+			for(Move m : piece.getPossibleMoves((Position12x10)currentPosition)) {
 				boolean moveIsValid = false;
 				moveIsValid = MoveValidator.validate(currentPosition, m);
 				if(moveIsValid)

@@ -16,6 +16,8 @@ import board.position.Fen;
 import board.square.InvalidSquare;
 import board.square.Square;
 import board.square.ValidSquare;
+import exceptions.InvalidIndexException;
+import exceptions.InvalidMoveException;
 import util.StringUtils;
 
 public class Position12x10 implements PositionInterface {
@@ -72,6 +74,7 @@ public class Position12x10 implements PositionInterface {
 		pieces.add(new Bishop('B', coordToIndex(new int[]{5,0})));
 		pieces.add(new Knight('N', coordToIndex(new int[]{6,0})));
 		pieces.add(new Rook('R', coordToIndex(new int[]{7,0})));
+		
 	}
 	
 	public Position12x10(Position12x10 position) {
@@ -85,7 +88,7 @@ public class Position12x10 implements PositionInterface {
 		}
 		
 		/* Copy piece list */
-		for(Piece p : position.pieces) {
+		for(Piece p : position.getPieces()) {
 			this.pieces.add(p);
 		}
 		
@@ -166,6 +169,31 @@ public class Position12x10 implements PositionInterface {
 			}
 		}
 		//TODO build 12x10 array
+		/* Init 12x10 board */
+		board_12x10 = new int [120];
+		int [] emptyBoard = {
+				INVALID,	INVALID,	INVALID,	INVALID,	INVALID,	INVALID,	INVALID,	INVALID,	INVALID,	INVALID,
+				INVALID,	INVALID,	INVALID,	INVALID,	INVALID,	INVALID,	INVALID,	INVALID,	INVALID,	INVALID,
+				INVALID,	EMPTY,	EMPTY,	EMPTY,	EMPTY,	EMPTY,	EMPTY,	EMPTY,	EMPTY,	INVALID,
+				INVALID,	EMPTY,	EMPTY,	EMPTY,	EMPTY,	EMPTY,	EMPTY,	EMPTY,	EMPTY,	INVALID,
+				INVALID,	EMPTY,	EMPTY,	EMPTY,	EMPTY,	EMPTY,	EMPTY,	EMPTY,	EMPTY,	INVALID,
+				INVALID,	EMPTY,	EMPTY,	EMPTY,	EMPTY,	EMPTY,	EMPTY,	EMPTY,	EMPTY,	INVALID,
+				INVALID,	EMPTY,	EMPTY,	EMPTY,	EMPTY,	EMPTY,	EMPTY,	EMPTY,	EMPTY,	INVALID,
+				INVALID,	EMPTY,	EMPTY,	EMPTY,	EMPTY,	EMPTY,	EMPTY,	EMPTY,	EMPTY,	INVALID,
+				INVALID,	EMPTY,	EMPTY,	EMPTY,	EMPTY,	EMPTY,	EMPTY,	EMPTY,	EMPTY,	INVALID,
+				INVALID,	EMPTY,	EMPTY,	EMPTY,	EMPTY,	EMPTY,	EMPTY,	EMPTY,	EMPTY,	INVALID,
+				INVALID,	INVALID,	INVALID,	INVALID,	INVALID,	INVALID,	INVALID,	INVALID,	INVALID,	INVALID,
+				INVALID,	INVALID,	INVALID,	INVALID,	INVALID,	INVALID,	INVALID,	INVALID,	INVALID,	INVALID };
+		
+		for (int i=0; i < 120; i++)
+			board_12x10 [i] = emptyBoard [i];
+
+		for(Piece p: pieces) {
+			char piece = p.getCharRep();
+			int index = p.getPosIndex();
+			board_12x10[index] = piece;
+		}
+		
 		/*initSquares();
 		for(Piece p : pieces) {
 			int x = p.getPosition()[0];
@@ -192,7 +220,7 @@ public class Position12x10 implements PositionInterface {
 		if(king == null) return true; // game over
 		List<Piece> opponentsPieces = getPieces().getPieces(getUnactiveColor());
 		for(Piece p : opponentsPieces) {
-			for(Move m : p.getPossibleMoves()) {
+			for(Move m : p.getPossibleMoves(this)) {
 				Position12x10 temp = new Position12x10(this);
 				temp.setActiveColor(p.getColor());
 				if(MoveValidator.validate(temp, m)) 
@@ -213,7 +241,7 @@ public class Position12x10 implements PositionInterface {
 		if(color == getActiveColor()) opponentsPieces = getPieces().getPieces(getUnactiveColor());
 		else opponentsPieces = getPieces().getPieces(getActiveColor());
 		for(Piece p : opponentsPieces) {
-			for(Move m : p.getPossibleMoves()) {
+			for(Move m : p.getPossibleMoves(this)) {
 				Position12x10 temp = new Position12x10(this);
 				temp.setActiveColor(p.getColor());
 				if(MoveValidator.validate(temp, m)) {
@@ -226,14 +254,16 @@ public class Position12x10 implements PositionInterface {
 		return false;
 	}
 	
+	public boolean isFree(int index) {
+		if(board_12x10[index] == EMPTY) {
+			return true;
+		} else return false;
+	}
+	
 	@Override
 	public boolean isFree(int[] coord) {
-		int x = coord[0];
-		int y = coord[1];
-		int i = (7 - y) * 10 + 20 + 1 + x;
-		//System.out.println(coord[0] + "/" + coord[1] + " --> " + i + " " + board_12x10[i]);
-		if(board_12x10[i] == EMPTY) return true;
-		else return false;
+		int index = coordToIndex(coord);
+		return isFree(index);
 	}
 
 	@Override
@@ -246,8 +276,20 @@ public class Position12x10 implements PositionInterface {
 	}
 	
 	public boolean isValid(int index) {
-		if(index > (board_12x10.length - 1)) return false; //TODO this should not happen!
-		return board_12x10[index] == INVALID;
+		try {
+			return board_12x10[index] != INVALID;
+		} catch (IndexOutOfBoundsException e) {
+			throw new InvalidIndexException(index);
+		}
+	}
+	
+	/** test piece for color */
+	public boolean isColor(int index, char color) {
+		char p = (char) board_12x10[index];
+		boolean isWhite = Character.isLowerCase(p);
+		if(isWhite && color == 'w') return true; 
+		else if(!isWhite && color == 'b') return true;
+		else return false;
 	}
 	
 	public int[] get12x10Board() {
@@ -268,8 +310,19 @@ public class Position12x10 implements PositionInterface {
 		return moveNr;
 	}
 	
+	/** Creates a new piece list or returns the current one */
 	public PieceList getPieces() {
 		return pieces;
+	}
+	
+	/** This method should be call always after the board has been manipulated */
+	public void updatePieceList() {
+		pieces = new PieceList();
+		for(int i = 0; i < board_12x10.length; i++) {
+			
+			if(board_12x10[i] != INVALID && board_12x10[i] != EMPTY)
+				pieces.add(getPieceAt(i));
+		}
 	}
 	
 	public Piece getPieceAt(int x, int y) {
@@ -335,22 +388,34 @@ public class Position12x10 implements PositionInterface {
 		activeColor = color;
 	}
 	
+	//TODO method is not safe
+	public void setPieceAt(int p, int index) {
+		try {
+			board_12x10[index] = p;
+		} catch (IndexOutOfBoundsException e) {
+			throw new InvalidIndexException(index);
+		}
+	}
+	
 	@Override
 	public void setPieceAt(Piece p, int[] coord) {
-		int x = coord[0];
-		int y = coord[1];
-		int i = (7 - y) * 10 + 20 + 1 + x;
-		//System.out.println(coord[0] + "/" + coord[1] + " --> " + i + " " + board_12x10[i]);
-		board_12x10[i] = p.getCharRep();	
+		int index = coordToIndex(coord);
+		setPieceAt(p.getCharRep(), index);
+	}
+	
+	//TODO method is not safe
+	public void clear(int index) {
+		try {
+			board_12x10[index] = EMPTY;
+		} catch (IndexOutOfBoundsException e) {
+			throw new InvalidIndexException(index);
+		}
 	}
 	
 	@Override
 	public void clear(int[] coord) {
-		int x = coord[0];
-		int y = coord[1];
-		int i = (7 - y) * 10 + 20 + 1 + x;
-		//System.out.println(coord[0] + "/" + coord[1] + " --> " + i + " " + board_12x10[i]);
-		board_12x10[i] = EMPTY;
+		int index = coordToIndex(coord);
+		clear(index);
 	}
 	
 	/** Init 12x10 board */
@@ -412,20 +477,21 @@ public class Position12x10 implements PositionInterface {
 	}
 	
 	
+	/** Converts one dimensional 12x10 board index to Cartesian coordinates of a 8x8 board
+	 * @param index one dimensional 12x10 board index 
+	 * @return Cartesian coordinates */
 	public static int[] indexToCoord(int index) {
-		//System.out.println("index: " + index);
-		int x = (index % 12) - 1;
-		int y = (11 - ((int)Math.floor((double)index / 12d)) - 2) ;
-		//System.out.println("x: " + x);
-		//System.out.println("y: " + y);
+		int x = (index % 10) - 1;
+		int y = (11 - (index / 10) - 2) ;
 		return new int[]{x,y};
 	}
 	
 	
-	
+	/** Converts Cartesian coordinates of a 8x8 board to one dimensional 12x10 board index
+	 * @param coord Cartesian coordinates
+	 * @return one dimensional 12x10 board index */
 	public static int coordToIndex(int[] coord) {
-		//int index = (7 - coord[1]) * 10 + 21 + coord[0];
-		int index = ((7 - coord[1]) + 2) * 12 + coord[0] + 1;
+		int index = ((7 - coord[1]) + 2) * 10 + coord[0] + 1;
 		return index;
 	}
 	
@@ -441,15 +507,19 @@ public class Position12x10 implements PositionInterface {
 		String outstr = new String();
 		String check = new String();
 		if(isInCheck()) check = " ch";
+		PieceList pieces = getPieces();
 		outstr += moveNr + " " + activeColor + check + ", " + pieces.size() + " pieces on the board, " + pieces.getWhitePieces().size() + " white, " + pieces.getBlackPieces().size() + " black\n";
 		for(int i = 0; i < board_12x10.length; i++) {
-			String number = Integer.toString(board_12x10[i]);
-			outstr += number;
+			//String number = Integer.toString(board_12x10[i]);
+			String number;
+			if(board_12x10[i] != -1)number = Character.toString((char)board_12x10[i]);
+			else number = Integer.toString(board_12x10[i]);
+				outstr += number;
 			/* adjust space between the numbers */
 			for(int c = number.length(); c < 4; c++) {
 				outstr += " ";
 			}
-			if((i + 1) % 12 == 0) outstr += '\n';
+			if((i + 1) % 10 == 0) outstr += '\n';
 		}
 		return outstr;
 	}

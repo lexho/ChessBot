@@ -14,6 +14,7 @@ public interface PositionInterface {
 	PieceList getPieces();
 	Piece getPieceAt(int x, int y);
 	Piece getPieceAt(int[] coord);
+	void updatePieceList();
 	void setPieceAt(Piece p, int[] coord);
 	void clear(int[] coord);
 	boolean isFree(int[] coord);

@@ -12,6 +12,7 @@ import board.Move;
 import search.AdversarialSearch;
 import search.Node;
 import search.datastructures.Pair;
+import search.nodes.BoardNode;
 import search.nodes.LimitedNode;
 
 public class AlphaBetaSearch implements AdversarialSearch {
@@ -85,6 +86,13 @@ public class AlphaBetaSearch implements AdversarialSearch {
 		} else {
 			List<Node> adjacent = current.adjacent();
 			Pair<Node, Double> bestNode = null; // init best score
+			
+			/* Workaround for faulty isLeaf() - Method of BoardNode */
+			if(adjacent.size() == 0) {
+				double score = evalFunction.apply(current);
+				return new Pair(current,score); // return evaluated leaf node
+			}
+			
 			int current_depth = depth;
 			for(int i = 0; i < adjacent.size(); i++) {
 				/* Get MinMax-Score of child node */
@@ -132,7 +140,7 @@ public class AlphaBetaSearch implements AdversarialSearch {
 		if(System.currentTimeMillis() - lastinfo  > 1000) {
 			long nps = (nodecount - lastnodes); // Nodes per second
 			lastnodes = nodecount;
-			System.out.println("info " + "currmove "+ ((LimitedNode) node).getFullAction() + "score " + score + " depth " + depth + " nodes " + nodecount + " nps " + nps);
+			System.out.println("info " + "currmove "+ ((BoardNode) node).getFullAction() + "score " + score + " depth " + depth + " nodes " + nodecount + " nps " + nps);
 			lastinfo = System.currentTimeMillis();
 		}
 	}
