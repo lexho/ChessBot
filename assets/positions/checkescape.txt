@@ -1,0 +1,2 @@
+position startpos moves e2e3 d7d5 d1f3 e7e6 b1c3 a7a6 f3g4 g8f6 g4g5 h7h6 g5h4 f8d6 h2h3 b8c6 g1f3 e6e5 c3d5 f6d5 h4e4 d6c5 f3e5 c6e5 e4e5
+position startpos moves e2e3 e7e5 b1c3 d7d6 c3b5 a7a6 b5c3 c8e6 g1f3 b8c6 c3e4 d6d5 e4c5 f8c5 f3g5 d8g5 d1f3 e6g4 f3g3 h7h6 b2b3 e8c8 c1b2 e5e4 f1e2 g4e2 e1e2 g5g3 f2g3 g8e7 b2c3 e7f5 g3g4 f5d6 a2a4 b7b5 a4b5 a6b5 d2d3 c8d7 d3e4 d5e4 a1a6 f7f5 g4f5 d6f5 h1d1 d7e7 a6a8 g7g5 a8a6 c6b4 a6g6 c5e3 c3b4 f5d6 e2e3 e7f7 b4c5 d6f5 e3e4 d8e8

@@ -262,7 +262,7 @@ public class Action {
 			if(takesPiece && pos.isColor(i, pos.getColor(source))) break; // do not take your own pieces
 			targets.add(i);
 			if(!repeatable) break;
-			if(takesPiece && !pos.isColor(i, pos.getColor(source))) break; // take and action is done
+			if(takesPiece) break; // take and action is done
 			i += trans;
 		}
 		

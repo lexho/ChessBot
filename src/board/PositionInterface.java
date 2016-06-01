@@ -11,6 +11,8 @@ public interface PositionInterface {
 	void switchActiveColor();
 	void setActiveColor(char color);
 	char getUnactiveColor();
+	boolean[] getCastling();
+	void disableCastling(int index);
 	PieceList getPieces();
 	Piece getPieceAt(int x, int y);
 	Piece getPieceAt(int[] coord);
@@ -23,7 +25,6 @@ public interface PositionInterface {
 	void increaseMoveNr();
 	boolean isInCheck();
 	boolean isInCheck(char color);
-	boolean castlingAllowed();
 	/** Prints a list of all pieces and their location (for Debugging) */
 	void printPieceLocationList();
 	String toString();

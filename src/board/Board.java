@@ -54,16 +54,16 @@ public class Board {
 	 * */
 	public boolean makeMove(Move m) {
 
-		boolean moveIsValid = MoveValidator.validate((Position12x10)currentPosition, m);
-		if(!moveIsValid) throw new InvalidMoveException(m, currentPosition);
-		if(moveIsValid) return executeMove(m);
+		//boolean moveIsValid = MoveValidator.validate((Position12x10)currentPosition, m);
+		//if(!moveIsValid) throw new InvalidMoveException(m, currentPosition);
+		return executeMove(m);
 
-		System.err.println(m.getSource()[0]+ " "+m.getSource()[1]);
+		/*System.err.println(m.getSource()[0]+ " "+m.getSource()[1]);
 		for(Piece p : currentPosition.getPieces()) {
 			System.err.println(p.getRep() + " " + p.getPosition()[0] + " "+ p.getPosition()[1]);
 		}
 		System.err.println(currentPosition.getPieces().getPieceAt(m.getSource()).toString());
-		return false;
+		return false;*/
 	}
 	
 	/**
@@ -72,7 +72,6 @@ public class Board {
 	 *  @param m the move that will be executed
 	 *  */
 	public boolean executeMove(Move m) {
-		//TODO detect and handle castle (e8g8 --> e8g8 and h8f8)
 		//System.out.println("executing move: " + m.toString());
 		int[] src = m.getSource();
 		int[] trg = m.getTarget();
@@ -82,29 +81,60 @@ public class Board {
 		//pieces.removePieceAt(trg);	// remove token piece
 		currentPosition.clear(trg);
 		
-		if(currentPosition.castlingAllowed()) {
+		boolean[] castling = currentPosition.getCastling();
+		
+		/* Handle castling move */
+		if(m.getSourceIndex() == 25 || m.getSourceIndex() == 95) {
 			/* Castling Black */
 			if(piece.getCharRep() == 'k') {
-				if(m.getTargetIndex() == 23) {
+				/* Queen-side castling */
+				if(castling[3] && m.getTargetIndex() == 23) {
 					((Position12x10) currentPosition).setPieceAt('r', 24);
 					((Position12x10) currentPosition).clear(21);
 				}
-				if(m.getTargetIndex() == 27) {
+				/* King-side castling */
+				if(castling[2] && m.getTargetIndex() == 27) {
 					((Position12x10) currentPosition).setPieceAt('r', 26);
 					((Position12x10) currentPosition).clear(28);
 				}	
 			} 
 			/* Castling White */
 			else if(piece.getCharRep() == 'K') {
-				if(m.getTargetIndex() == 93) {
+				/* Queen-side castling */
+				if(castling[1] && m.getTargetIndex() == 93) {
 					((Position12x10) currentPosition).setPieceAt('r', 94);
 					((Position12x10) currentPosition).clear(91);
 				}
-				if(m.getTargetIndex() == 97) {
+				/* King-side castling */
+				if(castling[0] && m.getTargetIndex() == 97) {
 					((Position12x10) currentPosition).setPieceAt('r', 96);
 					((Position12x10) currentPosition).clear(98);
 				}		
 			}
+		}
+		
+		/* Disable castling on king and/or rook moves */
+		switch(piece.getCharRep()) {
+		case 'K':
+			currentPosition.disableCastling(0);
+			currentPosition.disableCastling(1);
+			break;
+		case 'R':
+			if(piece.getPosIndex() == 91)
+				currentPosition.disableCastling(1);
+			else if(piece.getPosIndex() == 98)
+				currentPosition.disableCastling(0);
+			break;
+		case 'k':
+			currentPosition.disableCastling(2);
+			currentPosition.disableCastling(3);
+			break;
+		case 'r':
+			if(piece.getPosIndex() == 21)
+				currentPosition.disableCastling(3);
+			else if(piece.getPosIndex() == 28)
+				currentPosition.disableCastling(2);
+			break;
 		}
 		
 		/* Promotion (P -> Q,N,R,B on 8th rank)*/
@@ -250,7 +280,7 @@ public class Board {
 		    
 		    List<Future<List<Move>>> futures = new ArrayList<Future<List<Move>>>();
 		    
-		    for (final Piece piece : currentPosition.getPieces()) {
+		    for (final Piece piece : currentPosition.getPieces().getPieces(color)) {
 		        Callable<List<Move>> callable = new Callable<List<Move>>() {
 		        	
 		            public List<Move> call() throws Exception {
@@ -259,19 +289,21 @@ public class Board {
 		            	for(Move m : piece.getPossibleMoves((Position12x10)currentPosition)) {
 		            		if(DEBUG) System.out.print(m);
 		            		
-		    				if(MoveValidator.validate((Position12x10)currentPosition, m)) {
+		            		//TODO is validation necessary here?
+		    				//if(MoveValidator.validate((Position12x10)currentPosition, m)) {
 		    					Position12x10 test = new Position12x10((Position12x10)currentPosition);
-		    					test.setPieceAt(piece.getCharRep(), m.getTargetIndex());
-		    					test.clear(m.getTargetIndex());
+		    					test.movePiece(m.getSourceIndex(), m.getTargetIndex());
 		    					test.setActiveColor(currentPosition.getUnactiveColor());
 		    					
-		    		
 		    					if(!test.isInCheck(color)) {
 		    						if(m != null)
 		    							possibleMoves.add(m);
 		    					}
 		    					if(DEBUG) System.out.print("(+) ");
-		    				} else if(DEBUG)  System.out.print("(-) ");
+		    				/*} else {
+		    					if(DEBUG)  System.out.print("(-) ");
+		    					throw new InvalidMoveException(m, currentPosition);
+		    				}*/
 		    			}
 		            	if(DEBUG) System.out.println();
 		            	return possibleMoves;

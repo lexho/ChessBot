@@ -1,13 +1,15 @@
 package board;
 
+import java.util.List;
+
 import board.actions.Action;
 
 public class Move {
-	String command;
+	private String command;
 	//int src[];
 	//int[] trg;
-	int i_src;
-	int i_trg;
+	private int i_src;
+	private int i_trg;
 	public Move (String cmd) {
 		this.command = cmd;
 		
@@ -132,5 +134,16 @@ public class Move {
 		char num1 = (char) ((char) trg[1] + '0' + 1);
 		command = Character.toString(alpha) + Character.toString(num) + Character.toString(alpha1) + Character.toString(num1);
 		return command;
+	}
+	
+	/** Does the moveList contain the Move move? 
+	 * @return contains move */
+	public static boolean contains(List<Move> moveList, Move move) {
+		for(Move m : moveList) {
+			if(m.toString().equals(move.toString())) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

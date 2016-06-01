@@ -19,6 +19,7 @@ import board.Board;
 import board.Move;
 import board.MoveValidator;
 import board.Position;
+import board.Position12x10;
 import board.PositionInterface;
 import board.pieces.Piece;
 import board.pieces.PieceList;
@@ -65,7 +66,7 @@ public class TestCheckSituations {
 	
 	@Test
 	public void testCheckSituations() {
-		Board b = new Board(new Position(new Fen(fenstring)));
+		Board b = new Board(new Position12x10(new Fen(fenstring)));
 		b.print();
 		if(inCheck) {
 			PositionInterface pos = b.getPosition();

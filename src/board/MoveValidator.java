@@ -16,8 +16,6 @@ public class MoveValidator {
 		//Square target = position.getSquareAt(m.getTarget());
 		
 		/* Compare the move to the moves the piece is able to make */
-		//TODO validate castle
-		
 		Piece piece = position.getPieceAt(m.getSource()) ;
 		boolean valid = false;
 		for(Action action : piece.getActions()) {
@@ -78,27 +76,27 @@ public class MoveValidator {
 		
 		boolean validSquares = position.isValid(m.getSourceIndex()) && position.isValid(m.getTargetIndex());
 		
-		if(position.castlingAllowed()) {
-			/* Castle Black */
-			if(m.getSourceIndex() == 25) {
-				if(m.getTargetIndex() == 23 || m.getTargetIndex() == 27) {
-					return true;
-				}
-			}
-			/* Castle White */
-			else if(m.getSourceIndex() == 95) {
-				if(m.getTargetIndex() == 93 || m.getTargetIndex() == 97) {
-					return true;
-				}
-			}
-		}
-		
 		Piece piece = position.getPieceAt(m.getSourceIndex());
 		
 		/* Source is not our piece */
 		if(position.getActiveColor() != piece.getColor()) {
 			//System.out.println("source is not our piece");
 			return false;
+		}
+		
+		/* Validate Castling */
+		boolean[] castling = position.getCastling();
+		/* Castle Black */
+		if(m.getSourceIndex() == 25) {
+			if((m.getTargetIndex() == 23 && castling[3]) || (m.getTargetIndex() == 27 && castling[2])) {
+				return true;
+			}
+		}
+		/* Castle White */
+		else if(m.getSourceIndex() == 95) {
+			if((m.getTargetIndex() == 93 && castling[1] && position.isFree(94) && position.isFree(93) && position.isFree(92)) || (m.getTargetIndex() == 97 && castling[0] && position.isFree(96) && position.isFree(97))) {
+				return true;
+			}
 		}
 		
 		/* It's an invalid square */

@@ -24,6 +24,8 @@ public class Position12x10 implements PositionInterface {
 	int [] board_12x10;
 	char activeColor;
 	int moveNr;
+	/* Castling availability */
+	boolean castling[];
 	PieceList pieces;
 	
 	public static final int WROOK = 'R';
@@ -47,6 +49,9 @@ public class Position12x10 implements PositionInterface {
 		activeColor = 'w';
 		moveNr = 0;
 		init12x10();
+		
+		/* set castling KQkq */
+		castling = new boolean[] {true, true, true, true};
 		
 		/* Create inital piece list */
 		pieces = new PieceList(this);
@@ -82,18 +87,29 @@ public class Position12x10 implements PositionInterface {
 		this.board_12x10 = new int [120];
 		pieces = new PieceList(this);
 		
+		/* Init castling */
+		castling = new boolean[4];
+		
+		/* copy castling availability */
+		for(int i = 0; i < 4; i++) {
+			castling[i] = position.getCastling()[i];
+		}
+		
 		/* Copy 12x10 board */
 		for(int i = 0; i < position.board_12x10.length; i++) {
 			this.board_12x10[i] = position.board_12x10[i];
 		}
 		
 		/* Copy piece list */
-		for(Piece p : position.getPieces()) {
-			this.pieces.add(p);
-		}
+		/*for(Piece p : position.getPieces()) {
+			this.pieces.add(PieceCreator.createPiece(p.getCharRep(), p.getPosIndex()));
+		}*/
+		/* Create the piece list */
+		updatePieceList();
 		
 		/* set active color */
 		this.activeColor = position.activeColor;
+		this.moveNr = new Integer(position.getMoveNr());
 	}
 	
 	public Position12x10(PositionInterface position) {
@@ -102,38 +118,27 @@ public class Position12x10 implements PositionInterface {
 		moveNr = new Integer(position.getMoveNr());
 		
 		board_12x10 = new int [120];
+		
 		/* copy 12x10 board array */
 		int[] board_to_copy = ((Position12x10) position).get12x10Board();
 		for(int i = 0; i < board_to_copy.length; i++) {
 			board_12x10[i] = board_to_copy[i];
 		}
 		
-		pieces = new PieceList(this);
-		for(Piece p : position.getPieces()) {
-			switch(p.getID()) {
-			case Piece.WHITE_PAWN:
-				pieces.add(new WhitePawn(p.getCharRep(), new int[]{p.getPosition()[0],p.getPosition()[1]}));
-				break;
-			case Piece.BLACK_PAWN:
-				pieces.add(new BlackPawn(p.getCharRep(), new int[]{p.getPosition()[0],p.getPosition()[1]}));
-				break;
-			case Piece.KING:
-				pieces.add(new King(p.getCharRep(), new int[]{p.getPosition()[0],p.getPosition()[1]}));
-				break;
-			case Piece.QUEEN:
-				pieces.add(new Queen(p.getCharRep(), new int[]{p.getPosition()[0],p.getPosition()[1]}));
-				break;
-			case Piece.BISHOP:
-				pieces.add(new Bishop(p.getCharRep(), new int[]{p.getPosition()[0],p.getPosition()[1]}));
-				break;
-			case Piece.KNIGHT:
-				pieces.add(new Knight(p.getCharRep(), new int[]{p.getPosition()[0],p.getPosition()[1]}));
-				break;
-			case Piece.ROOK:
-				pieces.add(new Rook(p.getCharRep(), new int[]{p.getPosition()[0],p.getPosition()[1]}));
-				break;	
-			}
+		/* Init castling */
+		castling = new boolean[4];
+		
+		/* copy castling availability */
+		for(int i = 0; i < 4; i++) {
+			castling[i] = position.getCastling()[i];
 		}
+		
+		/*pieces = new PieceList(this);
+		for(Piece p : position.getPieces()) {
+			this.pieces.add(PieceCreator.createPiece(p.getCharRep(), p.getPosIndex()));
+		}*/
+		/* Create the piece list */
+		updatePieceList();
 		
 		//TODO build 12x10 array
 		/*initSquares();
@@ -151,6 +156,32 @@ public class Position12x10 implements PositionInterface {
 		
 		activeColor = new Character(fen.getActiveColor());
 		moveNr = 0; //new Integer(fen.getFullMove()); //TODO no compliant!?
+		
+		//TODO parse castling string
+		/* Init castling */
+		castling = new boolean[4];
+		for(int i = 0; i < 4; i++) {
+			castling[i] = false;
+		}
+		
+		/* Parse castling part of Fen */
+		String castlingstr = fen.getCastling();
+		for(int i = 0; i < castlingstr.length(); i++) {
+			switch(castlingstr.charAt(i)) {
+			case 'K':
+				castling[0] = true;
+				break;
+			case 'Q':
+				castling[1] = true;
+				break;
+			case 'k':
+				castling[2] = true;
+				break;
+			case 'q':
+				castling[3] = true;
+				break;
+			}
+		}
 		
 		// rnbqkbnr/pppp1ppp/8/8/8/8/PPPPQPPP/RNB1KBNR
 		String piecestr = fen.getPiecePlacement();
@@ -214,9 +245,21 @@ public class Position12x10 implements PositionInterface {
 		else System.err.println("Error: no active color");
 	}
 	
+	/** Get castling availability */
+	public boolean[] getCastling() {
+		return castling;
+	}
+	
+	/** Disable castling
+	 * @param index 0 = K, 1 = Q, 2 = k, 3 = q
+	 * */
+	public void disableCastling(int index) {
+		castling[index] = false;
+	}
+	
 	public boolean isInCheck() {
-		// TODO check if board is running (?)
-		Piece king = getPieces().getByID(Piece.KING, getActiveColor());
+		return isInCheck(getActiveColor());
+		/*Piece king = getPieces().getByID(Piece.KING, getActiveColor());
 		if(king == null) return true; // game over
 		List<Piece> opponentsPieces = getPieces().getPieces(getUnactiveColor());
 		for(Piece p : opponentsPieces) {
@@ -229,25 +272,41 @@ public class Position12x10 implements PositionInterface {
 				}
 			}
 		}
-		return false;
+		return false;*/
 	}
 	
 	public boolean isInCheck(char color) {
 		// TODO check if board is running (?)
-		Piece king = getPieces().getByID(Piece.KING, color);
-		//System.out.println(color + " king is at " + king.getPosition()[0] + "/" + king.getPosition()[1]);
-		if(king == null) return true; //TODO handle no king error
+		boolean white;
+		if(color == 'w') white = true;
+		else white = false;
+		
+		//System.out.println("test " + color + " for check");
+
+		Position12x10 temp = new Position12x10(this);
+		Piece king;
 		List<Piece> opponentsPieces;
-		if(color == getActiveColor()) opponentsPieces = getPieces().getPieces(getUnactiveColor());
-		else opponentsPieces = getPieces().getPieces(getActiveColor());
+		if(white) {
+			temp.setActiveColor('b');
+			king = temp.getPieceByID('K').get(0); 
+			opponentsPieces = temp.getPieces().getBlackPieces();
+		}
+		else { 
+			temp.setActiveColor('w');
+			king = temp.getPieceByID('k').get(0); 
+			opponentsPieces = temp.getPieces().getWhitePieces();
+		}
+		
+		if(king == null) return true; //TODO handle no king error
+		
+		//System.out.println("opponents pieces: " + opponentsPieces);
 		for(Piece p : opponentsPieces) {
-			for(Move m : p.getPossibleMoves(this)) {
-				Position12x10 temp = new Position12x10(this);
-				temp.setActiveColor(p.getColor());
-				if(MoveValidator.validate(temp, m)) {
-					if(m.getTarget()[0] == king.getPosition()[0] && m.getTarget()[1] == king.getPosition()[1]) {
-						return true;
-					}
+			for(Move m : p.getPossibleMoves(temp)) {
+				
+				/* Is any of the opponent's pieces threatening the king? */
+				if(m.getTargetIndex() == king.getPosIndex()) {
+					//System.out.println(m + " is threatening the king");
+					return true;
 				}
 			}
 		}
@@ -255,9 +314,9 @@ public class Position12x10 implements PositionInterface {
 	}
 	
 	//TODO implement castling test
-	public boolean castlingAllowed() {
+	/*public boolean castlingAllowed() {
 		return true;
-	}
+	}*/
 	
 	public boolean isFree(int index) {
 		if(board_12x10[index] == EMPTY) {
@@ -325,7 +384,7 @@ public class Position12x10 implements PositionInterface {
 		return pieces;
 	}
 	
-	/** This method should be call always after the board has been manipulated */
+	/** This method should be called always after the board has been manipulated */
 	public void updatePieceList() {
 		pieces = new PieceList();
 		for(int i = 0; i < board_12x10.length; i++) {
@@ -518,12 +577,54 @@ public class Position12x10 implements PositionInterface {
 		}
 	}
 	
+	/** Print a board by piece list */
+	public void printPieceBoard() {
+		int [] board = {
+				Position12x10.INVALID,	Position12x10.INVALID,	Position12x10.INVALID,	Position12x10.INVALID,	Position12x10.INVALID,	Position12x10.INVALID,	Position12x10.INVALID,	Position12x10.INVALID,	Position12x10.INVALID,	Position12x10.INVALID,
+				Position12x10.INVALID,	Position12x10.INVALID,	Position12x10.INVALID,	Position12x10.INVALID,	Position12x10.INVALID,	Position12x10.INVALID,	Position12x10.INVALID,	Position12x10.INVALID,	Position12x10.INVALID,	Position12x10.INVALID,
+				Position12x10.INVALID,	Position12x10.BROOK,	Position12x10.BKNIGHT,	Position12x10.BBISHOP,	Position12x10.BQUEEN,	Position12x10.BKING, 	Position12x10.BBISHOP,	Position12x10.BKNIGHT,	Position12x10.BROOK,	Position12x10.INVALID,
+				Position12x10.INVALID,	Position12x10.BPAWN,	Position12x10.BPAWN,	Position12x10.BPAWN,	Position12x10.BPAWN,	Position12x10.BPAWN,	Position12x10.BPAWN,	Position12x10.BPAWN,	Position12x10.BPAWN,	Position12x10.INVALID,
+				Position12x10.INVALID,	Position12x10.EMPTY,	Position12x10.EMPTY,	Position12x10.EMPTY,	Position12x10.EMPTY,	Position12x10.EMPTY,	Position12x10.EMPTY,	Position12x10.EMPTY,	Position12x10.EMPTY,	Position12x10.INVALID,
+				Position12x10.INVALID,	Position12x10.EMPTY,	Position12x10.EMPTY,	Position12x10.EMPTY,	Position12x10.EMPTY,	Position12x10.EMPTY,	Position12x10.EMPTY,	Position12x10.EMPTY,	Position12x10.EMPTY,	Position12x10.INVALID,
+				Position12x10.INVALID,	Position12x10.EMPTY,	Position12x10.EMPTY,	Position12x10.EMPTY,	Position12x10.EMPTY,	Position12x10.EMPTY,	Position12x10.EMPTY,	Position12x10.EMPTY,	Position12x10.EMPTY,	Position12x10.INVALID,
+				Position12x10.INVALID,	Position12x10.EMPTY,	Position12x10.EMPTY,	Position12x10.EMPTY,	Position12x10.EMPTY,	Position12x10.EMPTY,	Position12x10.EMPTY,	Position12x10.EMPTY,	Position12x10.EMPTY,	Position12x10.INVALID,
+				Position12x10.INVALID,	Position12x10.WPAWN,	Position12x10.WPAWN,	Position12x10.WPAWN,	Position12x10.WPAWN,	Position12x10.WPAWN,	Position12x10.WPAWN,	Position12x10.WPAWN,	Position12x10.WPAWN,	Position12x10.INVALID,
+				Position12x10.INVALID,	Position12x10.WROOK,	Position12x10.WKNIGHT,	Position12x10.WBISHOP,	Position12x10.WQUEEN,	Position12x10.WKING,	Position12x10.WBISHOP, 	Position12x10.WKNIGHT,	Position12x10.WROOK,	Position12x10.INVALID,
+				Position12x10.INVALID,	Position12x10.INVALID,	Position12x10.INVALID,	Position12x10.INVALID,	Position12x10.INVALID,	Position12x10.INVALID,	Position12x10.INVALID,	Position12x10.INVALID,	Position12x10.INVALID,	Position12x10.INVALID,
+				Position12x10.INVALID,	Position12x10.INVALID,	Position12x10.INVALID,	Position12x10.INVALID,	Position12x10.INVALID,	Position12x10.INVALID,	Position12x10.INVALID,	Position12x10.INVALID,	Position12x10.INVALID,	Position12x10.INVALID };
+		for(Piece p : getPieces()) {
+			board[p.getPosIndex()] = p.getCharRep();
+		}
+		
+		String outstr = "####### printPieceBoard #######\n";
+		for(int i = 0; i < board_12x10.length; i++) {
+			//String number = Integer.toString(board_12x10[i]);
+			String number;
+			if(board_12x10[i] != -1)number = Character.toString((char)board_12x10[i]);
+			else number = Integer.toString(board_12x10[i]);
+				outstr += number;
+			/* adjust space between the numbers */
+			for(int c = number.length(); c < 4; c++) {
+				outstr += " ";
+			}
+			if((i + 1) % 10 == 0) outstr += '\n';
+		}
+		outstr += "##############################";
+		System.out.println(outstr);
+	}
+	
 	public String toString() {
 		String outstr = new String();
 		String check = new String();
 		if(isInCheck()) check = " ch";
 		PieceList pieces = getPieces();
-		outstr += moveNr + " " + activeColor + check + ", " + pieces.size() + " pieces on the board, " + pieces.getWhitePieces().size() + " white, " + pieces.getBlackPieces().size() + " black\n";
+		String castlingstr = new String();
+		String str = "KQkq";
+		for(int i = 0; i < castling.length; i++) {
+			if(castling[i]) castlingstr += str.charAt(i);
+		}
+		
+		outstr += moveNr + " " + activeColor + check + ", " + castlingstr + ", " + pieces.size() + " pieces on the board, " + pieces.getWhitePieces().size() + " white, " + pieces.getBlackPieces().size() + " black\n";
 		for(int i = 0; i < board_12x10.length; i++) {
 			//String number = Integer.toString(board_12x10[i]);
 			String number;

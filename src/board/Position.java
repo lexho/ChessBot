@@ -304,4 +304,22 @@ public class Position implements PositionInterface {
 	public boolean isValid(int[] coord) {
 		return getSquareAt(coord).isValid();
 	}
+
+	@Override
+	public boolean[] getCastling() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void updatePieceList() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void disableCastling(int index) {
+		// TODO Auto-generated method stub
+		
+	}
 }

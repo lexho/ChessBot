@@ -50,39 +50,28 @@ public class TestBoard {
 
 		/* Pawn moves */
 		System.out.print("Pawn moves");
-		assertTrue(contains(possibleMoves, new Move("a2a4")));
-		assertTrue(contains(possibleMoves, new Move("b2b3")));
-		assertTrue(contains(possibleMoves, new Move("b2b4")));
-		assertTrue(contains(possibleMoves, new Move("d4d5")));
+		assertTrue(Move.contains(possibleMoves, new Move("a2a4")));
+		assertTrue(Move.contains(possibleMoves, new Move("b2b3")));
+		assertTrue(Move.contains(possibleMoves, new Move("b2b4")));
+		assertTrue(Move.contains(possibleMoves, new Move("d4d5")));
 		System.out.println(" checked");
 		
 		/* Queen moves */
 		System.out.print("Queen moves");
-		assertTrue(contains(possibleMoves, new Move("d1d2")));
-		assertTrue(contains(possibleMoves, new Move("d1d3")));
-		assertTrue(!contains(possibleMoves, new Move("d1d4")));
+		assertTrue(Move.contains(possibleMoves, new Move("d1d2")));
+		assertTrue(Move.contains(possibleMoves, new Move("d1d3")));
+		assertTrue(!Move.contains(possibleMoves, new Move("d1d4")));
 		System.out.println(" checked");
 		
 		/* Bishop moves */
 		System.out.print("Bishop moves");
-		assertTrue(contains(possibleMoves, new Move("c1d2")));
-		assertTrue(contains(possibleMoves, new Move("c1e3")));
-		assertTrue(contains(possibleMoves, new Move("c1h6")));
-		assertTrue(!contains(possibleMoves, new Move("f1e2")));
-		assertTrue(!contains(possibleMoves, new Move("f1g2")));
+		assertTrue(Move.contains(possibleMoves, new Move("c1d2")));
+		assertTrue(Move.contains(possibleMoves, new Move("c1e3")));
+		assertTrue(Move.contains(possibleMoves, new Move("c1h6")));
+		assertTrue(!Move.contains(possibleMoves, new Move("f1e2")));
+		assertTrue(!Move.contains(possibleMoves, new Move("f1g2")));
 		System.out.println(" checked");
 		
 		//assertEquals(b.getActiveColor(), 'b');
-	}
-	
-	/** Does the moveList contain the Move move? 
-	 * @return contains move */
-	private boolean contains(List<Move> moveList, Move move) {
-		for(Move m : moveList) {
-			if(m.toString().equals(move.toString())) {
-				return true;
-			}
-		}
-		return false;
 	}
 }

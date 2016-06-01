@@ -26,10 +26,10 @@ public class UCIEngine {
 	public static void main(String[] args) {
 		Scanner terminalInput = new Scanner(System.in);
 		try {
-			cmdlog = new PrintWriter("/home/alex/Code/java/ChessBot/log/cmds.txt", "UTF-8");
+			cmdlog = new PrintWriter("/home/guest/workspace/java/ChessBot/log/cmds.txt", "UTF-8");
 			
 			//System.setOut(new PrintStream(new File("/home/alex/Code/java/ChessBot/log/output.txt")));
-			//System.setErr(new PrintStream(new File("/home/alex/Code/java/ChessBot/log/error.txt")));
+			//System.setErr(new PrintStream(new File("/home/guest/workspace/java/ChessBot/log/error.txt")));
 			bot = new ChessBot();
 		
 			/* Wait for commands */
@@ -62,8 +62,6 @@ public class UCIEngine {
 			System.out.println("id name ChessBot");
 			System.out.println("id author Alexander Hoertenhuber");
 			System.out.println("uciok");
-			break;
-		case "debug":
 			break;
 		case "isready":
 			System.out.println("readyok");
@@ -107,6 +105,12 @@ public class UCIEngine {
 			break;
 		case "print":
 			bot.printBoard();
+			break;
+		case "possible":
+			bot.printPossibleMoves();
+			break;
+		case "debug":
+			bot.debugOnOff();
 			break;
 		case "quit":
 			System.exit(0);

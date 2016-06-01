@@ -163,6 +163,19 @@ public class ChessBot {
 		return board.makeMove(new Move(movecmd)); //TODO change to makeMove to enable move validation
 	}
 	
+	/** Set the number of threads
+	 * @param threads number of threads */
+	public void setNrOfThreads(int threads) {
+		NR_OF_THREADS = threads;
+	}
+	
+	/** Turn Debug-Mode on/off */
+	public boolean debugOnOff() {
+		if(board.DEBUG) board.DEBUG = false;
+		else board.DEBUG = true;
+		return board.DEBUG;
+	}
+	
 	/**
 	 * prints a human-readable board to the commandline
 	 */

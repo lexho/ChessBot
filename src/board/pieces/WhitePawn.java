@@ -2,6 +2,7 @@ package board.pieces;
 
 import board.Position12x10;
 import board.actions.Action;
+import board.actions.PawnTakeAction;
 
 public class WhitePawn extends Pawn {
 	
@@ -13,8 +14,8 @@ public class WhitePawn extends Pawn {
 		super(rep, index);
 		ID = 3;
 		actions.add(new Action(Action.UP, false));
-		actions.add(new Action(Action.UP_LEFT, true));
-		actions.add(new Action(Action.UP_RIGHT, true));
+		actions.add(new PawnTakeAction(Action.UP_LEFT));
+		actions.add(new PawnTakeAction(Action.UP_RIGHT));
 		
 		/*actions.add(new Action(0, 1, false)); // allow move forward 		
 		actions.add(new Action(1, 1, true)); // allow move forward and take on the right

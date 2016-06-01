@@ -25,13 +25,12 @@ abstract class Pawn extends Piece {
 		coord = Position12x10.indexToCoord(index);
 		
 		// two-square initial move rule
-		if(coord[1] == 1) {
-			if(getColor() == 'w') {
-				//System.out.println("add move " + new Move(coord,  new int[]{coord[0], coord[1] + 2}));
+		if(getColor() == 'w' )
+			if(index > 80 && index < 89 && pos.isFree(index - 10) && pos.isFree(index - 20)) 
 				moves.add(new Move(index,  index + 2*Action.UP));
-			} else
+		else 
+			if(index > 20 && index < 29 && pos.isFree(index + 10) && pos.isFree(index + 20)) 
 				moves.add(new Move(index,  index + 2*Action.DOWN));
-		}
 		
 		for(Action action : actions) {
 			List<Integer> targets = action.apply(pos, index);

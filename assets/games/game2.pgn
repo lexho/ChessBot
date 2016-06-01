@@ -1,0 +1,12 @@
+[Event "Casual Game"]
+[Site "?"]
+[Date "2016.06.01"]
+[Round "-"]
+[White "ChessBot"]
+[Black "guest"]
+[Result "1-0"]
+[TimeControl "-"]
+1. e3 Nf6 2. Qf3 e5 3. Nc3 Bd6 4. Nb5 O-O 5. Nd6 d6 6. Bd3 Qa5 7. a4 d5 8. b4 Qb4 9. Ba3 Qa4
+10. Bb2 d6 11. Ra4 Bg4 12. Rg4 Ng4 13. Qg4 Nc6 14. Bb5 Ne7 15. Nf3 Rac8 16. Qd7 Rfe8 17. Qb7
+Rc2 18. Be8 Nf5 19. Qf7 Kh8 20. Qf5 Rb2 21. Ke2 e4 22. Nd4 a5 23. Qd5 Rb8 24. Qe4 Rd8 25. Qe7
+Re8 26. Qe8 1-0
