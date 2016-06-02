@@ -6,16 +6,19 @@ import java.io.PrintWriter;
 import java.util.List;
 import java.util.Scanner;
 
+import commands.Command;
+import commands.GoCommand;
 import exceptions.InvalidMoveException;
 import util.StringUtils;
 
 public class UCIEngine {
 	static ChessBot bot;
 	static PrintWriter cmdlog;
+	static Command current;
 	
 	// TODO remove this unused constructor in static context
 	public UCIEngine() {
-		
+
 	}
 	
 	/**
@@ -24,15 +27,18 @@ public class UCIEngine {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		
 		Scanner terminalInput = new Scanner(System.in);
 		try {
-			cmdlog = new PrintWriter("/home/guest/workspace/java/ChessBot/log/cmds.txt", "UTF-8");
+			cmdlog = new PrintWriter("/home/alex/Code/java/ChessBot/log/cmds.txt", "UTF-8");
 			
 			//System.setOut(new PrintStream(new File("/home/alex/Code/java/ChessBot/log/output.txt")));
-			//System.setErr(new PrintStream(new File("/home/guest/workspace/java/ChessBot/log/error.txt")));
+			System.setErr(new PrintStream(new File("/home/alex/Code/java/ChessBot/log/error.txt")));
 			bot = new ChessBot();
 		
 			/* Wait for commands */
+			current = new Command(); // dummy command for interrupts
+			Command.setBot(bot); // give command class a bot to pass the commands to
 			while(true) {
 				String command = terminalInput.nextLine(); // read user input
 				cmdlog.println(command);
@@ -73,16 +79,10 @@ public class UCIEngine {
 		case "ucinewgame":
 			break;
 		case "position":
-			/*subcmd = cmd.substring(sep + 1);
-			int end = subcmd.indexOf(' ');
-			System.out.println(subcmd.substring(0, end));*/
-			//System.out.println(cmds.get(1));
 			if(cmds.get(1).equals("startpos")) {
 				bot.init();
-				//System.out.println("eq startpos");
 				if(cmds.size() > 2)
 					if(cmds.get(2).equals("moves")) {
-						//System.out.println("eq moves");
 						for(int i = 3; i < cmds.size(); i++) {
 							try {
 								bot.makeMove(cmds.get(i));
@@ -96,10 +96,12 @@ public class UCIEngine {
 			}
 			break;
 		case "go":
-			String nextMove = bot.getNextMove();
-			System.out.println("bestmove " + nextMove + " ponder");	
+			current.interrupt();
+			current = new GoCommand();
+			current.start();
 			break;
 		case "stop":
+			current.interrupt();
 			break;
 		case "ponderhit":
 			break;
@@ -113,6 +115,7 @@ public class UCIEngine {
 			bot.debugOnOff();
 			break;
 		case "quit":
+			current.interrupt();
 			System.exit(0);
 			break;
 		default:

@@ -267,6 +267,14 @@ public class Board {
 	//TODO this is not nice
 	static Board b; // current instance
 	
+	/** ExecutorService for multi-threading move generator in getPossibleMoves() */
+	private ExecutorService service;
+	
+	/** Stop all running processes */
+	public void stop() {
+		service.shutdown(); // stop ExecutorService
+	}
+	
 	/**
 	 * Get a list of all possible moves in the current position
 	 * @return a list of all possible moves in the current position
@@ -275,59 +283,63 @@ public class Board {
 		char color = getActiveColor();
 		List<Move> possibleMoves = new ArrayList<Move>();
 		if(DEBUG) System.out.println("Possible Moves");
-		    ExecutorService service = Executors.newFixedThreadPool(ChessBot.NR_OF_THREADS);
-		    b = this;
-		    
-		    List<Future<List<Move>>> futures = new ArrayList<Future<List<Move>>>();
-		    
-		    for (final Piece piece : currentPosition.getPieces().getPieces(color)) {
-		        Callable<List<Move>> callable = new Callable<List<Move>>() {
-		        	
-		            public List<Move> call() throws Exception {
-		            	List<Move> possibleMoves = new ArrayList<Move>();
-		            	if(DEBUG) System.out.print(piece + " ");
-		            	for(Move m : piece.getPossibleMoves((Position12x10)currentPosition)) {
-		            		if(DEBUG) System.out.print(m);
-		            		
-		            		//TODO is validation necessary here?
-		    				//if(MoveValidator.validate((Position12x10)currentPosition, m)) {
-		    					Position12x10 test = new Position12x10((Position12x10)currentPosition);
-		    					test.movePiece(m.getSourceIndex(), m.getTargetIndex());
-		    					test.setActiveColor(currentPosition.getUnactiveColor());
-		    					
-		    					if(!test.isInCheck(color)) {
-		    						if(m != null)
-		    							possibleMoves.add(m);
-		    					}
-		    					if(DEBUG) System.out.print("(+) ");
-		    				/*} else {
-		    					if(DEBUG)  System.out.print("(-) ");
-		    					throw new InvalidMoveException(m, currentPosition);
-		    				}*/
-		    			}
-		            	if(DEBUG) System.out.println();
-		            	return possibleMoves;
-		            }
-		        };
-		        
-		        futures.add(service.submit(callable));
-		    }
+		service = Executors.newFixedThreadPool(ChessBot.NR_OF_THREADS);
+		b = this;
+	    
+	    List<Future<List<Move>>> futures = new ArrayList<Future<List<Move>>>();
+	    
+	    for (final Piece piece : currentPosition.getPieces().getPieces(color)) {
+	        Callable<List<Move>> callable = new Callable<List<Move>>() {
+	        	
+	            public List<Move> call() throws Exception {
+	            	List<Move> possibleMoves = new ArrayList<Move>();
+	            	if(DEBUG) System.out.print(piece + " ");
+	            	for(Move m : piece.getPossibleMoves((Position12x10)currentPosition)) {
+	            		if(DEBUG) System.out.print(m);
+	            		
+	            		//TODO is validation necessary here?
+	    				//if(MoveValidator.validate((Position12x10)currentPosition, m)) {
+	    					Position12x10 test = new Position12x10((Position12x10)currentPosition);
+	    					test.movePiece(m.getSourceIndex(), m.getTargetIndex());
+	    					test.setActiveColor(currentPosition.getUnactiveColor());
+	    					
+	    					if(!test.isInCheck(color)) {
+	    						if(m != null)
+	    							possibleMoves.add(m);
+	    					}
+	    					if(DEBUG) System.out.print("(+) ");
+	    				/*} else {
+	    					if(DEBUG)  System.out.print("(-) ");
+	    					throw new InvalidMoveException(m, currentPosition);
+	    				}*/
+	    			}
+	            	if(DEBUG) System.out.println();
+	            	return possibleMoves;
+	            }
+	        };
+	        
+	        futures.add(service.submit(callable));
+	    }
 
-		    service.shutdown();
+	    service.shutdown();
 
-		    List<Move> outputs = new ArrayList<Move>();
-		    for (Future<List<Move>> future : futures) {
-		        try {
-					outputs.addAll(future.get());
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (ExecutionException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-		    }
-		    return outputs;
+	    List<Move> outputs = new ArrayList<Move>();
+	    for (Future<List<Move>> future : futures) {
+	        try {
+				outputs.addAll(future.get());
+			} catch (InterruptedException e) {
+				//e.printStackTrace();
+				/* Interrupt search and return the moves found yet */
+				service.shutdown();
+				return outputs;
+				// TODO Auto-generated catch block
+				//e.printStackTrace();
+			} catch (ExecutionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	    }
+	    return outputs;
 	    
 		/*for(Piece piece : pieces) {
 			for(Move m : piece.getPossibleMoves()) {

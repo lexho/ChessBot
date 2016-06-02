@@ -35,6 +35,7 @@ public class AlphaBetaSearch implements AdversarialSearch {
 			e.printStackTrace();
 		}*/
 		lastinfo = System.currentTimeMillis();
+		interrupted = false; // reset interrupt
 	}
 	
 	//private double alpha = Double.NEGATIVE_INFINITY;
@@ -56,6 +57,7 @@ public class AlphaBetaSearch implements AdversarialSearch {
 	}
 	
 	private int depth = 0;
+	private boolean interrupted;
 	public long nodecount = 0;
 	private long lastinfo = 0; // the last time a info message was printed
 	private long lastnodes = 0; // the number of processed nodes at the last time a info message was printed
@@ -79,7 +81,7 @@ public class AlphaBetaSearch implements AdversarialSearch {
 		//System.out.println("alphabeta search depth: " + depth);
 		
 		/* Recursively score nodes up to start node */
-		if(current.isLeaf() || !searchLimitingPredicate.test(depth, current)) {
+		if(interrupted || (current.isLeaf() || !searchLimitingPredicate.test(depth, current))) {
 			double score = evalFunction.apply(current);
 			
 			return new Pair(current,score); // return evaluated leaf node
@@ -136,6 +138,11 @@ public class AlphaBetaSearch implements AdversarialSearch {
 		}
 	}
 
+	/** interrupt a running alphabeta search */
+	public void interrupt() {
+		interrupted = true;
+	}
+	
 	private void printInfoMessage(Node node, double score) {
 		if(System.currentTimeMillis() - lastinfo  > 1000) {
 			long nps = (nodecount - lastnodes); // Nodes per second

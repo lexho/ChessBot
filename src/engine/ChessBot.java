@@ -1,6 +1,9 @@
 package engine;
 
+import java.util.List;
 import java.util.Random;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -61,6 +64,17 @@ public class ChessBot {
 	public void init() {
 		NR_OF_THREADS = Runtime.getRuntime().availableProcessors();
 		board = new Board(new Position12x10());
+	}
+	
+	/** Stop thinking process of the bot and return bestmove */
+	public void stop() {
+		//System.out.println("stopping");
+		try {
+			alphabeta.interrupt();
+			board.stop();
+		} catch (NullPointerException e) {
+			
+		}
 	}
 	
 	/**
@@ -126,6 +140,8 @@ public class ChessBot {
 		return nextMove;
 	}
 	
+	AlphaBetaSearch alphabeta;
+	
 	/** use AlphaBeta Search as search engine
 	 * @return best move found
 	 * */
@@ -134,7 +150,7 @@ public class ChessBot {
 		long searchtime = System.currentTimeMillis(); // current time in milliseconds
 		
 		/* AlphaBeta Search */
-		AlphaBetaSearch alphabeta = new AlphaBetaSearch((d, current) -> d < depthLimit);
+		alphabeta = new AlphaBetaSearch((d, current) -> d < depthLimit);
 		ScoreBoard scoreboard = new ScoreBoard(board.copy());
 		Function<Node, Double> evalFunction = new BoardFunction(scoreboard);
 		Pair<Node, Double> result = alphabeta.search(
