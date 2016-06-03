@@ -87,7 +87,7 @@ public class UCIEngine {
 							try {
 								bot.makeMove(cmds.get(i));
 							} catch (InvalidMoveException e) {
-								System.out.println(e.getMessage());
+								System.err.println(e.getMessage());
 							}
 						}
 					}

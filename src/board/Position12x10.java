@@ -13,11 +13,7 @@ import board.pieces.Queen;
 import board.pieces.Rook;
 import board.pieces.WhitePawn;
 import board.position.Fen;
-import board.square.InvalidSquare;
-import board.square.Square;
-import board.square.ValidSquare;
 import exceptions.InvalidIndexException;
-import exceptions.InvalidMoveException;
 import util.StringUtils;
 
 public class Position12x10 implements PositionInterface {

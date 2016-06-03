@@ -15,7 +15,6 @@ import board.pieces.Piece;
 import board.pieces.PieceList;
 import board.pieces.Queen;
 import engine.ChessBot;
-import exceptions.InvalidMoveException;
 import search.endconditions.EndCondition;
 
 public class Board {
@@ -72,13 +71,13 @@ public class Board {
 	 *  @param m the move that will be executed
 	 *  */
 	public boolean executeMove(Move m) {
-		//System.out.println("executing move: " + m.toString());
-		int[] src = m.getSource();
-		int[] trg = m.getTarget();
+		int src = m.getSourceIndex();
+		int trg = m.getTargetIndex();
+		
+		Position12x10 currentPosition = (Position12x10)this.currentPosition;
 		
 		/* Move piece to target */
-		Piece piece = currentPosition.getPieceAt(src[0], src[1]);
-		//pieces.removePieceAt(trg);	// remove token piece
+		int piece = currentPosition.get12x10Board()[src];
 		currentPosition.clear(trg);
 		
 		boolean[] castling = currentPosition.getCastling();
@@ -86,43 +85,43 @@ public class Board {
 		/* Handle castling move */
 		if(m.getSourceIndex() == 25 || m.getSourceIndex() == 95) {
 			/* Castling Black */
-			if(piece.getCharRep() == 'k') {
+			if(piece == 'k') {
 				/* Queen-side castling */
 				if(castling[3] && m.getTargetIndex() == 23) {
-					((Position12x10) currentPosition).setPieceAt('r', 24);
-					((Position12x10) currentPosition).clear(21);
+					currentPosition.setPieceAt('r', 24);
+					currentPosition.clear(21);
 				}
 				/* King-side castling */
 				if(castling[2] && m.getTargetIndex() == 27) {
-					((Position12x10) currentPosition).setPieceAt('r', 26);
-					((Position12x10) currentPosition).clear(28);
+					currentPosition.setPieceAt('r', 26);
+					currentPosition.clear(28);
 				}	
 			} 
 			/* Castling White */
-			else if(piece.getCharRep() == 'K') {
+			else if(piece == 'K') {
 				/* Queen-side castling */
 				if(castling[1] && m.getTargetIndex() == 93) {
-					((Position12x10) currentPosition).setPieceAt('r', 94);
-					((Position12x10) currentPosition).clear(91);
+					currentPosition.setPieceAt('r', 94);
+					currentPosition.clear(91);
 				}
 				/* King-side castling */
 				if(castling[0] && m.getTargetIndex() == 97) {
-					((Position12x10) currentPosition).setPieceAt('r', 96);
-					((Position12x10) currentPosition).clear(98);
+					currentPosition.setPieceAt('r', 96);
+					currentPosition.clear(98);
 				}		
 			}
 		}
 		
 		/* Disable castling on king and/or rook moves */
-		switch(piece.getCharRep()) {
+		switch(piece) {
 		case 'K':
 			currentPosition.disableCastling(0);
 			currentPosition.disableCastling(1);
 			break;
 		case 'R':
-			if(piece.getPosIndex() == 91)
+			if(src == 91)
 				currentPosition.disableCastling(1);
-			else if(piece.getPosIndex() == 98)
+			else if(src == 98)
 				currentPosition.disableCastling(0);
 			break;
 		case 'k':
@@ -130,37 +129,34 @@ public class Board {
 			currentPosition.disableCastling(3);
 			break;
 		case 'r':
-			if(piece.getPosIndex() == 21)
+			if(src == 21)
 				currentPosition.disableCastling(3);
-			else if(piece.getPosIndex() == 28)
+			else if(src == 28)
 				currentPosition.disableCastling(2);
 			break;
 		}
 		
 		/* Promotion (P -> Q,N,R,B on 8th rank)*/
-		if(piece.getID() == Piece.WHITE_PAWN && trg[1] == 7) {
+		if(piece == 'P' && trg > 20 && trg < 29) {
 			System.out.println("promotion white");
 			print();
-			//pieces.removePieceAt(src);
 			currentPosition.clear(src);
-			currentPosition.setPieceAt(new Queen('Q', new int[]{trg[0],trg[1]}), trg);
-			//pieces.add(new Queen("Q", new int[]{trg[0],trg[1]}));
-			piece = currentPosition.getPieceAt(trg);
-			currentPosition.clear(trg);
+			currentPosition.setPieceAt((int)'Q', trg);
+			currentPosition.updatePieceList();
+			piece = 'Q';
 			print();
 			
 		}
-		else if(piece.getID() == Piece.BLACK_PAWN && trg[1] == 0) {
+		else if(piece == 'p' && trg > 90 && trg < 99) {
 			System.out.println("promotion black");
 			print();
 			currentPosition.clear(src);
-			currentPosition.setPieceAt(new Queen('q', new int[]{trg[0],trg[1]}), trg);
-			piece = currentPosition.getPieceAt(trg);
-			currentPosition.clear(trg);
+			currentPosition.setPieceAt((int)'q', trg);
+			currentPosition.updatePieceList();
+			piece = 'q';
 			print();
 		}
 		currentPosition.setPieceAt(piece, trg); // update position table
-		//piece.setPosition(trg); // update piece
 		
 		/* Clear source */
 		currentPosition.clear(src);
@@ -170,8 +166,6 @@ public class Board {
 		currentPosition.switchActiveColor();
 		currentPosition.increaseMoveNr();
 		
-		//System.out.println("active color " + currentPosition.getActiveColor());
-		//System.out.println("new moveNr " + currentPosition.getMoveNr());
 		return false;
 	}
 	

@@ -1,6 +1,7 @@
 package test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
@@ -73,5 +74,18 @@ public class TestBoard {
 		System.out.println(" checked");
 		
 		//assertEquals(b.getActiveColor(), 'b');
+	}
+
+	@Test
+	public void testPromotion() {
+		ChessBot.NR_OF_THREADS = 1;
+		Board b = new Board(new Position12x10(new Fen("5k2/3P1p2/8/8/8/8/4P3/4K3 w - - 0 1")));
+		b.print();
+		b.makeMove(new Move("e7e8"));
+		b.makeMove(new Move("g8g7"));
+		//b.DEBUG = true;
+		System.out.println("possible moves: " + b.getPossibleMoves());
+		assertTrue(Move.contains(b.getPossibleMoves(), new Move("e8g6")));
+		assertTrue(Move.contains(b.getPossibleMoves(), new Move("e8e1")));
 	}
 }

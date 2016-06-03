@@ -23,7 +23,7 @@ public class TestUCI {
 	@Test
 	public void testCommands() throws IOException {
 		Process process = new ProcessBuilder(
-				"java", "-classpath", "/home/guest/workspace/java/ChessBot/bin", "engine.UCIEngine").start();
+				"java", "-classpath", "/home/alex/Code/java/ChessBot/bin", "engine.UCIEngine").start();
 				InputStream is = process.getInputStream();
 				InputStreamReader isr = new InputStreamReader(is);
 				BufferedReader br = new BufferedReader(isr);
@@ -38,7 +38,9 @@ public class TestUCI {
 				wr.flush();
 				
 				line = br.readLine(); // skip header line
+				System.out.println(line);
 				line = br.readLine(); // answer to the uci command 'isready'...
+				System.out.println(line);
 				assertEquals("readyok", line); // ...should be 'readyok'
 				
 				/*System.out.print("Output of running bot is:");

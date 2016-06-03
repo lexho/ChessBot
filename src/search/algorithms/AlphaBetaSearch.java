@@ -3,6 +3,7 @@ package search.algorithms;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.util.ArrayList;
 //import java.io.Printwriter;
 import java.util.List;
 import java.util.function.BiPredicate;
@@ -18,6 +19,7 @@ import search.nodes.LimitedNode;
 public class AlphaBetaSearch implements AdversarialSearch {
 	@SuppressWarnings("unused")
 	private BiPredicate<Integer, Node> searchLimitingPredicate;
+	private int depthLimit;
 
 	/**
 	 * To limit the extent of the search, this implementation should honor a
@@ -36,6 +38,22 @@ public class AlphaBetaSearch implements AdversarialSearch {
 		}*/
 		lastinfo = System.currentTimeMillis();
 		interrupted = false; // reset interrupt
+		alphaBound = Double.NEGATIVE_INFINITY;
+		betaBound = Double.POSITIVE_INFINITY;
+	}
+	
+	public AlphaBetaSearch(int depthLimit)
+	{
+		this.depthLimit = depthLimit;
+		/*try {
+			writer = new Print//writer(new FileOutputStream(new File("/home/alex/Code/workspace_java/aiws15_2/assets/log/" + "alphabeta.log"),false));
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}*/
+		lastinfo = System.currentTimeMillis();
+		interrupted = false; // reset interrupt
+		alphaBound = Double.NEGATIVE_INFINITY;
+		betaBound = Double.POSITIVE_INFINITY;
 	}
 	
 	//private double alpha = Double.NEGATIVE_INFINITY;
@@ -58,85 +76,111 @@ public class AlphaBetaSearch implements AdversarialSearch {
 	
 	private int depth = 0;
 	private boolean interrupted;
+	
 	public long nodecount = 0;
 	private long lastinfo = 0; // the last time a info message was printed
 	private long lastnodes = 0; // the number of processed nodes at the last time a info message was printed
 	private int lastdepth = 0; // the depth at last depth message
+	private int NrOfLeafNodes = 0;
+	
+	public int getLeafNodeStatistics() {
+		return NrOfLeafNodes;
+	}
 	
 	/* Debug*/
 	//Printwriter writer;
+	
+	private double alphaBound;
+	private double betaBound;
+	
+	public void setBounds(double alpha, double beta) {
+		this.alphaBound = alpha;
+		this.betaBound = beta;
+	}
+	
+	public double[] getBounds() {
+		return new double[]{alphaBound, betaBound};
+	}
+	
+	Function<Node, Double> evalFunction;
 
 	public Pair<Node, Double> search(Node start, Function<Node, Double> evalFunction) {
-		double alpha = Double.POSITIVE_INFINITY;
-		double beta = Double.NEGATIVE_INFINITY;
+		Pair<Node, Double> alpha = new Pair<Node, Double>(null, alphaBound); //Double.POSITIVE_INFINITY;
+		Pair<Node, Double> beta =  new Pair<Node, Double>(null, betaBound); // Double.NEGATIVE_INFINITY;
 		Node current = start;
-		nodecount++;
+		lastinfo = System.currentTimeMillis();
+		this.evalFunction = evalFunction;
 		
-		/*if(depth != lastdepth) {
-			System.out.println("depth: " + depth);
-			lastdepth = depth;
-		}*/
-		
-		//if(depth != d) System.out.println("Depth-Error!");
-		//System.out.println("alphabeta search depth: " + depth);
-		
-		/* Recursively score nodes up to start node */
-		if(interrupted || (current.isLeaf() || !searchLimitingPredicate.test(depth, current))) {
-			double score = evalFunction.apply(current);
-			
-			return new Pair(current,score); // return evaluated leaf node
-		} else {
-			List<Node> adjacent = current.adjacent();
-			Pair<Node, Double> bestNode = null; // init best score
-			
-			/* Workaround for faulty isLeaf() - Method of BoardNode */
-			if(adjacent.size() == 0) {
-				double score = evalFunction.apply(current);
-				return new Pair(current,score); // return evaluated leaf node
-			}
-			
-			int current_depth = depth;
-			for(int i = 0; i < adjacent.size(); i++) {
-				/* Get MinMax-Score of child node */
-				depth = current_depth;
-				depth++;
-				double score = search(adjacent.get(i), evalFunction).s;
-				printInfoMessage(adjacent.get(i), score);
-				depth = current_depth;
-				//if(depth != getDepth(current)) System.out.println("Depth-Error! " + depth + " != " + getDepth(current));
-				
-				/* Set alpha/beta */
-				if(depth % 2 == 0) {
-					if(score < alpha) alpha = score; 
-				} else {
-					if(score > beta) beta = score;
-				}
-				
-				if(i == 0) bestNode = new Pair(adjacent.get(i),score); // init best score with first node score
-				
-				/* Check who's turn it is and minimize / maximize minmax score */
-				if(depth % 2 == 0) {
-					if(score > bestNode.s) bestNode = new Pair(adjacent.get(i),score); // get MAX score
-				} else {
-					if(score < bestNode.s) bestNode = new Pair(adjacent.get(i),score); // get MIN score
-				}
-				
-				/* Alpha-Beta Pruning */
-				if(depth % 2 == 0) {
-					//System.out.println(score + ", alpha " + alpha);
-					if(score < alpha) {
-						return bestNode;
-					}
-				} else {
-					//System.out.println(score + ", beta " + beta);
-					if(score > beta) {
-						return bestNode;
-					}
-				}
-			}
-			return bestNode; // return node with best minmax score
-		}
+		Pair<Node, Double> result = alphaBetaMax( start, alpha, beta, depthLimit);
+		return result;
 	}
+	
+	private int alphaCount = 0;
+	private int betaCount = 0;
+	
+	public List<Integer> getPruningStats() {
+		List<Integer> stats = new ArrayList<Integer>();
+		stats.add(alphaCount);
+		stats.add(betaCount);
+		return stats;
+	}
+	
+	Pair<Node, Double> alphaBetaMax( Node current,  Pair<Node, Double> alpha,  Pair<Node, Double> beta, int depthleft ) {
+		nodecount++;   
+		if ( depthleft == 0 || current.isLeaf() ) {
+			NrOfLeafNodes++;
+			return new Pair<Node, Double>(current, evalFunction.apply(current));
+		}
+		   int current_depth = depth;
+		   int i = 0;
+		   for ( Node node : current.adjacent() ) {
+			   depth = current_depth;
+			   depth++;
+		      double score = alphaBetaMin( node, alpha, beta, depthleft - 1 ).s;
+		      printInfoMessage(node, score);
+		      if( score >= beta.s ) {
+		    	  //System.out.println("beta: " + score + " >= " + beta.s);
+		    	  betaCount += current.adjacent().size() - i;
+		    	  //System.out.println("beta prune " + (current.adjacent().size() - i) + " of " + current.adjacent().size());
+		         return beta;   // fail hard beta-cutoff
+		      }
+		      if( score > alpha.s ) {
+		    	  /*System.out.print("set new alpha: " + alpha.s);
+		    	  System.out.println(" at depth: " + depth);*/
+		         alpha = new Pair<Node, Double>(node, score); // alpha acts like max in MiniMax
+		      }
+		   i++;
+		   }
+		   return alpha;
+		}
+		 
+	Pair<Node, Double> alphaBetaMin( Node current, Pair<Node, Double> alpha, Pair<Node, Double> beta, int depthleft ) {
+		nodecount++;   
+		if ( depthleft == 0 || current.isLeaf() ) {
+			NrOfLeafNodes++;
+			return new Pair<Node, Double>(current, evalFunction.apply(current));
+		}
+		   int current_depth = depth;
+		   int i = 0;
+		   for ( Node node : current.adjacent() ) {
+			   depth = current_depth;
+			   depth++;
+			  double score = alphaBetaMax( node, alpha, beta, depthleft - 1 ).s;
+			  printInfoMessage(node, score);
+		      if( score <= alpha.s ) {
+		    	  //System.out.println("alpha: " + score + " <= " + alpha.s);
+		    	  alphaCount += current.adjacent().size() - i;
+		         return alpha; // fail hard alpha-cutoff
+		      }
+		      if( score < beta.s ) {
+		    	  /*System.out.print("set new beta: " + beta.s);
+		    	  System.out.println(" at depth: " + depth);*/
+		         beta = new Pair<Node, Double>(node, score); // beta acts like min in MiniMax
+		      }
+		      i++;
+		   }
+		   return beta;
+		}
 
 	/** interrupt a running alphabeta search */
 	public void interrupt() {

@@ -8,7 +8,6 @@ import board.Position;
 import board.Position12x10;
 import board.PositionInterface;
 import board.pieces.Piece;
-import exceptions.InvalidMoveException;
 
 public class Action {
 	protected int delta_x;

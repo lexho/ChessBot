@@ -35,7 +35,7 @@ public class ChessBot {
 	private Board board;
 	
 	public static int NR_OF_THREADS;
-	int depthLimit = 3;
+	int depthLimit = 4;
 	
 	/**
 	 * Create a new (internal) board with initial position
@@ -141,32 +141,49 @@ public class ChessBot {
 	}
 	
 	AlphaBetaSearch alphabeta;
+	private double currentScore = 0d;
 	
 	/** use AlphaBeta Search as search engine
 	 * @return best move found
 	 * */
 	private Move alphaBetaSearch() {
-		Move nextMove;
+		Move nextMove = null;
 		long searchtime = System.currentTimeMillis(); // current time in milliseconds
 		
 		/* AlphaBeta Search */
-		alphabeta = new AlphaBetaSearch((d, current) -> d < depthLimit);
 		ScoreBoard scoreboard = new ScoreBoard(board.copy());
 		Function<Node, Double> evalFunction = new BoardFunction(scoreboard);
-		Pair<Node, Double> result = alphabeta.search(
-				new LimitedNode(board.copy()),
-				evalFunction);
-		nextMove = result.f.getAction();
+		
+		for(int depth = 1; depth <= depthLimit; depth++) {
+			alphabeta = new AlphaBetaSearch(depth);
+	
+			/* Prune search tree at higher depths to reduce search time */
+			if(depth > 1)
+			alphabeta.setBounds(currentScore -50d, currentScore + 50d); // the higher alpha the more pruning, the lower beta the more pruning
+			
+			Pair<Node, Double> result = alphabeta.search(
+					new BoardNode(board.copy()),
+					evalFunction);
+			
+			if(result.f != null) {
+				System.out.println(result.f.getAction() + " " + result.s + depth);
+				System.out.println();
+				currentScore = result.s;
+				nextMove = result.f.getAction();
+			}
+		}
 		
 		searchtime = System.currentTimeMillis() - searchtime;
 		//System.out.println("Possible moves: " + new LimitedNode(board.copy()).adjacent().size());
+		System.out.println("score: " + currentScore);
 		System.out.println("Possible moves: " + board.getPossibleMoves().size());
 		//System.out.println(alphabeta.nodecount/(searchtime / 60) + " nodes per second");
 		System.out.println("searchtime: " + searchtime / 1000 + " s");
-		System.out.println(scoreboard.scoreCounter + " scores");
-		System.out.println(nextMove + " " + result.s);
+		System.out.println("scores: " + scoreboard.scoreCounter);
+		System.out.println("aspiration window: " + alphabeta.getBounds()[0] + " " + alphabeta.getBounds()[1]);
+		System.out.println("pruning alpha: " + alphabeta.getPruningStats().get(0) + ", beta: " + alphabeta.getPruningStats().get(1));
+		System.out.println("leaf nodes: " + alphabeta.getLeafNodeStatistics());
 		System.out.println();
-		//System.out.println(result.f); // print board
 		return nextMove;
 	}
 	/**
