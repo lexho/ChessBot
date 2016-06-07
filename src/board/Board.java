@@ -138,23 +138,23 @@ public class Board {
 		
 		/* Promotion (P -> Q,N,R,B on 8th rank)*/
 		if(piece == 'P' && trg > 20 && trg < 29) {
-			System.out.println("promotion white");
-			print();
+			/*System.out.println("promotion white");
+			print();*/
 			currentPosition.clear(src);
 			currentPosition.setPieceAt((int)'Q', trg);
 			currentPosition.updatePieceList();
 			piece = 'Q';
-			print();
+			//print();
 			
 		}
 		else if(piece == 'p' && trg > 90 && trg < 99) {
-			System.out.println("promotion black");
-			print();
+			/*System.out.println("promotion black");
+			print();*/
 			currentPosition.clear(src);
 			currentPosition.setPieceAt((int)'q', trg);
 			currentPosition.updatePieceList();
 			piece = 'q';
-			print();
+			//print();
 		}
 		currentPosition.setPieceAt(piece, trg); // update position table
 		
@@ -229,6 +229,14 @@ public class Board {
 	 */
 	public PositionInterface getPosition() {
 		return currentPosition;
+	}
+	
+	/**
+	 * 
+	 * @return the current position (as 12x10 board)
+	 */
+	public Position12x10 getPosition12x10() {
+		return (Position12x10) currentPosition;
 	}
 	
 	public char getActiveColor() {

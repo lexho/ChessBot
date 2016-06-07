@@ -54,21 +54,9 @@ public class ScoreBoard<V> implements Function<Board, Double>
 		  {
 			double score = 0d;
 
-			/*score += scoreFountains(board);
-			score += getFountainBalance(board);
-			score += scoreClouds(board);
-			score -= getDistanceToFountain(board);
-			score += scoreSeeds(board);
-			score -= distanceToOpponent(board); */
-			
-			//score += getPieceSize(board);
 			score += scoreMaterial(board);
-			//score += getPieceDifference(board);
-			score += possibleQueenMoves(board);
-			score += possibleRookMoves(board);
-			score += possibleBishopMoves(board);
-			score += possibleKnightMoves(board);
-			//System.out.println(score);
+			score += scoreMobility(board);
+			score += scorePosition(board);
 			
 			return score;
 		  } else
@@ -142,58 +130,171 @@ public class ScoreBoard<V> implements Function<Board, Double>
 		}
 		return score;
 	}
-	private double getPieceSize(Board board) {
-		int NrMyPieces = board.getPosition().getPieces().getPieces(player_id).size();
-		return NrMyPieces;
-	}
 	
-	private double getPieceDifference(Board board) {
-		int NrMyPieces = board.getPosition().getPieces().getPieces(player_id).size();
-		int NrOpponentPieces = board.getPosition().getPieces().getPieces(opponent_id).size();
-		return (NrMyPieces - NrOpponentPieces) * 312; // return points in the range of [-10000, 10000]
-	}
-	
-	/*private double possibleMoves(Board board) {
-		if(player_id == board.getActiveColor())
-			return board.getPossibleMoves().size();
-		else
-			return board.getPossibleMoves().size() * -1;
-	}*/
-	
-	private double possibleQueenMoves(Board board) {
-		return possibleMoves(board, Position12x10.WQUEEN);
+	private double scoreMobility(Board board) {
+		int[] white_pieces = {Position12x10.WROOK, Position12x10.WKNIGHT, Position12x10.WBISHOP, Position12x10.WQUEEN, Position12x10.WKING};
+		int[] black_pieces = {Position12x10.BROOK, Position12x10.BKNIGHT, Position12x10.BBISHOP, Position12x10.BQUEEN, Position12x10.BKING};
+		int factor;
+		if(player_id == 'w') factor = 1; else factor = -1; 
 		
-		/*if(board.getPosition().getPieces().getByID(Piece.QUEEN, player_id) == null) return 0d; // no queen left
-		//TODO get possible moves of all queens
-		if(player_id == board.getActiveColor())
-			return board.getPosition().getPieces().getByID(Piece.QUEEN, player_id).getPossibleMoves().size();
-		else
-			return board.getPosition().getPieces().getByID(Piece.QUEEN, player_id).getPossibleMoves().size() * -1;
-			*/
-	}
-	
-	private double possibleRookMoves(Board board) {
-		return possibleMoves(board, Position12x10.WROOK);
-	}
-	
-	private double possibleBishopMoves(Board board) {
-		return possibleMoves(board, Position12x10.WBISHOP);
-	}
-	
-	private double possibleKnightMoves(Board board) {
-		return possibleMoves(board, Position12x10.WKNIGHT);
+		/* Calculate score */
+		double score = 0d;
+		for(int piece : white_pieces) {
+			score += possibleMoves(board, piece) * factor;
+		}
+		for(int piece : black_pieces) {
+			score += possibleMoves(board, piece) * factor * -1d;
+		}
+		return score / 16d; // scale score
 	}
 	
 	private double possibleMoves(Board board, int piece) {
 		double score = 0d;
-		for(Piece queen : position.getPieceByID(piece)) {
-			score += queen.getPossibleMoves((Position12x10) board.getPosition()).size();
+		for(Piece p : position.getPieceByID(piece)) {
+			score += p.getPossibleMoves((Position12x10) board.getPosition()).size();
 		}
 		// TODO create method to convert white to black piece
-		for(Piece queen : position.getPieceByID(piece + 65)) {
-			score += queen.getPossibleMoves((Position12x10) board.getPosition()).size() * -1;
-		}
+		/*for(Piece p : position.getPieceByID(piece + 65)) {
+			score += p.getPossibleMoves((Position12x10) board.getPosition()).size() * -1;
+		}*/
 		return score;
 	}
 
+
+	private double scorePosition(Board board) {
+		double score = 0d;
+		int[] board_12x10 = board.getPosition12x10().get12x10Board();
+		for(int i = 0; i < board_12x10.length; i++) {
+			int index;
+			if(player_id == 'w') { 
+				index = i;
+				switch (board_12x10[i]) {
+				case Position12x10.WPAWN:
+					score += PawnTable[index];
+					break;
+				case Position12x10.WKNIGHT:
+					score += KnightTable[index];
+					break;
+				case Position12x10.WBISHOP:
+					score += BishopTable[index];
+					break;
+				case Position12x10.WKING:
+					score += KingTable[index];
+					//TODO score king end game
+					break;
+				}
+			} else {
+				index  = board_12x10.length - i;
+				switch (board_12x10[i]) {
+				case Position12x10.BPAWN:
+					score += PawnTable[index];
+					break;
+				case Position12x10.BKNIGHT:
+					score += KnightTable[index];
+					break;
+				case Position12x10.BBISHOP:
+					score += BishopTable[index];
+					break;
+				case Position12x10.BKING:
+					score += KingTable[index];
+					//TODO score king end game
+					break;
+				}
+			}
+			/*if(board_12x10[i] == Position12x10.WPAWN) score += PawnTable[index];
+			if(board_12x10[i] == Position12x10.WKNIGHT) score += KnightTable[index];	
+			if(board_12x10[i] == Position12x10.WBISHOP) score += BishopTable[index];
+			if(board_12x10[i] == Position12x10.WKING) score += KingTable[index];	
+				//System.out.println("pawn table white");
+			/*} else if (board_12x10[i] == Position12x10.BPAWN){
+				score+= PawnTable[board_12x10.length - i];
+				score += KnightTable[board_12x10.length - i];
+				score += BishopTable[board_12x10.length - i];
+				//System.out.println("pawn table black");
+			}*/
+		}
+		return score;
+	}
+	
+	/** Pawns are encouraged to stay in the center and advance forward */
+	private static short[] PawnTable = new short[] {
+			-1, -1, -1, -1, -1, -1, -1, -1, -1,	-1,
+			-1,  -1, -1, -1, -1, -1, -1, -1, -1, -1,
+			-1,  0,  0,  0,  0,  0,  0,  0,  0, -1,
+			-1, 50, 50, 50, 50, 50, 50, 50, 50, -1,
+			-1, 10, 10, 20, 30, 30, 20, 10, 10, -1,
+			-1,  5,  5, 10, 27, 27, 10,  5,  5, -1,
+			-1,  0,  0,  0, 25, 25,  0,  0,  0, -1,
+			-1,  5, -5,-10,  0,  0,-10, -5,  5, -1,
+			-1,  5, 10, 10,-25,-25, 10, 10,  5, -1,
+			-1,  0,  0,  0,  0,  0,  0,  0,  0  -1,
+			-1, -1, -1, -1, -1, -1, -1, -1, -1,	-1,
+			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1
+	};
+	
+	/** Knights are encouraged to control the center and stay away from edges to increase mobility */
+	private static short[] KnightTable = new short[] {
+			-1, -1, -1, -1, -1, -1, -1, -1, -1,	-1,
+			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+			-1, -50,-40,-30,-30,-30,-30,-40,-50, -1,
+			-1, -40,-20,  0,  0,  0,  0,-20,-40, -1,
+			-1, -30,  0, 10, 15, 15, 10,  0,-30, -1,
+			-1, -30,  5, 15, 20, 20, 15,  5,-30, -1,
+			-1, -30,  0, 15, 20, 20, 15,  0,-30, -1,
+			-1, -30,  5, 10, 15, 15, 10,  5,-30, -1,
+			-1, -40,-20,  0,  5,  5,  0,-20,-40, -1,
+			-1, -50,-40,-20,-30,-30,-20,-40,-50, -1,
+			-1, -1, -1, -1, -1, -1, -1, -1, -1,	-1,
+			-1,  -1, -1, -1, -1, -1, -1, -1, -1, -1
+	};
+	
+	/** Bishops are also encouraged to control the center and stay away from edges and corners */
+	private static short[] BishopTable = new short[] {
+			-1, -1, -1, -1, -1, -1, -1, -1, -1,	-1,
+			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+			-1, -20,-10,-10,-10,-10,-10,-10,-20, -1,
+			-1, -10,  0,  0,  0,  0,  0,  0,-10, -1,
+			-1, -10,  0,  5, 10, 10,  5,  0,-10, -1,
+			-1, -10,  5,  5, 10, 10,  5,  5,-10, -1,
+			-1, -10,  0, 10, 10, 10, 10,  0,-10, -1,
+			-1, -10, 10, 10, 10, 10, 10, 10,-10, -1,
+			-1,  -10,  5,  0,  0,  0,  0,  5,-10, -1,
+			-1, -20,-10,-40,-10,-10,-40,-10,-20, -1,
+			-1, -1, -1, -1, -1, -1, -1, -1, -1,	-1,
+			-1,  -1, -1, -1, -1, -1, -1, -1, -1, -1
+	};
+	
+	/** Kings have 2 piece square tables, one for the end game and one for the middle game. 
+	 * During the middle game kings are encouraged to stay in the corners, while in the end game kings are encouraged to move towards the center.*/
+	 private static short[] KingTable = new short[] {
+			 -1, -1, -1, -1, -1, -1, -1, -1, -1,	-1,
+			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+			-1, -30, -40, -40, -50, -50, -40, -40, -30, -1,
+			-1, -30, -40, -40, -50, -50, -40, -40, -30, -1,
+			-1, -30, -40, -40, -50, -50, -40, -40, -30, -1,
+			-1, -30, -40, -40, -50, -50, -40, -40, -30, -1,
+			-1, -20, -30, -30, -40, -40, -30, -30, -20, -1,
+			-1, -10, -20, -20, -20, -20, -20, -20, -10, -1,
+			-1, 20,  20,   0,   0,   0,   0,  20,  20, -1,
+			-1, 20,  30,  10,   0,   0,  10,  30,  20 -1,
+			-1, -1, -1, -1, -1, -1, -1, -1, -1,	-1,
+			-1,  -1, -1, -1, -1, -1, -1, -1, -1, -1
+	};
+
+	/** Kings have 2 piece square tables, one for the end game and one for the middle game. 
+	 * During the middle game kings are encouraged to stay in the corners, while in the end game kings are encouraged to move towards the center.*/
+	private static short[] KingTableEndGame = new short[] {
+			-1, -1, -1, -1, -1, -1, -1, -1, -1,	-1,
+			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+			-1, -50,-40,-30,-20,-20,-30,-40,-50, -1,
+			-1, -30,-20,-10,  0,  0,-10,-20,-30, -1,
+			-1, -30,-10, 20, 30, 30, 20,-10,-30, -1,
+			-1, -30,-10, 30, 40, 40, 30,-10,-30, -1,
+			-1, -30,-10, 30, 40, 40, 30,-10,-30, -1,
+			-1, -30,-10, 20, 30, 30, 20,-10,-30, -1,
+			-1, -30,-30,  0,  0,  0,  0,-30,-30, -1,
+			-1, -50,-30,-30,-30,-30,-30,-30,-50, -1,
+			-1, -1, -1, -1, -1, -1, -1, -1, -1,	-1,
+			-1,  -1, -1, -1, -1, -1, -1, -1, -1, -1
+	};
 }

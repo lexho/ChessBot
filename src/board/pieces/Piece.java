@@ -28,9 +28,6 @@ public class Piece {
 	/* actions */
 	protected List<Action> actions;
 	
-	//static final int KNIGHT_ = -9;
-	// TODO add knight move constants
-	
 	protected int direction_x;
 	protected int direction_y;
 	int range;

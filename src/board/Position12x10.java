@@ -129,23 +129,8 @@ public class Position12x10 implements PositionInterface {
 			castling[i] = position.getCastling()[i];
 		}
 		
-		/*pieces = new PieceList(this);
-		for(Piece p : position.getPieces()) {
-			this.pieces.add(PieceCreator.createPiece(p.getCharRep(), p.getPosIndex()));
-		}*/
 		/* Create the piece list */
 		updatePieceList();
-		
-		//TODO build 12x10 array
-		/*initSquares();
-		for(Piece p : pieces) {
-			int x = p.getPosition()[0];
-			int y = p.getPosition()[1];
-			//System.out.println(p + " " + x + " " + y);
-			squares[x][y] = new ValidSquare(p);
-		}
-		pieces.setSquareArray(squares);*/
-
 	}
 	
 	public Position12x10(Fen fen) {
@@ -195,7 +180,7 @@ public class Position12x10 implements PositionInterface {
 				pieces.add(PieceCreator.createPiece(Character.toString(p), new int[]{x,y}));
 			}
 		}
-		//TODO build 12x10 array
+
 		/* Init 12x10 board */
 		board_12x10 = new int [120];
 		int [] emptyBoard = {
@@ -284,16 +269,24 @@ public class Position12x10 implements PositionInterface {
 		List<Piece> opponentsPieces;
 		if(white) {
 			temp.setActiveColor('b');
+			try {
 			king = temp.getPieceByID('K').get(0); 
+			} catch (IndexOutOfBoundsException e) {
+				return true; //TODO handle no king error
+			}
 			opponentsPieces = temp.getPieces().getBlackPieces();
 		}
 		else { 
 			temp.setActiveColor('w');
+			try {
 			king = temp.getPieceByID('k').get(0); 
+			} catch (IndexOutOfBoundsException e) {
+				return true; //TODO handle no king error
+			}
 			opponentsPieces = temp.getPieces().getWhitePieces();
 		}
 		
-		if(king == null) return true; //TODO handle no king error
+		//if(king == null) return true;
 		
 		//System.out.println("opponents pieces: " + opponentsPieces);
 		for(Piece p : opponentsPieces) {
@@ -308,11 +301,6 @@ public class Position12x10 implements PositionInterface {
 		}
 		return false;
 	}
-	
-	//TODO implement castling test
-	/*public boolean castlingAllowed() {
-		return true;
-	}*/
 	
 	public boolean isFree(int index) {
 		if(board_12x10[index] == EMPTY) {
@@ -400,42 +388,6 @@ public class Position12x10 implements PositionInterface {
 	
 	public Piece getPieceAt(int[] coord) {
 		return getPieceAt(coordToIndex(coord));
-		/*int x = coord[0];
-		int y = coord[1];
-		int i = (7 - y) * 10 + 20 + 1 + x;
-		//System.out.println(coord[0] + "/" + coord[1] + " --> " + i + " " + board_12x10[i]);
-		
-		String rep = Character.toString((char)board_12x10[i]); // TODO don't use string as rep, use character
-		switch((char)board_12x10[i]) {
-		case WPAWN:
-			return new WhitePawn(rep, new int[]{x,y});
-		case BPAWN:
-			return new BlackPawn(rep, new int[]{x,y});
-			
-		case WKING:
-		case BKING:
-			return new King(rep, new int[]{x,y});
-			
-		case WQUEEN:
-		case BQUEEN:
-			return new Queen(rep, new int[]{x,y});
-			
-		case WBISHOP:
-		case BBISHOP:
-			return new Bishop(rep, new int[]{x,y});
-			
-		case WKNIGHT:
-		case BKNIGHT:
-			return new Knight(rep, new int[]{x,y});
-			
-		case WROOK:
-		case BROOK:
-			return new Rook(rep, new int[]{x,y});
-				
-		}
-		//pieces.add(new Piece(p));
-			
-		return new Piece((char)board_12x10[i], coord);*/
 	}
 	
 	public List<Piece> getPieceByID(int pieceID) {
@@ -592,7 +544,7 @@ public class Position12x10 implements PositionInterface {
 			board[p.getPosIndex()] = p.getCharRep();
 		}
 		
-		String outstr = "####### printPieceBoard #######\n";
+		String outstr = "######### printPieceBoard() ##########\n";
 		for(int i = 0; i < board_12x10.length; i++) {
 			//String number = Integer.toString(board_12x10[i]);
 			String number;
@@ -605,7 +557,7 @@ public class Position12x10 implements PositionInterface {
 			}
 			if((i + 1) % 10 == 0) outstr += '\n';
 		}
-		outstr += "##############################";
+		outstr += "######################################";
 		System.out.println(outstr);
 	}
 	

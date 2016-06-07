@@ -10,6 +10,7 @@ import java.util.function.BiPredicate;
 import java.util.function.Function;
 
 import board.Move;
+import exceptions.SearchFailException;
 import search.AdversarialSearch;
 import search.Node;
 import search.datastructures.Pair;
@@ -104,14 +105,20 @@ public class AlphaBetaSearch implements AdversarialSearch {
 	
 	Function<Node, Double> evalFunction;
 
-	public Pair<Node, Double> search(Node start, Function<Node, Double> evalFunction) {
+	public Pair<Node, Double> search(Node start, Function<Node, Double> evalFunction) throws SearchFailException {
 		Pair<Node, Double> alpha = new Pair<Node, Double>(null, alphaBound); //Double.POSITIVE_INFINITY;
 		Pair<Node, Double> beta =  new Pair<Node, Double>(null, betaBound); // Double.NEGATIVE_INFINITY;
+		depth = 0;
 		Node current = start;
 		lastinfo = System.currentTimeMillis();
 		this.evalFunction = evalFunction;
-		
+
 		Pair<Node, Double> result = alphaBetaMax( start, alpha, beta, depthLimit);
+		/* Alpha- and Beta-Fails*/
+		if(result.f == null) {
+			if(result.s == alphaBound) throw new SearchFailException(true);
+			else throw new SearchFailException(false);
+		}
 		return result;
 	}
 	

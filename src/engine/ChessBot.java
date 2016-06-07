@@ -23,6 +23,7 @@ import board.Position12x10;
 import board.PositionInterface;
 import board.pieces.Piece;
 import board.position.Fen;
+import exceptions.SearchFailException;
 import search.algorithms.RS;
 
 /**
@@ -142,6 +143,7 @@ public class ChessBot {
 	
 	AlphaBetaSearch alphabeta;
 	private double currentScore = 0d;
+	private double[] aspwindow = {25d, 25d};
 	
 	/** use AlphaBeta Search as search engine
 	 * @return best move found
@@ -154,23 +156,61 @@ public class ChessBot {
 		ScoreBoard scoreboard = new ScoreBoard(board.copy());
 		Function<Node, Double> evalFunction = new BoardFunction(scoreboard);
 		
+		/* Reset aspiration window */
+		aspwindow[0] = 25d;
+		aspwindow[1] = 25d;
 		for(int depth = 1; depth <= depthLimit; depth++) {
 			alphabeta = new AlphaBetaSearch(depth);
-	
-			/* Prune search tree at higher depths to reduce search time */
-			if(depth > 1)
-			alphabeta.setBounds(currentScore -50d, currentScore + 50d); // the higher alpha the more pruning, the lower beta the more pruning
 			
-			Pair<Node, Double> result = alphabeta.search(
-					new BoardNode(board.copy()),
-					evalFunction);
+			Pair<Node, Double> result = null;
+			double[] aspReset = {new Double(aspwindow[0]), new Double(aspwindow[1])};
+			boolean failed = false;
+			do {
+				/* Prune search tree at higher depths to reduce search time */
+				if(depth > 1)
+				alphabeta.setBounds(currentScore - aspwindow[0], currentScore + aspwindow[1]); // the higher alpha the more pruning, the lower beta the more pruning
+				
+				try {
+					result = alphabeta.search(
+						new BoardNode(board.copy()),
+						evalFunction);	
+					failed = false;
+				} catch (SearchFailException e) {
+					failed = true;
+					if(e.isAlphaFail()) {
+						System.out.println("alpha fail");
+						aspwindow[0] = Math.pow(Math.abs(aspwindow[0]), 1.2);
+					}
+					else {
+						System.out.println("beta fail");
+						aspwindow[1] = Math.pow(aspwindow[1], 1.2);
+					}
+				}
+				//aspwindow = Math.pow(aspwindow, 1.2);
+				System.out.println("new aspiration window: " + (currentScore - aspwindow[0]) + " " + (currentScore + aspwindow[1]));
+				/* Aspiration window approach failed --> fall back to full range search */
+				if(aspwindow[0] > 10000 || aspwindow[1] > 10000) {
+					aspwindow = aspReset; // reset aspiration window
+					System.err.println("aspwindow is bigger than 10000 and no move found yet");
+					System.out.println("aspwindow is bigger than 10000 and no move found yet");
+					System.err.println("starting search without full range window (-infinity and +infinity)");
+					System.out.println("starting search without full range window (-infinity and +infinity)");
+					alphabeta.setBounds(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+					result = alphabeta.search(
+							new BoardNode(board.copy()),
+							evalFunction);	
+					currentScore = result.s;
+					return result.f.getAction();
+				}
+			} while(failed);
 			
-			if(result.f != null) {
-				System.out.println(result.f.getAction() + " " + result.s + depth);
-				System.out.println();
+			aspwindow = aspReset; // reset aspiration window
+			
+			//if(result.f != null) {
+				System.out.println(result.f.getAction() + " " + result.s + " depth " + depth);
 				currentScore = result.s;
 				nextMove = result.f.getAction();
-			}
+			//}
 		}
 		
 		searchtime = System.currentTimeMillis() - searchtime;
@@ -192,8 +232,7 @@ public class ChessBot {
 	 * @return the move is valid and has been executed
 	 */
 	public boolean makeMove(String movecmd) {
-		//System.out.println("Bot: MakeMove: " + movecmd);
-		return board.makeMove(new Move(movecmd)); //TODO change to makeMove to enable move validation
+		return board.makeMove(new Move(movecmd));
 	}
 	
 	/** Set the number of threads
