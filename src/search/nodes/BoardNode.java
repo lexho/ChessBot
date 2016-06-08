@@ -7,6 +7,7 @@ import java.util.List;
 import board.Board;
 import board.Move;
 import search.Node;
+import search.hashfunctions.ZobristHash;
 
 public class BoardNode implements Node
 {
@@ -72,7 +73,7 @@ public class BoardNode implements Node
 	
 	public int getDepth() {
 		int depth = 0;
-		Node node = new LimitedNode(this.board);
+		Node node = new BoardNode(this.board);
 		while(!node.isRoot()) {
 			depth++;
 			node = node.parent();
@@ -99,10 +100,11 @@ public class BoardNode implements Node
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		/*final int prime = 31;
 		int result = 1;
 		result = prime * result + ((board == null) ? 0 : board.hashCode());
-		return result;
+		return result;*/
+		return ZobristHash.hash(board.getPosition12x10());
 	}
 
 	@Override

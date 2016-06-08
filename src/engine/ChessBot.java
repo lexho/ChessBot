@@ -9,9 +9,12 @@ import java.util.function.Predicate;
 
 import search.evalfunctions.ScoreBoard;
 import search.datastructures.Pair;
+import search.algorithms.AlphaBetaHashSearch;
 import search.algorithms.AlphaBetaSearch;
 import search.functions.BoardFunction;
 import search.functions.BoardPredicate;
+import search.hashfunctions.ZobristHash;
+import search.hashtables.MainTranspositionTable;
 import search.nodes.BoardNode;
 import search.nodes.LimitedNode;
 import search.Node;
@@ -37,6 +40,7 @@ public class ChessBot {
 	
 	public static int NR_OF_THREADS;
 	int depthLimit = 4;
+	private MainTranspositionTable hashmap;
 	
 	/**
 	 * Create a new (internal) board with initial position
@@ -65,6 +69,8 @@ public class ChessBot {
 	public void init() {
 		NR_OF_THREADS = Runtime.getRuntime().availableProcessors();
 		board = new Board(new Position12x10());
+		ZobristHash.init(); // init hash table
+		hashmap = new MainTranspositionTable();
 	}
 	
 	/** Stop thinking process of the bot and return bestmove */
@@ -141,7 +147,7 @@ public class ChessBot {
 		return nextMove;
 	}
 	
-	AlphaBetaSearch alphabeta;
+	private AlphaBetaHashSearch alphabeta;
 	private double currentScore = 0d;
 	private double[] aspwindow = {25d, 25d};
 	
@@ -160,7 +166,7 @@ public class ChessBot {
 		aspwindow[0] = 25d;
 		aspwindow[1] = 25d;
 		for(int depth = 1; depth <= depthLimit; depth++) {
-			alphabeta = new AlphaBetaSearch(depth);
+			alphabeta = new AlphaBetaHashSearch(depth, hashmap);
 			
 			Pair<Node, Double> result = null;
 			double[] aspReset = {new Double(aspwindow[0]), new Double(aspwindow[1])};
@@ -221,6 +227,7 @@ public class ChessBot {
 		System.out.println("searchtime: " + searchtime / 1000 + " s");
 		System.out.println("scores: " + scoreboard.scoreCounter);
 		System.out.println("aspiration window: " + alphabeta.getBounds()[0] + " " + alphabeta.getBounds()[1]);
+		System.out.println("hashmap size: " + hashmap.size());
 		System.out.println("pruning alpha: " + alphabeta.getPruningStats().get(0) + ", beta: " + alphabeta.getPruningStats().get(1));
 		System.out.println("leaf nodes: " + alphabeta.getLeafNodeStatistics());
 		System.out.println();

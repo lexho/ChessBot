@@ -75,14 +75,14 @@ public class AlphaBetaSearch implements AdversarialSearch {
 		}
 	}
 	
-	private int depth = 0;
+	protected int depth = 0;
 	private boolean interrupted;
 	
 	public long nodecount = 0;
 	private long lastinfo = 0; // the last time a info message was printed
 	private long lastnodes = 0; // the number of processed nodes at the last time a info message was printed
 	private int lastdepth = 0; // the depth at last depth message
-	private int NrOfLeafNodes = 0;
+	protected int NrOfLeafNodes = 0;
 	
 	public int getLeafNodeStatistics() {
 		return NrOfLeafNodes;
@@ -122,8 +122,8 @@ public class AlphaBetaSearch implements AdversarialSearch {
 		return result;
 	}
 	
-	private int alphaCount = 0;
-	private int betaCount = 0;
+	protected int alphaCount = 0;
+	protected int betaCount = 0;
 	
 	public List<Integer> getPruningStats() {
 		List<Integer> stats = new ArrayList<Integer>();
@@ -194,7 +194,7 @@ public class AlphaBetaSearch implements AdversarialSearch {
 		interrupted = true;
 	}
 	
-	private void printInfoMessage(Node node, double score) {
+	protected void printInfoMessage(Node node, double score) {
 		if(System.currentTimeMillis() - lastinfo  > 1000) {
 			long nps = (nodecount - lastnodes); // Nodes per second
 			lastnodes = nodecount;

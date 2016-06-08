@@ -11,6 +11,8 @@ public interface Node {
 
 	boolean isRoot();
 	boolean isLeaf();
+	
+	public int getDepth();
 
 	public int hashCode();
 	public boolean equals(Object obj);
