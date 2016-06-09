@@ -42,6 +42,10 @@ public class ChessBot {
 	int depthLimit = 4;
 	private MainTranspositionTable hashmap;
 	
+	/* Optional Enhancements */
+	boolean useHashTable;
+	boolean useAspWindows;
+	
 	/**
 	 * Create a new (internal) board with initial position
 	 */
@@ -49,7 +53,7 @@ public class ChessBot {
 		System.out.println("ChessBot by Alexander Hoertenhuber | May 2016");
 		init();
 	}
-	
+
 	/**
 	 * Create a new (internal) board with the given position
 	 * @param position the position that should be on the board
@@ -73,6 +77,14 @@ public class ChessBot {
 		hashmap = new MainTranspositionTable();
 	}
 	
+	public void useHashTable(boolean useHashTable) {
+		this.useHashTable = useHashTable;
+	}
+
+	public void useAspWindows(boolean useAspWindows) {
+		this.useAspWindows = useAspWindows;
+	}
+	
 	/** Stop thinking process of the bot and return bestmove */
 	public void stop() {
 		//System.out.println("stopping");
@@ -91,12 +103,12 @@ public class ChessBot {
 	 */
 	public String getNextMove() {
 		board.setColor(board.getActiveColor());
-		//System.out.println(board);
-		//System.out.println(board.getPossibleMoves());
-		Move nextMove;
-		nextMove = alphaBetaSearch();
-		//nextMove = randomSearch();
-		//System.out.println(nextMove);
+		
+		Move nextMove = null;
+		if(useAspWindows) nextMove = alphaBetaSearchAspWindows();
+		if(!useAspWindows && !useHashTable) nextMove = alphaBetaSearchPure();
+		if(!useAspWindows && useHashTable) nextMove = alphaBetaSearchHashTable();
+
 		if(nextMove == null) nextMove = new NullMove();
 		return nextMove.toString();
 	}
@@ -147,14 +159,14 @@ public class ChessBot {
 		return nextMove;
 	}
 	
-	private AlphaBetaHashSearch alphabeta;
+	private AlphaBetaSearch alphabeta;
 	private double currentScore = 0d;
 	private double[] aspwindow = {25d, 25d};
 	
-	/** use AlphaBeta Search as search engine
+	/** use AlphaBeta Search with aspiration windows and a hashtable as search engine
 	 * @return best move found
 	 * */
-	private Move alphaBetaSearch() {
+	private Move alphaBetaSearchAspWindows() {
 		Move nextMove = null;
 		long searchtime = System.currentTimeMillis(); // current time in milliseconds
 		
@@ -165,9 +177,15 @@ public class ChessBot {
 		/* Reset aspiration window */
 		aspwindow[0] = 25d;
 		aspwindow[1] = 25d;
+
 		for(int depth = 1; depth <= depthLimit; depth++) {
-			alphabeta = new AlphaBetaHashSearch(depth, hashmap);
-			
+			/* Use hashmap? */
+			if(useHashTable) {
+				System.out.println("new hashmap search");
+				alphabeta = new AlphaBetaHashSearch(depth, hashmap, searchtime);
+			}
+			else alphabeta = new AlphaBetaSearch(depth, searchtime);
+				
 			Pair<Node, Double> result = null;
 			double[] aspReset = {new Double(aspwindow[0]), new Double(aspwindow[1])};
 			boolean failed = false;
@@ -212,18 +230,99 @@ public class ChessBot {
 			
 			aspwindow = aspReset; // reset aspiration window
 			
-			//if(result.f != null) {
-				System.out.println(result.f.getAction() + " " + result.s + " depth " + depth);
-				currentScore = result.s;
-				nextMove = result.f.getAction();
-			//}
+			System.out.println(result.f.getAction() + " " + result.s + " depth " + depth);
+			currentScore = result.s;
+			nextMove = result.f.getAction();
 		}
 		
 		searchtime = System.currentTimeMillis() - searchtime;
-		//System.out.println("Possible moves: " + new LimitedNode(board.copy()).adjacent().size());
+		
+		printSearchStats(searchtime, scoreboard);
+		
+		return nextMove;
+	}
+	
+	/** use AlphaBeta Search with a hashtable as search engine
+	 * @return best move found
+	 * */
+	private Move alphaBetaSearchHashTable() {
+		Move nextMove = null;
+		long searchtime = System.currentTimeMillis(); // current time in milliseconds
+		
+		/* AlphaBeta Search */
+		ScoreBoard scoreboard = new ScoreBoard(board.copy());
+		Function<Node, Double> evalFunction = new BoardFunction(scoreboard);
+		
+		long starttime = System.currentTimeMillis();
+		for(int depth = 1; depth <= depthLimit; depth++) {
+			alphabeta = new AlphaBetaHashSearch(depth, hashmap, starttime);
+			
+			Pair<Node, Double> result = null;
+			double[] aspReset = {new Double(aspwindow[0]), new Double(aspwindow[1])};
+			boolean failed = false;
+			alphabeta.setBounds(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+			result = alphabeta.search(
+					new BoardNode(board.copy()),
+					evalFunction);	
+			currentScore = result.s;
+
+			
+			if(result.f != null) {
+				System.out.println(result.f.getAction() + " " + result.s + " depth " + depth);
+				currentScore = result.s;
+				nextMove = result.f.getAction();
+			}
+		}
+		
+		searchtime = System.currentTimeMillis() - searchtime;
+		
+		printSearchStats(searchtime, scoreboard);
+		
+		return nextMove;
+	}
+	
+	/** use AlphaBeta Search without any additional enhancement as search engine
+	 * @return best move found
+	 * */
+	private Move alphaBetaSearchPure() {
+		Move nextMove = null;
+		long searchtime = System.currentTimeMillis(); // current time in milliseconds
+		
+		/* AlphaBeta Search */
+		ScoreBoard scoreboard = new ScoreBoard(board.copy());
+		Function<Node, Double> evalFunction = new BoardFunction(scoreboard);
+		
+		long starttime = System.currentTimeMillis();
+		for(int depth = 1; depth <= depthLimit; depth++) {
+			alphabeta = new AlphaBetaSearch(depth, starttime);
+			
+			Pair<Node, Double> result = null;
+			double[] aspReset = {new Double(aspwindow[0]), new Double(aspwindow[1])};
+			boolean failed = false;
+			alphabeta.setBounds(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+			result = alphabeta.search(
+					new BoardNode(board.copy()),
+					evalFunction);	
+			currentScore = result.s;
+
+			
+			if(result.f != null) {
+				System.out.println(result.f.getAction() + " " + result.s + " depth " + depth);
+				currentScore = result.s;
+				nextMove = result.f.getAction();
+			}
+		}
+		
+		searchtime = System.currentTimeMillis() - searchtime;
+		
+		printSearchStats(searchtime, scoreboard);
+		
+		return nextMove;
+	}
+	
+	private void printSearchStats(long searchtime, ScoreBoard scoreboard) {
 		System.out.println("score: " + currentScore);
 		System.out.println("Possible moves: " + board.getPossibleMoves().size());
-		//System.out.println(alphabeta.nodecount/(searchtime / 60) + " nodes per second");
 		System.out.println("searchtime: " + searchtime / 1000 + " s");
 		System.out.println("scores: " + scoreboard.scoreCounter);
 		System.out.println("aspiration window: " + alphabeta.getBounds()[0] + " " + alphabeta.getBounds()[1]);
@@ -231,8 +330,8 @@ public class ChessBot {
 		System.out.println("pruning alpha: " + alphabeta.getPruningStats().get(0) + ", beta: " + alphabeta.getPruningStats().get(1));
 		System.out.println("leaf nodes: " + alphabeta.getLeafNodeStatistics());
 		System.out.println();
-		return nextMove;
 	}
+	
 	/**
 	 * 
 	 * @param movecmd the move to be made

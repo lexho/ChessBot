@@ -4,20 +4,20 @@ import java.util.HashMap;
 
 import search.Node;
 import search.datastructures.Pair;
-import search.datastructures.TTEntry;
 import search.hashfunctions.ZobristHash;
 import search.hashtables.MainTranspositionTable;
+import search.hashtables.HashTableEntry;
 
 public class AlphaBetaHashSearch extends AlphaBetaSearch {
 
-	public AlphaBetaHashSearch(int depthLimit) {
-		super(depthLimit);
+	public AlphaBetaHashSearch(int depthLimit, long starttime) {
+		super(depthLimit, starttime);
 		hashmap = new MainTranspositionTable();
 		// TODO Auto-generated constructor stub
 	}
 	
-	public AlphaBetaHashSearch(int depthLimit, MainTranspositionTable hashmap) {
-		super(depthLimit);
+	public AlphaBetaHashSearch(int depthLimit, MainTranspositionTable hashmap, long starttime) {
+		super(depthLimit, starttime);
 		this.hashmap = hashmap;
 		// TODO Auto-generated constructor stub
 	}
@@ -36,7 +36,7 @@ public class AlphaBetaHashSearch extends AlphaBetaSearch {
 			NrOfLeafNodes++;
 			val = new Pair<Node, Double>(current, evalFunction.apply(current));
 			// store current node in hashmap
-			hashmap.put(current.hashCode(), new TTEntry(val, TTEntry.hashfEXACT)); 
+			hashmap.put(current.hashCode(), new HashTableEntry(val, HashTableEntry.hashfEXACT)); 
 			return val;
 		}
 		   int current_depth = depth;
@@ -49,7 +49,9 @@ public class AlphaBetaHashSearch extends AlphaBetaSearch {
 		      if( score >= beta.s ) {
 		    	  betaCount += current.adjacent().size() - i;
 		    	  // store beta node in hashmap
-		    	  hashmap.put(beta.hashCode(), new TTEntry(beta, TTEntry.hashfBETA));
+		    	  try {
+		    		  hashmap.put(beta.hashCode(), new HashTableEntry(beta.s, beta.f.getDepth(), HashTableEntry.hashfBETA));
+		    	  } catch (NullPointerException e) {}
 		         return beta;   // fail hard beta-cutoff
 		      }
 		      if( score > alpha.s ) {
@@ -57,7 +59,9 @@ public class AlphaBetaHashSearch extends AlphaBetaSearch {
 		      }
 		   i++;
 		   }
-		   hashmap.put(alpha.hashCode(), new TTEntry(alpha, TTEntry.hashfALPHA)); // store alpha node in hashmap
+		   try {
+			   hashmap.put(alpha.hashCode(), new HashTableEntry(alpha, HashTableEntry.hashfALPHA)); // store alpha node in hashmap
+		   } catch (NullPointerException e) {}
 		   return alpha;
 		}
 	
@@ -73,7 +77,7 @@ public class AlphaBetaHashSearch extends AlphaBetaSearch {
 			NrOfLeafNodes++;
 			val = new Pair<Node, Double>(current, evalFunction.apply(current));
 			// store current node in hashmap
-			hashmap.put(current.hashCode(), new TTEntry(val, TTEntry.hashfEXACT)); 
+			hashmap.put(current.hashCode(), new HashTableEntry(val, HashTableEntry.hashfEXACT)); 
 			return val;
 		}
 		   int current_depth = depth;
@@ -87,8 +91,10 @@ public class AlphaBetaHashSearch extends AlphaBetaSearch {
 		    	  //System.out.println("alpha: " + score + " <= " + alpha.s);
 		    	  // store beta node in hashmap
 		    	  alphaCount += current.adjacent().size() - i;
-		    	  hashmap.put(alpha.hashCode(), new TTEntry(alpha, TTEntry.hashfALPHA));
-		         return alpha; // fail hard alpha-cutoff
+		    	  try {
+		    		  hashmap.put(alpha.hashCode(), new HashTableEntry(alpha, HashTableEntry.hashfALPHA));
+		    	  } catch (NullPointerException e) {}
+		    	  return alpha; // fail hard alpha-cutoff
 		      }
 		      if( score < beta.s ) {
 		    	  /*System.out.print("set new beta: " + beta.s);
@@ -97,7 +103,9 @@ public class AlphaBetaHashSearch extends AlphaBetaSearch {
 		      }
 		      i++;
 		   }
-		   hashmap.put(beta.hashCode(), new TTEntry(beta, TTEntry.hashfBETA)); // store alpha node in hashmap
+		   try {
+			   hashmap.put(beta.hashCode(), new HashTableEntry(beta, HashTableEntry.hashfBETA)); // store alpha node in hashmap
+		   } catch (NullPointerException e) {}
 		   return beta;
 		}
 }

@@ -43,9 +43,10 @@ public class AlphaBetaSearch implements AdversarialSearch {
 		betaBound = Double.POSITIVE_INFINITY;
 	}
 	
-	public AlphaBetaSearch(int depthLimit)
+	public AlphaBetaSearch(int depthLimit, long starttime)
 	{
 		this.depthLimit = depthLimit;
+		this.starttime = starttime;
 		/*try {
 			writer = new Print//writer(new FileOutputStream(new File("/home/alex/Code/workspace_java/aiws15_2/assets/log/" + "alphabeta.log"),false));
 		} catch (FileNotFoundException e) {
@@ -60,25 +61,11 @@ public class AlphaBetaSearch implements AdversarialSearch {
 	//private double alpha = Double.NEGATIVE_INFINITY;
 	//private double beta = Double.POSITIVE_INFINITY;
 	
-	private int getDepth(Node node) {
-		int depth = 0;
-		while(!node.isRoot()) {
-			node = node.parent();
-			depth++;
-		}
-		return depth;
-	}
-	
-	private void indent(int depth) {
-		for(int i = 0; i < depth; i++) {
-			//writer.print(" ");
-		}
-	}
-	
 	protected int depth = 0;
 	private boolean interrupted;
 	
 	public long nodecount = 0;
+	private long starttime;
 	private long lastinfo = 0; // the last time a info message was printed
 	private long lastnodes = 0; // the number of processed nodes at the last time a info message was printed
 	private int lastdepth = 0; // the depth at last depth message
@@ -106,14 +93,16 @@ public class AlphaBetaSearch implements AdversarialSearch {
 	Function<Node, Double> evalFunction;
 
 	public Pair<Node, Double> search(Node start, Function<Node, Double> evalFunction) throws SearchFailException {
+		lastinfo = System.currentTimeMillis();
+		
 		Pair<Node, Double> alpha = new Pair<Node, Double>(null, alphaBound); //Double.POSITIVE_INFINITY;
 		Pair<Node, Double> beta =  new Pair<Node, Double>(null, betaBound); // Double.NEGATIVE_INFINITY;
 		depth = 0;
 		Node current = start;
-		lastinfo = System.currentTimeMillis();
 		this.evalFunction = evalFunction;
 
 		Pair<Node, Double> result = alphaBetaMax( start, alpha, beta, depthLimit);
+		
 		/* Alpha- and Beta-Fails*/
 		if(result.f == null) {
 			if(result.s == alphaBound) throw new SearchFailException(true);
@@ -198,7 +187,10 @@ public class AlphaBetaSearch implements AdversarialSearch {
 		if(System.currentTimeMillis() - lastinfo  > 1000) {
 			long nps = (nodecount - lastnodes); // Nodes per second
 			lastnodes = nodecount;
-			System.out.println("info " + "currmove "+ ((BoardNode) node).getFullAction() + "score " + score + " depth " + depth + " nodes " + nodecount + " nps " + nps);
+			long time = System.currentTimeMillis() - starttime;
+			// info depth 8 seldepth 9 multipv 1 score cp 334 nodes 4943 nps 617875 tbhits 0 time 8 pv e4f3 d1f3 e7e5 b1c3 f8d6 e1g1 d6c5 c4b3
+			System.out.println("info " + "depth " + depth + " seldepth " + depth + " multipv 1 " + "score cp " + score + " nodes " + nodecount + " nps " + nps + " tbhits 0 " + "time " + time + " pv " + ((BoardNode) node).getFullAction()); 
+			//System.out.println("info " + "currmove "+ ((BoardNode) node).getFullAction() + "score " + score + " depth " + depth + " nodes " + nodecount + " nps " + nps);
 			lastinfo = System.currentTimeMillis();
 		}
 	}
