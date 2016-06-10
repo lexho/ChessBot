@@ -1,7 +1,5 @@
 package engine;
 
-import java.io.File;
-import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.Scanner;
@@ -80,7 +78,7 @@ public class UCIEngine {
 			break;
 		case "position":
 			if(cmds.get(1).equals("startpos")) {
-				bot.init();
+				bot.reset();
 				if(cmds.size() > 2)
 					if(cmds.get(2).equals("moves")) {
 						for(int i = 3; i < cmds.size(); i++) {
@@ -92,7 +90,10 @@ public class UCIEngine {
 						}
 					}
 			} else if(cmds.get(1).equals("fen")) {
-				bot = new ChessBot(cmds.get(2));
+				//int pos = cmds.get(0).length() + cmds.get(1).length();
+				String fenstr = cmd.substring(13);
+				bot = new ChessBot(fenstr);
+				Command.setBot(bot);
 			}
 			break;
 		case "go":

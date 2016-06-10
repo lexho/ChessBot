@@ -1,13 +1,6 @@
-package board;
+package board.pieces;
 
-import board.pieces.Bishop;
-import board.pieces.BlackPawn;
-import board.pieces.King;
-import board.pieces.Knight;
-import board.pieces.Piece;
-import board.pieces.Queen;
-import board.pieces.Rook;
-import board.pieces.WhitePawn;
+import board.Position12x10;
 
 /** Create a Piece by representation */
 public class PieceCreator {

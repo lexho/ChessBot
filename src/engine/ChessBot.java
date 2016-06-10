@@ -1,33 +1,27 @@
 package engine;
 
-import java.util.List;
 import java.util.Random;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import search.evalfunctions.ScoreBoard;
-import search.datastructures.Pair;
+import board.Board;
+import board.Move;
+import board.NullMove;
+import board.Position12x10;
+import board.PositionInterface;
+import board.position.Fen;
+import exceptions.SearchFailException;
+import search.Node;
 import search.algorithms.AlphaBetaHashSearch;
 import search.algorithms.AlphaBetaSearch;
+import search.algorithms.RS;
+import search.datastructures.Pair;
+import search.evalfunctions.ScoreBoard;
 import search.functions.BoardFunction;
 import search.functions.BoardPredicate;
 import search.hashfunctions.ZobristHash;
 import search.hashtables.MainTranspositionTable;
 import search.nodes.BoardNode;
-import search.nodes.LimitedNode;
-import search.Node;
-import board.Board;
-import board.Move;
-import board.NullMove;
-import board.Position;
-import board.Position12x10;
-import board.PositionInterface;
-import board.pieces.Piece;
-import board.position.Fen;
-import exceptions.SearchFailException;
-import search.algorithms.RS;
 
 /**
  * ChessBot is a UCI compatible chess engine
@@ -43,14 +37,15 @@ public class ChessBot {
 	private MainTranspositionTable hashmap;
 	
 	/* Optional Enhancements */
-	boolean useHashTable;
-	boolean useAspWindows;
+	boolean useHashTable = true;
+	boolean useAspWindows = true;
 	
 	/**
 	 * Create a new (internal) board with initial position
 	 */
 	public ChessBot() {
 		System.out.println("ChessBot by Alexander Hoertenhuber | May 2016");
+		board = new Board(new Position12x10());
 		init();
 	}
 
@@ -60,17 +55,28 @@ public class ChessBot {
 	 */
 	public ChessBot(PositionInterface position) {
 		board = new Board(position);
+		init();
 	}
 	
 	/** Create a new (internal) board with the given fenstring */
 	public ChessBot(String fenstr) {
-		board = new Board(new Position(new Fen(fenstr)));
+		board = new Board(new Position12x10(new Fen(fenstr)));
+		init();
+	}
+	
+	/**
+	 * Initialize HashMap, Hashing function and multithreading
+	 */
+	private void init() {
+		NR_OF_THREADS = Runtime.getRuntime().availableProcessors();
+		ZobristHash.init(); // init hashing function
+		hashmap = new MainTranspositionTable();
 	}
 	
 	/**
 	 * Create new (internal) Board with initial position
 	 */
-	public void init() {
+	public void reset() {
 		NR_OF_THREADS = Runtime.getRuntime().availableProcessors();
 		board = new Board(new Position12x10());
 		ZobristHash.init(); // init hash table
@@ -180,11 +186,10 @@ public class ChessBot {
 
 		for(int depth = 1; depth <= depthLimit; depth++) {
 			/* Use hashmap? */
-			if(useHashTable) {
-				System.out.println("new hashmap search");
+			if(useHashTable) 
 				alphabeta = new AlphaBetaHashSearch(depth, hashmap, searchtime);
-			}
-			else alphabeta = new AlphaBetaSearch(depth, searchtime);
+			else 
+				alphabeta = new AlphaBetaSearch(depth, searchtime);
 				
 			Pair<Node, Double> result = null;
 			double[] aspReset = {new Double(aspwindow[0]), new Double(aspwindow[1])};
@@ -202,16 +207,14 @@ public class ChessBot {
 				} catch (SearchFailException e) {
 					failed = true;
 					if(e.isAlphaFail()) {
-						System.out.println("alpha fail");
 						aspwindow[0] = Math.pow(Math.abs(aspwindow[0]), 1.2);
 					}
 					else {
-						System.out.println("beta fail");
 						aspwindow[1] = Math.pow(aspwindow[1], 1.2);
 					}
+					System.out.println("new aspiration window: " + (currentScore - aspwindow[0]) + " " + (currentScore + aspwindow[1]));
 				}
-				//aspwindow = Math.pow(aspwindow, 1.2);
-				System.out.println("new aspiration window: " + (currentScore - aspwindow[0]) + " " + (currentScore + aspwindow[1]));
+				
 				/* Aspiration window approach failed --> fall back to full range search */
 				if(aspwindow[0] > 10000 || aspwindow[1] > 10000) {
 					aspwindow = aspReset; // reset aspiration window

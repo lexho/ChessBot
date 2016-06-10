@@ -1,6 +1,6 @@
 package test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,7 +8,7 @@ import java.util.List;
 import org.junit.Test;
 
 import board.Position12x10;
-import search.hashfunctions.*;
+import search.hashfunctions.ZobristHash;
 
 public class TestHashFunctions {
 	@Test

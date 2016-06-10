@@ -11,7 +11,6 @@ public class Queen extends Piece {
 	
 	public Queen(char rep, int index) {
 		super(rep, index);
-		ID = 2;
 		
 		/* Bishop moves */
 		actions.add(new Action(Action.DOWN_LEFT, true, false));
@@ -68,6 +67,16 @@ public class Queen extends Piece {
 			actions.add(new Action(0 * d, -1 * d, true));
 			actions.add(new Action(1 * d, 0 * d, true));
 		}*/
+	}
+	
+	@Override
+	public int getID() {
+		return QUEEN;
+	}
+	
+	@Override
+	public int getValue() {
+		return QUEEN_V;
 	}
 
 }

@@ -6,7 +6,6 @@ import board.Board;
 import board.Position12x10;
 import board.pieces.Piece;
 import board.pieces.PieceList;
-import search.endconditions.EndCondition;
 
 /**
  * This is how a scoring function could look like. It's not a very sophisticated

@@ -11,7 +11,6 @@ public class Rook extends Piece {
 	
 	public Rook(char rep, int index) {
 		super(rep, index);
-		ID = 7;
 		
 		actions.add(new Action(Action.UP, true, false));
 		actions.add(new Action(Action.DOWN, true, false));
@@ -42,4 +41,13 @@ public class Rook extends Piece {
 		}*/
 	}
 
+	@Override
+	public int getID() {
+		return ROOK;
+	}
+	
+	@Override
+	public int getValue() {
+		return ROOK_V;
+	}
 }

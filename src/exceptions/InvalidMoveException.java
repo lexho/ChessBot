@@ -1,8 +1,6 @@
 package exceptions;
 
-import board.Board;
 import board.Move;
-import board.Position;
 import board.Position12x10;
 import board.PositionInterface;
 import board.pieces.Piece;
@@ -31,10 +29,10 @@ public class InvalidMoveException extends RuntimeException {
 		//printErrorMessage(m, pos);
 	}
 	
-	public InvalidMoveException(String s, Move m, Position pos) {
+	/*public InvalidMoveException(String s, Move m, Position pos) {
 		super(s + " " + m);
 		//printErrorMessage(m, pos);
-	}
+	}*/
 	
 	@Override
 	public String getMessage() {

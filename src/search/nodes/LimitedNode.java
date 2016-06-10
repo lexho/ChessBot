@@ -1,7 +1,6 @@
 package search.nodes;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import board.Board;

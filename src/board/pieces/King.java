@@ -1,6 +1,5 @@
 package board.pieces;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import board.Move;
@@ -15,7 +14,6 @@ public class King extends Piece {
 	
 	public King(char rep, int index) {
 		super(rep, index);
-		ID = 1;
 
 		actions.add(new Action(Action.UP, false));
 		actions.add(new Action(Action.DOWN, false));
@@ -56,5 +54,13 @@ public class King extends Piece {
 		return moves;
 	}
 
+	@Override
+	public int getID() {
+		return KING;
+	}
 	
+	@Override
+	public int getValue() {
+		return KING_V;
+	}
 }

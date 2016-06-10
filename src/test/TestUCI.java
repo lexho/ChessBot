@@ -9,14 +9,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.util.Arrays;
 
 import org.junit.Test;
-
-import board.Board;
-import board.Position;
-import board.position.Fen;
-import engine.UCIEngine;
 
 public class TestUCI {
 

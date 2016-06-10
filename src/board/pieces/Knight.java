@@ -11,7 +11,6 @@ public class Knight extends Piece {
 	
 	public Knight(char rep, int index) {
 		super(rep, index);
-		ID = 5;
 		
 		actions.add(new Action(-21, false));
 		actions.add(new Action(21, false));
@@ -60,4 +59,13 @@ public class Knight extends Piece {
 
 	}
 
+	@Override
+	public int getID() {
+		return KNIGHT;
+	}
+	
+	@Override
+	public int getValue() {
+		return KNIGHT_V;
+	}
 }

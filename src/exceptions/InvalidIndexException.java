@@ -1,11 +1,5 @@
 package exceptions;
 
-import board.Board;
-import board.Move;
-import board.Position;
-import board.PositionInterface;
-import board.pieces.Piece;
-
 public class InvalidIndexException extends RuntimeException {
 
 	/**

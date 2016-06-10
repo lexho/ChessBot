@@ -1,26 +1,22 @@
 package search.algorithms;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.util.ArrayList;
 //import java.io.Printwriter;
 import java.util.List;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 
-import board.Move;
 import exceptions.SearchFailException;
 import search.AdversarialSearch;
 import search.Node;
 import search.datastructures.Pair;
 import search.nodes.BoardNode;
-import search.nodes.LimitedNode;
 
 public class AlphaBetaSearch implements AdversarialSearch {
 	@SuppressWarnings("unused")
 	private BiPredicate<Integer, Node> searchLimitingPredicate;
 	private int depthLimit;
+	private final boolean VERBOSE = true;
 
 	/**
 	 * To limit the extent of the search, this implementation should honor a
@@ -184,14 +180,16 @@ public class AlphaBetaSearch implements AdversarialSearch {
 	}
 	
 	protected void printInfoMessage(Node node, double score) {
-		if(System.currentTimeMillis() - lastinfo  > 1000) {
-			long nps = (nodecount - lastnodes); // Nodes per second
-			lastnodes = nodecount;
-			long time = System.currentTimeMillis() - starttime;
-			// info depth 8 seldepth 9 multipv 1 score cp 334 nodes 4943 nps 617875 tbhits 0 time 8 pv e4f3 d1f3 e7e5 b1c3 f8d6 e1g1 d6c5 c4b3
-			System.out.println("info " + "depth " + depth + " seldepth " + depth + " multipv 1 " + "score cp " + score + " nodes " + nodecount + " nps " + nps + " tbhits 0 " + "time " + time + " pv " + ((BoardNode) node).getFullAction()); 
-			//System.out.println("info " + "currmove "+ ((BoardNode) node).getFullAction() + "score " + score + " depth " + depth + " nodes " + nodecount + " nps " + nps);
-			lastinfo = System.currentTimeMillis();
+		if(VERBOSE) {
+			if(System.currentTimeMillis() - lastinfo  > 1000) {
+				long nps = (nodecount - lastnodes); // Nodes per second
+				lastnodes = nodecount;
+				long time = System.currentTimeMillis() - starttime;
+				// info depth 8 seldepth 9 multipv 1 score cp 334 nodes 4943 nps 617875 tbhits 0 time 8 pv e4f3 d1f3 e7e5 b1c3 f8d6 e1g1 d6c5 c4b3
+				System.out.println("info " + "depth " + depth + " seldepth " + depth + " multipv 1 " + "score cp " + score + " nodes " + nodecount + " nps " + nps + " tbhits 0 " + "time " + time + " pv " + ((BoardNode) node).getFullAction()); 
+				//System.out.println("info " + "currmove "+ ((BoardNode) node).getFullAction() + "score " + score + " depth " + depth + " nodes " + nodecount + " nps " + nps);
+				lastinfo = System.currentTimeMillis();
+			}
 		}
 	}
 }

@@ -11,7 +11,6 @@ public class Bishop extends Piece {
 	
 	public Bishop(char rep, int index) {
 		super(rep, index);
-		ID = 6;
 		
 		actions.add(new Action(Action.DOWN_LEFT, true, false));
 		actions.add(new Action(Action.DOWN_RIGHT, true, false));
@@ -41,5 +40,14 @@ public class Bishop extends Piece {
 			actions.add(new Action(-1 * d, -1 * d, true));
 		}*/
 	}
+	
+	@Override
+	public int getID() {
+		return BISHOP;
+	}
 
+	@Override
+	public int getValue() {
+		return BISHOP_V;
+	}
 }

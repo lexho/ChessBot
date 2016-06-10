@@ -2,20 +2,15 @@ package board;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import com.sun.corba.se.spi.orbutil.fsm.Input;
-
 import board.pieces.Piece;
 import board.pieces.PieceList;
-import board.pieces.Queen;
 import engine.ChessBot;
-import search.endconditions.EndCondition;
 
 public class Board {
 	public static boolean DEBUG = false;
@@ -180,11 +175,11 @@ public class Board {
 		else return true;*/
 	}
 	
-	public boolean isMate() {
+	/* public boolean isMate() {
 		Piece king = currentPosition.getPieces().getKing(getActiveColor());
 		if(king == null) return true; //TODO handle no king error
 		//System.out.println(king.getPossibleMoves());
-		/* Are we in check? */
+		/* Are we in check? 
 		if(!currentPosition.isInCheck()) return false;
 		
 		ExecutorService service = Executors.newFixedThreadPool(ChessBot.NR_OF_THREADS);
@@ -220,8 +215,8 @@ public class Board {
 			}
 		}
 		//System.out.println("is mate");
-		return true;*/
-	}
+		return true;
+	}*/
 	
 	/**
 	 * 
@@ -297,23 +292,18 @@ public class Board {
 	            	List<Move> possibleMoves = new ArrayList<Move>();
 	            	if(DEBUG) System.out.print(piece + " ");
 	            	for(Move m : piece.getPossibleMoves((Position12x10)currentPosition)) {
-	            		if(DEBUG) System.out.print(m);
 	            		
-	            		//TODO is validation necessary here?
-	    				//if(MoveValidator.validate((Position12x10)currentPosition, m)) {
-	    					Position12x10 test = new Position12x10((Position12x10)currentPosition);
-	    					test.movePiece(m.getSourceIndex(), m.getTargetIndex());
-	    					test.setActiveColor(currentPosition.getUnactiveColor());
-	    					
-	    					if(!test.isInCheck(color)) {
-	    						if(m != null)
-	    							possibleMoves.add(m);
-	    					}
-	    					if(DEBUG) System.out.print("(+) ");
-	    				/*} else {
-	    					if(DEBUG)  System.out.print("(-) ");
-	    					throw new InvalidMoveException(m, currentPosition);
-	    				}*/
+	            		if(DEBUG) System.out.print(m);
+	            		/* Test if we would be in check after making this move */
+    					Position12x10 test = new Position12x10((Position12x10)currentPosition);
+    					test.movePiece(m.getSourceIndex(), m.getTargetIndex());
+    					test.setActiveColor(currentPosition.getUnactiveColor());
+    					
+    					if(!test.isInCheck(color)) {
+    						if(m != null)
+    							possibleMoves.add(m);
+    						if(DEBUG) System.out.print("(+) ");
+    					}
 	    			}
 	            	if(DEBUG) System.out.println();
 	            	return possibleMoves;
@@ -363,10 +353,6 @@ public class Board {
 		this.color = color;
 	}
 	
-	// TODO implement EndCondition
-	public EndCondition getEndCondition() {
-		return null;
-	}
 	/**
 	 * 
 	 * @return a new Board which is a clone of the current Board
@@ -380,6 +366,10 @@ public class Board {
 	 */
 	public void print() {
 		System.out.println(this.toString());
+
+		for(Piece p : this.getPosition12x10().getPieces()) {
+			System.out.println(p.getCharRep() + " " + p.getPosIndex());
+		}
 	}
 	
 	/**
@@ -393,7 +383,7 @@ public class Board {
 		String piecesstr = pieces.size() + " Pieces on the board: \n" + pieces.toString() + "\n";
 		String moves = new String();
 		int NrOfMoves = 0;
-		for(Piece piece : pieces) {
+		/*for(Piece piece : pieces) {
 			NrOfMoves += piece.getPossibleMoves((Position12x10)currentPosition).size();
 			for(Move m : piece.getPossibleMoves((Position12x10)currentPosition)) {
 				boolean moveIsValid = false;
@@ -401,7 +391,7 @@ public class Board {
 				if(moveIsValid)
 					moves += m + ", ";
 			}
-		}
+		}*/
 		
 		//String outstr = piecesstr + "\n" + NrOfMoves + " possible Moves " + moves + "\n\n" + currentPosition.toString();
 		String outstr = currentPosition.toString();

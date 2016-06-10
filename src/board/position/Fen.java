@@ -11,7 +11,7 @@ public class Fen {
 	/** @param fenstr a particular game position in Forsyth-Edwards Notation like 
 	 * "position fen rnbqkbnr/pppp1ppp/8/8/8/8/PPPPQPPP/RNB1KBNR b KQkq - 0 2" */
 	public Fen(String fenstr) {
-		//System.out.println(fenstr);
+		System.out.println(fenstr);
 		this.fenstr = StringUtils.splitString(fenstr, ' ');
 	}
 	
@@ -37,5 +37,9 @@ public class Fen {
 	
 	public String getFullMove() {
 		return fenstr.get(5);
+	}
+	
+	public String toString() {
+		return fenstr.toString();
 	}
 }

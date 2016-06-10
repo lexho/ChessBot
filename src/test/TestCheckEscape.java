@@ -1,6 +1,6 @@
 package test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
 
 import java.util.List;
 
@@ -8,9 +8,7 @@ import org.junit.Test;
 
 import board.Board;
 import board.Move;
-import board.Position;
 import board.Position12x10;
-import board.position.Fen;
 import engine.ChessBot;
 
 public class TestCheckEscape {

@@ -9,7 +9,7 @@ import board.Position12x10;
 import board.actions.Action;
 
 abstract class Pawn extends Piece {
-
+	
 	public Pawn(char rep, int index) {
 		super(rep, index);
 	}
@@ -46,4 +46,7 @@ abstract class Pawn extends Piece {
 		return moves;
 	}
 
+	public int getValue() {
+		return PAWN_V;
+	}
 }

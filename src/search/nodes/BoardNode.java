@@ -1,12 +1,12 @@
 package search.nodes;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import board.Board;
 import board.Move;
 import search.Node;
+import search.evalfunctions.MoveComparator;
 import search.hashfunctions.ZobristHash;
 
 public class BoardNode implements Node
@@ -36,6 +36,10 @@ public class BoardNode implements Node
 		List<Node> successors = new ArrayList<>();
 		List<Move> possible = board.getPossibleMoves();
 
+		/* Move Ordering */
+		int[] board_raw = board.getPosition12x10().get12x10Board();
+		possible.sort(new MoveComparator(board_raw));
+		
 		for (Move move : possible)
 		{
 			Board next = board.copy();
@@ -133,5 +137,4 @@ public class BoardNode implements Node
 		}
 		return movestr;
 	}
-	
 }

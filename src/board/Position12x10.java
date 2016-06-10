@@ -8,6 +8,7 @@ import board.pieces.BlackPawn;
 import board.pieces.King;
 import board.pieces.Knight;
 import board.pieces.Piece;
+import board.pieces.PieceCreator;
 import board.pieces.PieceList;
 import board.pieces.Queen;
 import board.pieces.Rook;

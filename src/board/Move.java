@@ -2,8 +2,6 @@ package board;
 
 import java.util.List;
 
-import board.actions.Action;
-
 public class Move {
 	private String command;
 	//int src[];
@@ -111,14 +109,14 @@ public class Move {
 	 * convert the move into an action
 	 * @return an action that can be applied
 	 */
-	//TODO fix this: this method always returns actions where taking is not allowed
-	public Action getAction() {
+	//TODO remove this
+	/*public Action getAction() {
 		int[] src = getSource();
 		int[] trg = getTarget();
 		int[] delta = {trg[0] - src[0], trg[1] - src[1]};
 		
 		return new Action(delta, false);
-	}
+	}*/
 	
 	/**
 	 * @return the move in long algebraic notation

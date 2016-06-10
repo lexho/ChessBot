@@ -1,12 +1,9 @@
 package search.algorithms;
 
-import java.util.HashMap;
-
 import search.Node;
 import search.datastructures.Pair;
-import search.hashfunctions.ZobristHash;
-import search.hashtables.MainTranspositionTable;
 import search.hashtables.HashTableEntry;
+import search.hashtables.MainTranspositionTable;
 
 public class AlphaBetaHashSearch extends AlphaBetaSearch {
 

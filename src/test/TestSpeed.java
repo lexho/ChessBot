@@ -1,13 +1,11 @@
 package test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
-import java.io.File;
 import java.io.PrintStream;
 
 import org.junit.Test;
 
-import board.Move;
 import engine.ChessBot;
 import util.NullPrinter;
 

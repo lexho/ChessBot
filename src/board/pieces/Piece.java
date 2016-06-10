@@ -4,18 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import board.Move;
-import board.MoveValidator;
 import board.Position12x10;
-import board.PositionInterface;
-import board.Rule;
 import board.actions.Action;
-import exceptions.InvalidIndexException;
 
 public class Piece {
 	char rep;
 	int[] coord; // x / y on the board
 	int index; // 12x10 board index
-	protected int ID = 0;
 	
 	public static final int WHITE_PAWN = 3;
 	public static final int BLACK_PAWN = 4;
@@ -24,6 +19,13 @@ public class Piece {
 	public static final int BISHOP = 6;
 	public static final int KNIGHT = 5;
 	public static final int ROOK = 7;
+	
+	public static final int KING_V = 10000;
+	public static final int QUEEN_V = 900;
+	public static final int ROOK_V = 465;
+	public static final int BISHOP_V = 325;
+	public static final int KNIGHT_V = 275;
+	public static final int PAWN_V = 100;
 	
 	/* actions */
 	protected List<Action> actions;
@@ -74,7 +76,12 @@ public class Piece {
 	}
 	
 	public int getID() {
-		return ID;
+		return 0;
+	}
+	
+	/** the scoring value of the piece */
+	public int getValue() {
+		return 0;
 	}
 	
 	public String getRep() {
@@ -111,22 +118,12 @@ public class Piece {
 
 		List<Move> moves = new ArrayList<Move>();
 		
-		/*for(Action action : actions) {
-			int target = action.apply(index);
-			
-			if(target != -1) moves.add(new Move(coord, action.apply(coord)));
-		}*/
-		
+		/* Create move targets for all possible actions */
 		for(Action action : actions) {
-			//int[] target = action.apply(coord);
-			
-			/* Validate target position */
-			//boolean isValid = MoveValidator.validateSquare(action.apply(index));
 			List<Integer> targets = action.apply(pos, index);
 			for(Integer target : targets) {
 				moves.add(new Move(index, target));
 			}
-			//moves.add(new Move(index, action.apply(index)));
 		}
 		return moves;
 	}

@@ -12,7 +12,7 @@ public class WhitePawn extends Pawn {
 	
 	public WhitePawn(char rep, int index) {
 		super(rep, index);
-		ID = 3;
+
 		actions.add(new Action(Action.UP, false));
 		actions.add(new PawnTakeAction(Action.UP_LEFT));
 		actions.add(new PawnTakeAction(Action.UP_RIGHT));
@@ -23,4 +23,8 @@ public class WhitePawn extends Pawn {
 		*/
 	}
 
+	@Override
+	public int getID() {
+		return WHITE_PAWN;
+	}
 }
