@@ -10,6 +10,8 @@ import java.util.concurrent.Future;
 
 import board.pieces.Piece;
 import board.pieces.PieceList;
+import board.position.Position12x10;
+import board.position.PositionInterface;
 import engine.ChessBot;
 
 public class Board {

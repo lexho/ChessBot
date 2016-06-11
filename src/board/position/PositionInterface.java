@@ -1,4 +1,4 @@
-package board;
+package board.position;
 
 import board.pieces.Piece;
 import board.pieces.PieceList;

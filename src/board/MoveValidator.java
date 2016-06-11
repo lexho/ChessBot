@@ -4,6 +4,7 @@ import java.util.List;
 
 import board.actions.Action;
 import board.pieces.Piece;
+import board.position.Position12x10;
 
 public class MoveValidator {
 	/*public static boolean validate(PositionInterface position, Move m) {	

@@ -3,8 +3,8 @@ package board.actions;
 import java.util.ArrayList;
 import java.util.List;
 
-import board.Position12x10;
 import board.pieces.Piece;
+import board.position.Position12x10;
 
 public class Action {
 	/*protected int delta_x;

@@ -2,6 +2,8 @@ package board;
 
 import java.util.List;
 
+import board.position.Position12x10;
+
 public class Move {
 	private String command;
 	//int src[];

@@ -8,7 +8,7 @@ import java.util.List;
 import org.junit.Test;
 
 import board.Board;
-import board.Position12x10;
+import board.position.Position12x10;
 import engine.ChessBot;
 
 public class TestPosition12x10 {

@@ -3,7 +3,7 @@ package board.actions;
 import java.util.ArrayList;
 import java.util.List;
 
-import board.Position12x10;
+import board.position.Position12x10;
 
 public class PawnTakeAction extends Action {
 

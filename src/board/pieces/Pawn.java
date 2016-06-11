@@ -5,8 +5,8 @@ import java.util.List;
 
 import board.Move;
 import board.MoveValidator;
-import board.Position12x10;
 import board.actions.Action;
+import board.position.Position12x10;
 
 abstract class Pawn extends Piece {
 	

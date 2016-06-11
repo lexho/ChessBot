@@ -4,7 +4,7 @@ import org.junit.Test;
 
 import board.Board;
 import board.Move;
-import board.Position12x10;
+import board.position.Position12x10;
 import exceptions.InvalidIndexException;
 import exceptions.InvalidMoveException;
 

@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import board.Position12x10;
+import board.position.Position12x10;
 import board.square.Square;
 
 public class PieceList extends ArrayList<Piece> {

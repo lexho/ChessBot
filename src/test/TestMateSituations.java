@@ -16,10 +16,10 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import board.Board;
-import board.Position12x10;
-import board.PositionInterface;
 import board.pieces.Piece;
 import board.position.Fen;
+import board.position.Position12x10;
+import board.position.PositionInterface;
 
 @RunWith(Parameterized.class)
 public class TestMateSituations {

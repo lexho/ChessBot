@@ -1,8 +1,9 @@
-package board;
+package board.position;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import board.Move;
 import board.pieces.Bishop;
 import board.pieces.BlackPawn;
 import board.pieces.King;
@@ -13,7 +14,6 @@ import board.pieces.PieceList;
 import board.pieces.Queen;
 import board.pieces.Rook;
 import board.pieces.WhitePawn;
-import board.position.Fen;
 import exceptions.InvalidIndexException;
 import util.StringUtils;
 

@@ -3,8 +3,8 @@ package search.evalfunctions;
 import java.util.Comparator;
 
 import board.Move;
-import board.Position12x10;
 import board.pieces.PieceCreator;
+import board.position.Position12x10;
 
 /** sorts moves by Most Valuable Victim - Least Valuable Aggressor */
 public class MoveComparator implements Comparator<Move> {

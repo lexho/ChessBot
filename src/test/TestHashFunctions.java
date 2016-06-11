@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.junit.Test;
 
-import board.Position12x10;
+import board.position.Position12x10;
 import search.hashfunctions.ZobristHash;
 
 public class TestHashFunctions {

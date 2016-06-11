@@ -4,14 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import board.Move;
-import board.Position12x10;
 import board.actions.Action;
+import board.position.Position12x10;
 
 public class Piece {
 	char rep;
 	int[] coord; // x / y on the board
 	int index; // 12x10 board index
 	
+	public static final int nPieceTypes = 12;
 	public static final int WHITE_PAWN = 3;
 	public static final int BLACK_PAWN = 4;
 	public static final int KING = 1;

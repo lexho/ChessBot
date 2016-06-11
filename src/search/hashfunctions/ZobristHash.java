@@ -2,7 +2,7 @@ package search.hashfunctions;
 
 import java.util.Random;
 
-import board.Position12x10;
+import board.position.Position12x10;
 
 public class ZobristHash {
 	

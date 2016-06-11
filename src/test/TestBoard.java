@@ -9,8 +9,8 @@ import org.junit.Test;
 
 import board.Board;
 import board.Move;
-import board.Position12x10;
 import board.position.Fen;
+import board.position.Position12x10;
 import engine.ChessBot;
 
 public class TestBoard {

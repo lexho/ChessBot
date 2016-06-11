@@ -5,8 +5,8 @@ import java.util.List;
 
 import board.Board;
 import board.Move;
-import board.Position12x10;
 import board.pieces.Piece;
+import board.position.Position12x10;
 import search.Node;
 
 public class LimitedNode extends BoardNode

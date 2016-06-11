@@ -1,7 +1,7 @@
 package board.pieces;
 
-import board.Position12x10;
 import board.actions.Action;
+import board.position.Position12x10;
 
 public class Bishop extends Piece {
 	

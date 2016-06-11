@@ -3,9 +3,9 @@ package search.evalfunctions;
 import java.util.function.Function;
 
 import board.Board;
-import board.Position12x10;
 import board.pieces.Piece;
 import board.pieces.PieceList;
+import board.position.Position12x10;
 
 /**
  * This is how a scoring function could look like. It's not a very sophisticated

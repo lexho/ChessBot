@@ -1,9 +1,9 @@
 package exceptions;
 
 import board.Move;
-import board.Position12x10;
-import board.PositionInterface;
 import board.pieces.Piece;
+import board.position.Position12x10;
+import board.position.PositionInterface;
 
 public class InvalidMoveException extends RuntimeException {
 
