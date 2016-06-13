@@ -11,8 +11,11 @@ import java.util.concurrent.Future;
 import board.pieces.Piece;
 import board.pieces.PieceList;
 import board.position.Position12x10;
+import board.position.PositionBB;
 import board.position.PositionInterface;
+import board.position.bitboard.Movement;
 import engine.ChessBot;
+import util.BitBoardUtils;
 
 public class Board {
 	public static boolean DEBUG = false;
@@ -35,7 +38,8 @@ public class Board {
 	 * @param b the blueprint board for the new board
 	 * */
 	public Board(Board b) {
-		this.currentPosition = new Position12x10((Position12x10)b.getPosition());
+		//this.currentPosition = new Position12x10((Position12x10)b.getPosition());
+		this.currentPosition = new PositionBB((PositionBB)b.getPosition());
 		//pieces = new PieceList<Piece>();
 		//this.pieces = currentPosition.getPieces();
 		/*for(Piece p : b.getPosition().getPieces()) {
@@ -50,16 +54,8 @@ public class Board {
 	 * */
 	public boolean makeMove(Move m) {
 
-		//boolean moveIsValid = MoveValidator.validate((Position12x10)currentPosition, m);
-		//if(!moveIsValid) throw new InvalidMoveException(m, currentPosition);
-		return executeMove(m);
-
-		/*System.err.println(m.getSource()[0]+ " "+m.getSource()[1]);
-		for(Piece p : currentPosition.getPieces()) {
-			System.err.println(p.getRep() + " " + p.getPosition()[0] + " "+ p.getPosition()[1]);
-		}
-		System.err.println(currentPosition.getPieces().getPieceAt(m.getSource()).toString());
-		return false;*/
+		//return executeMove(m);
+		return executeBitboardMove(m);
 	}
 	
 	/**
@@ -154,6 +150,7 @@ public class Board {
 			//print();
 		}
 		currentPosition.setPieceAt(piece, trg); // update position table
+		//currentPosition.printPieceBoard();
 		
 		/* Clear source */
 		currentPosition.clear(src);
@@ -166,11 +163,40 @@ public class Board {
 		return false;
 	}
 	
+	/**
+	 *  Executes move m on the current bitboard 
+	 *  
+	 *  @param m the move that will be executed
+	 *  */
+	public boolean executeBitboardMove(Move m) {
+		PositionBB currentPosition = (PositionBB) this.currentPosition;
+		
+		/*int piece12x10 = currentPosition.get12x10Board()[m.getSourceIndex()];
+		int piece = BitBoardUtils.charPieceToPieceType(piece12x10);
+		System.out.println("set piece " + piece + " to " + BitBoardUtils.index12x10ToBBSquare(m.getTargetIndex()));
+		((PositionBB) currentPosition).setPiece(BitBoardUtils.index12x10ToBBSquare(m.getTargetIndex()), piece); */
+		
+		int src = m.getSource8x8Index(); //BitBoardUtils.index12x10ToBBSquare(m.getSourceIndex());
+		int trg = m.getTarget8x8Index(); //BitBoardUtils.index12x10ToBBSquare(m.getTargetIndex());
+		currentPosition.movePieceNotPawn(src, trg);
+		currentPosition.switchActiveColor();
+		return false;
+	}
+	
 	public boolean isRunning() {
-		 for (Piece piece : currentPosition.getPieces()) {
+		long validMoves;
+		if(currentPosition.whiteMove()) 
+			validMoves = Movement.whitePiecesValid((PositionBB)currentPosition);
+		else 
+			validMoves = Movement.blackPiecesValid((PositionBB)currentPosition);
+		
+		if(validMoves == 0L) return false;
+		else return true;
+		
+		 /*for (Piece piece : currentPosition.getPieces()) {
 			 if(piece.isMoveable((Position12x10)currentPosition)) return true;
 		 }
-		 return false;
+		 return false;*/
 		//System.out.println("is running");
 		//return !isMate();
 		/*if(getPossibleMoves().size() == 0) return false;
@@ -236,6 +262,14 @@ public class Board {
 		return (Position12x10) currentPosition;
 	}
 	
+	/**
+	 * 
+	 * @return the current position (as 8x8 bitboard)
+	 */
+	public PositionBB getPositionBB() {
+		return (PositionBB) currentPosition;
+	}
+	
 	public char getActiveColor() {
 		return currentPosition.getActiveColor();
 	}
@@ -279,7 +313,7 @@ public class Board {
 	 * @return a list of all possible moves in the current position
 	 */
 	public List<Move> getPossibleMoves() {
-		char color = getActiveColor();
+		/*char color = getActiveColor();
 		List<Move> possibleMoves = new ArrayList<Move>();
 		if(DEBUG) System.out.println("Possible Moves");
 		service = Executors.newFixedThreadPool(ChessBot.NR_OF_THREADS);
@@ -296,7 +330,7 @@ public class Board {
 	            	for(Move m : piece.getPossibleMoves((Position12x10)currentPosition)) {
 	            		
 	            		if(DEBUG) System.out.print(m);
-	            		/* Test if we would be in check after making this move */
+	            		/* Test if we would be in check after making this move 
     					Position12x10 test = new Position12x10((Position12x10)currentPosition);
     					test.movePiece(m.getSourceIndex(), m.getTargetIndex());
     					test.setActiveColor(currentPosition.getUnactiveColor());
@@ -323,7 +357,7 @@ public class Board {
 				outputs.addAll(future.get());
 			} catch (InterruptedException e) {
 				//e.printStackTrace();
-				/* Interrupt search and return the moves found yet */
+				/* Interrupt search and return the moves found yet 
 				service.shutdown();
 				return outputs;
 				// TODO Auto-generated catch block
@@ -333,7 +367,7 @@ public class Board {
 				e.printStackTrace();
 			}
 	    }
-	    return outputs;
+	    return outputs;*/
 	    
 		/*for(Piece piece : pieces) {
 			for(Move m : piece.getPossibleMoves()) {
@@ -349,6 +383,8 @@ public class Board {
 		}
 		return possibleMoves;
 		*/
+		
+		return ((PositionBB) currentPosition).getPossibleMoves();
 	}
 	
 	public void setColor(char color) {
@@ -369,9 +405,9 @@ public class Board {
 	public void print() {
 		System.out.println(this.toString());
 
-		for(Piece p : this.getPosition12x10().getPieces()) {
+		/*for(Piece p : this.getPosition12x10().getPieces()) {
 			System.out.println(p.getCharRep() + " " + p.getPosIndex());
-		}
+		}*/
 	}
 	
 	/**
@@ -381,8 +417,8 @@ public class Board {
 	 * @return the current board representation
 	 */
 	public String toString() {
-		PieceList pieces = currentPosition.getPieces();
-		String piecesstr = pieces.size() + " Pieces on the board: \n" + pieces.toString() + "\n";
+		//PieceList pieces = currentPosition.getPieces();
+		//String piecesstr = pieces.size() + " Pieces on the board: \n" + pieces.toString() + "\n";
 		String moves = new String();
 		int NrOfMoves = 0;
 		/*for(Piece piece : pieces) {

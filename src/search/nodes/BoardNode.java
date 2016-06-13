@@ -37,15 +37,20 @@ public class BoardNode implements Node
 		List<Move> possible = board.getPossibleMoves();
 
 		/* Move Ordering */
-		int[] board_raw = board.getPosition12x10().get12x10Board();
+		//int[] board_raw = board.getPosition12x10().get12x10Board();
+		int[] board_raw = board.getPositionBB().getSquares();
 		possible.sort(new MoveComparator(board_raw));
 		
 		for (Move move : possible)
 		{
+			//System.out.println(move);
+			//System.out.println(move.getSource8x8Index() + " " + move.getTarget8x8Index());
 			Board next = board.copy();
 			next.makeMove(move);
+			//System.out.println(next);
 			successors.add(new BoardNode(this, move, next));
 		}
+
 	
 		return successors;
 	}
@@ -61,6 +66,8 @@ public class BoardNode implements Node
 		//if(board.getPossibleMoves().size() == 0) // too slow
 		//board.isMate() // incomplete
 		if(!board.isRunning()) {
+			/*System.out.println("BoardNode: board is not running ");
+			board.print();*/
 			/*board.print();
 			System.out.println("Player is Mate");*/
 			return true;
@@ -108,7 +115,7 @@ public class BoardNode implements Node
 		int result = 1;
 		result = prime * result + ((board == null) ? 0 : board.hashCode());
 		return result;*/
-		return ZobristHash.hash(board.getPosition12x10());
+		return ZobristHash.hash(board.getPositionBB());
 	}
 
 	@Override

@@ -3,13 +3,16 @@ package board;
 import java.util.List;
 
 import board.position.Position12x10;
+import util.BitBoardUtils;
 
 public class Move {
-	private String command;
+	protected String command;
 	//int src[];
 	//int[] trg;
-	private int i_src;
-	private int i_trg;
+	protected int i_src;
+	protected int i_trg;
+	protected int i8x8_src;
+	protected int i8x8_trg;
 	public Move (String cmd) {
 		this.command = cmd;
 		
@@ -30,6 +33,10 @@ public class Move {
 		/* Create 12x10 board index */
 		this.i_src = Position12x10.coordToIndex(src);
 		this.i_trg = Position12x10.coordToIndex(trg);
+		
+		/* Create 8x8 board index */
+		this.i8x8_src = BitBoardUtils.index12x10ToBBSquare(i_src);
+		this.i8x8_trg = BitBoardUtils.index12x10ToBBSquare(i_trg);
 		//System.out.println("i_src " + i_src);
 		
 	}
@@ -73,6 +80,34 @@ public class Move {
 	public Move(int src, int trg) {
 		this.i_src = src;
 		this.i_trg = trg;
+		
+		/* Create 8x8 board index */
+		this.i8x8_src = BitBoardUtils.index12x10ToBBSquare(i_src);
+		this.i8x8_trg = BitBoardUtils.index12x10ToBBSquare(i_trg);
+	}
+	
+	/** Create a Move by source and target indexes of board 
+	 * @param src board index of move's source
+	 * @param trg board index of move'S target
+	 * @param type type of the board (12x10, 8x8,...)
+	 * */
+	public Move(int src, int trg, int type) {
+		switch(type) {
+		case 1: // 8x8 board indices
+			this.i8x8_src = src;
+			this.i8x8_trg = trg;
+			
+			this.i_src = BitBoardUtils.squareTo12x10(src);
+			this.i_trg = BitBoardUtils.squareTo12x10(trg);	
+			break;
+		default: // 12x10 board indices
+			this.i_src = src;
+			this.i_trg = trg;	
+			
+			/* Create 8x8 board index */
+			this.i8x8_src = BitBoardUtils.index12x10ToBBSquare(i_src);
+			this.i8x8_trg = BitBoardUtils.index12x10ToBBSquare(i_trg);
+		}
 	}
 	
 	/**
@@ -105,6 +140,18 @@ public class Move {
 	 */
 	public int getTargetIndex() {
 		return i_trg;
+	}
+	
+	/**
+	 * get the source index of the move
+	 * @return the source index
+	 */
+	public int getSource8x8Index() {
+		return i8x8_src;
+	}
+	
+	public int getTarget8x8Index() {
+		return i8x8_trg;
 	}
 	
 	/**

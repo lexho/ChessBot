@@ -3,6 +3,7 @@ package search.hashfunctions;
 import java.util.Random;
 
 import board.position.Position12x10;
+import board.position.PositionBB;
 
 public class ZobristHash {
 	
@@ -47,7 +48,7 @@ public class ZobristHash {
 	public static int hash(Position12x10 pos) {
 		int[] board = pos.get12x10Board();
 	       int h = 0;
-	       for(int i = 0; i < 64; i++) { //    # loop over the board positions
+	       for(int i = 0; i < board.length; i++) { //    # loop over the board positions
 	           if(board[i] != Position12x10.EMPTY) {
 	        	   int j = 0;
 	        	   switch(board[i]) {
@@ -85,6 +86,58 @@ public class ZobristHash {
 	        		   j = 10;
 	        		   break;
 	        	   case Position12x10.BKING:
+	        		   j = 11;
+	        		   break;
+	        	   }
+	        	   h = h ^ table[i][j];
+	               //j := the piece at board[i], as listed in the constant indices, above
+	               //h := h XOR table[i][j];
+	           }
+	       }
+	           return h;
+	}
+	
+	public static int hash(PositionBB pos) {
+		int[] board = pos.getSquares();
+	       int h = 0;
+	       for(int i = 0; i < board.length; i++) { //    # loop over the board positions
+	           if(board[i] != PositionBB.EMPTY) {
+	        	   int j = 0;
+	        	   switch(board[i]) {
+	        	   case PositionBB.WPAWNS:
+	        		   j = 0;
+	        		   break;
+	        	   case PositionBB.WROOKS:
+	        		   j = 1;
+	        		   break;
+	        	   case PositionBB.WKNIGHTS:
+	        		   j = 2;
+	        		   break;
+	        	   case PositionBB.WBISHOPS:
+	        		   j = 3;
+	        		   break;
+	        	   case PositionBB.WQUEENS:
+	        		   j = 4;
+	        		   break;
+	        	   case PositionBB.WKING:
+	        		   j = 5;
+	        		   break;
+	        	   case PositionBB.BPAWNS:
+	        		   j = 6;
+	        		   break;
+	        	   case PositionBB.BROOKS:
+	        		   j = 7;
+	        		   break;
+	        	   case PositionBB.BKNIGHTS:
+	        		   j = 8;
+	        		   break;
+	        	   case PositionBB.BBISHOPS:
+	        		   j = 9;
+	        		   break;
+	        	   case PositionBB.BQUEENS:
+	        		   j = 10;
+	        		   break;
+	        	   case PositionBB.BKING:
 	        		   j = 11;
 	        		   break;
 	        	   }

@@ -6,13 +6,14 @@ import java.util.List;
 import board.Move;
 import board.actions.Action;
 import board.position.Position12x10;
+import board.position.PositionBB;
 
 public class Piece {
 	char rep;
 	int[] coord; // x / y on the board
 	int index; // 12x10 board index
 	
-	public static final int nPieceTypes = 12;
+	public static final int nPieceTypes = 13;
 	public static final int WHITE_PAWN = 3;
 	public static final int BLACK_PAWN = 4;
 	public static final int KING = 1;
@@ -85,6 +86,24 @@ public class Piece {
 		return 0;
 	}
 	
+	public static int getValue(int piece) {
+		switch(piece) {
+		case PositionBB.WPAWNS: return PAWN_V;
+		case PositionBB.WKNIGHTS: return KNIGHT_V;
+		case PositionBB.WBISHOPS: return BISHOP_V;
+		case PositionBB.WROOKS: return ROOK_V;
+		case PositionBB.WQUEENS: return QUEEN_V;
+		case PositionBB.WKING: return KING_V;
+		case PositionBB.BPAWNS: return PAWN_V;
+		case PositionBB.BKNIGHTS: return KNIGHT_V;
+		case PositionBB.BBISHOPS: return BISHOP_V;
+		case PositionBB.BROOKS: return ROOK_V;
+		case PositionBB.BQUEENS: return QUEEN_V;
+		case PositionBB.BKING: return KING_V;
+		default: return 0;
+		}
+	}
+	
 	public String getRep() {
 		return Character.toString(rep);
 	}
@@ -148,6 +167,12 @@ public class Piece {
 	
 	public boolean setPosition(int[] xy) {
 		return setPosition(xy[0], xy[1]);
+	}
+	
+	public static boolean isWhite(int p) {
+		return p < 7 ? true : false;
+		/*if(Character.isUpperCase(p)) return true;
+		else return false;*/
 	}
 	
 	public String toString() {

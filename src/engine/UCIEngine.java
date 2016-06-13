@@ -33,7 +33,7 @@ public class UCIEngine {
 			cmdlog = new PrintWriter("/home/alex/Code/java/ChessBot/log/cmds.txt", "UTF-8");
 			
 			//System.setOut(new PrintStream(new File("/home/alex/Code/java/ChessBot/log/output.txt")));
-			System.setErr(new PrintStream(new File("/home/alex/Code/java/ChessBot/log/error.txt")));
+			//System.setErr(new PrintStream(new File("/home/alex/Code/java/ChessBot/log/error.txt")));
 			bot = new ChessBot();
 		
 			/* Wait for commands */

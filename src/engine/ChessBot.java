@@ -9,6 +9,7 @@ import board.Move;
 import board.NullMove;
 import board.position.Fen;
 import board.position.Position12x10;
+import board.position.PositionBB;
 import board.position.PositionInterface;
 import exceptions.SearchFailException;
 import search.Node;
@@ -17,11 +18,13 @@ import search.algorithms.AlphaBetaSearch;
 import search.algorithms.RS;
 import search.datastructures.Pair;
 import search.evalfunctions.ScoreBoard;
+import search.evalfunctions.ScoreBoardBB;
 import search.functions.BoardFunction;
 import search.functions.BoardPredicate;
 import search.hashfunctions.ZobristHash;
 import search.hashtables.MainTranspositionTable;
 import search.nodes.BoardNode;
+import util.BitBoardUtils;
 
 /**
  * ChessBot is a UCI compatible chess engine
@@ -37,15 +40,15 @@ public class ChessBot {
 	private MainTranspositionTable hashmap;
 	
 	/* Optional Enhancements */
-	boolean useHashTable = true;
-	boolean useAspWindows = true;
+	boolean useHashTable = false; //TODO change back to true
+	boolean useAspWindows = false; //TODO change back to true
 	
 	/**
 	 * Create a new (internal) board with initial position
 	 */
 	public ChessBot() {
 		System.out.println("ChessBot by Alexander Hoertenhuber | May 2016");
-		board = new Board(new Position12x10());
+		board = new Board(new PositionBB());
 		init();
 	}
 
@@ -78,7 +81,7 @@ public class ChessBot {
 	 */
 	public void reset() {
 		NR_OF_THREADS = Runtime.getRuntime().availableProcessors();
-		board = new Board(new Position12x10());
+		board = new Board(new PositionBB());
 		ZobristHash.init(); // init hash table
 		hashmap = new MainTranspositionTable();
 	}
@@ -108,7 +111,8 @@ public class ChessBot {
 	 * @return the next move to be played
 	 */
 	public String getNextMove() {
-		board.setColor(board.getActiveColor());
+		//board.setColor(board.getActiveColor());
+		System.out.println("active color: " + board.getActiveColor());
 		
 		Move nextMove = null;
 		if(useAspWindows) nextMove = alphaBetaSearchAspWindows();
@@ -177,7 +181,7 @@ public class ChessBot {
 		long searchtime = System.currentTimeMillis(); // current time in milliseconds
 		
 		/* AlphaBeta Search */
-		ScoreBoard scoreboard = new ScoreBoard(board.copy());
+		Function<Board, Double> scoreboard = new ScoreBoardBB(board.copy());
 		Function<Node, Double> evalFunction = new BoardFunction(scoreboard);
 		
 		/* Reset aspiration window */
@@ -199,6 +203,8 @@ public class ChessBot {
 				if(depth > 1)
 				alphabeta.setBounds(currentScore - aspwindow[0], currentScore + aspwindow[1]); // the higher alpha the more pruning, the lower beta the more pruning
 				
+				//System.out.println("possible moves: " + board.getPossibleMoves());
+				//System.out.println("possible moves: " + board.copy().getPossibleMoves());
 				try {
 					result = alphabeta.search(
 						new BoardNode(board.copy()),
@@ -240,7 +246,7 @@ public class ChessBot {
 		
 		searchtime = System.currentTimeMillis() - searchtime;
 		
-		printSearchStats(searchtime, scoreboard);
+		//printSearchStats(searchtime, scoreboard);
 		
 		return nextMove;
 	}
@@ -292,7 +298,8 @@ public class ChessBot {
 		long searchtime = System.currentTimeMillis(); // current time in milliseconds
 		
 		/* AlphaBeta Search */
-		ScoreBoard scoreboard = new ScoreBoard(board.copy());
+		//ScoreBoard scoreboard = new ScoreBoard(board.copy());
+		Function<Board, Double> scoreboard = new ScoreBoardBB(board.copy());
 		Function<Node, Double> evalFunction = new BoardFunction(scoreboard);
 		
 		long starttime = System.currentTimeMillis();
@@ -318,7 +325,7 @@ public class ChessBot {
 		
 		searchtime = System.currentTimeMillis() - searchtime;
 		
-		printSearchStats(searchtime, scoreboard);
+		//printSearchStats(searchtime, scoreboard);
 		
 		return nextMove;
 	}
@@ -365,17 +372,19 @@ public class ChessBot {
 	}
 	
 	public void printPossibleMoves() {
-		int[] prev = {-1, -1};
+		int prev = -1;
 		for(Move m : board.getPossibleMoves()) {
-			int[] src = m.getSource();
+			int src = m.getSource8x8Index();
 			if(src != prev) {
 				System.out.println();
-				System.out.print(board.getPosition().getPieceAt(src).getCharRep() + " ");
+				System.out.print(board.getPosition().getPieceAt(src) + " ");
 			}
-			m.getSourceIndex();
-			System.out.print(m);
+
+			System.out.print(m + " ");
+			//System.out.print(m.getSource8x8Index() + " " + m.getTarget8x8Index() + " ");
 			prev = src;
 		}
+		System.out.println();
 		//System.out.print(board.getPossibleMoves());
 	}
 

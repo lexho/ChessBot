@@ -37,7 +37,7 @@ public class MoveComparator implements Comparator<Move> {
     }
     
     private int getVictimValue(Move m) {
-    	int trg = m.getTargetIndex();
+    	int trg = m.getTarget8x8Index();
     	char rep = (char) board_raw[trg];
 		
 		if(rep != Position12x10.EMPTY)

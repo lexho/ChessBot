@@ -8,7 +8,7 @@ public class BitBoard {
 		this.bitboard = bitboard;
 	}
 	
-	public String toString() {
+	public static String toString(long bitboard) {
 		 StringBuilder result = new StringBuilder();
 
 		 for(int i = 0; i < Long.numberOfLeadingZeros(bitboard); i++) {
