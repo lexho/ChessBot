@@ -70,11 +70,6 @@ public class Queen extends Piece {
 	}
 	
 	@Override
-	public int getID() {
-		return QUEEN;
-	}
-	
-	@Override
 	public int getValue() {
 		return QUEEN_V;
 	}

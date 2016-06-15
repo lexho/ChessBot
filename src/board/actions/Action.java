@@ -66,9 +66,9 @@ public class Action {
 		List<Integer> targets = apply(pos, source);
 		for(Integer target : targets) {
 			boolean targetIsFree = pos.isFree(target);
-			Piece targetPiece = pos.getPieceAt(target);
+			Piece targetPiece = pos.getPieceAt1(target);
 			
-			Piece srcPiece = pos.getPieceAt(source);
+			Piece srcPiece = pos.getPieceAt1(source);
 			
 			/* Is the source piece's color of the active player? */
 			//System.out.println(srcPiece.getColor() + " != " + pos.getActiveColor());

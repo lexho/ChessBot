@@ -3,7 +3,6 @@ package search.hashfunctions;
 import java.util.Random;
 
 import board.position.Position12x10;
-import board.position.PositionBB;
 
 public class ZobristHash {
 	

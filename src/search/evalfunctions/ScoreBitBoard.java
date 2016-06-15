@@ -6,6 +6,7 @@ import board.Board;
 import board.pieces.Piece;
 import board.pieces.PieceList;
 import board.position.PositionBB;
+import board.position.bitboard.Movement;
 
 /**
  * This is how a scoring function could look like. It's not a very sophisticated
@@ -19,7 +20,7 @@ import board.position.PositionBB;
  * called!
  * @param <V>
  */
-public class ScoreBoardBB<V> implements Function<Board, Double>
+public class ScoreBitBoard<V> implements ScoreBoard
 {
 	private char player_id;
 	private char opponent_id;
@@ -35,7 +36,7 @@ public class ScoreBoardBB<V> implements Function<Board, Double>
 	 * @param player_id
 	 * @param opponent_id
 	 */
-	public ScoreBoardBB(Board start)
+	public ScoreBitBoard(Board start)
 	{
 		this.start = start;
 		this.player_id = start.getColor();
@@ -54,8 +55,8 @@ public class ScoreBoardBB<V> implements Function<Board, Double>
 			double score = 0d;
 
 			score += scoreMaterial(board);
-			//score += scoreMobility(board);
-			//score += scorePosition(board);
+			score += scoreMobility(board);
+			score += scorePosition(board);
 			
 			return score;
 		  } else
@@ -69,6 +70,10 @@ public class ScoreBoardBB<V> implements Function<Board, Double>
 				return 0d;
 			}
 		}
+	}
+	
+	public int getScoreCounter() {
+		return scoreCounter;
 	}
 	
 	private double scoreMaterial(Board board) {
@@ -85,12 +90,19 @@ public class ScoreBoardBB<V> implements Function<Board, Double>
 	}
 	
 	private double scoreMobility(Board board) {
-		int[] white_pieces = {Position12x10.WROOK, Position12x10.WKNIGHT, Position12x10.WBISHOP, Position12x10.WQUEEN, Position12x10.WKING};
+		long validMoves;
+		if(board.getPositionBB().whiteMove)
+			validMoves = Movement.whitePiecesValid(board.getPositionBB());
+		else 
+			validMoves = Movement.blackPiecesValid(board.getPositionBB());
+		return Long.bitCount(validMoves);
+		
+		/*int[] white_pieces = {Position12x10.WROOK, Position12x10.WKNIGHT, Position12x10.WBISHOP, Position12x10.WQUEEN, Position12x10.WKING};
 		int[] black_pieces = {Position12x10.BROOK, Position12x10.BKNIGHT, Position12x10.BBISHOP, Position12x10.BQUEEN, Position12x10.BKING};
 		int factor;
 		if(player_id == 'w') factor = 1; else factor = -1; 
 		
-		/* Calculate score */
+		/* Calculate score 
 		double score = 0d;
 		for(int piece : white_pieces) {
 			score += possibleMoves(board, piece) * factor;
@@ -98,10 +110,10 @@ public class ScoreBoardBB<V> implements Function<Board, Double>
 		for(int piece : black_pieces) {
 			score += possibleMoves(board, piece) * factor * -1d;
 		}
-		return score / 16d; // scale score
+		return score / 16d; // scale score */
 	}
 	
-	private double possibleMoves(Board board, int piece) {
+	/*private double possibleMoves(Board board, int piece) {
 		double score = 0d;
 		for(Piece p : position.getPieceByID(piece)) {
 			score += p.getPossibleMoves((Position12x10) board.getPosition()).size();
@@ -109,62 +121,52 @@ public class ScoreBoardBB<V> implements Function<Board, Double>
 		// TODO create method to convert white to black piece
 		/*for(Piece p : position.getPieceByID(piece + 65)) {
 			score += p.getPossibleMoves((Position12x10) board.getPosition()).size() * -1;
-		}*/
+		}
 		return score;
-	}
+	} */
 
 
 	private double scorePosition(Board board) {
 		double score = 0d;
-		int[] board_12x10 = board.getPosition12x10().get12x10Board();
-		for(int i = 0; i < board_12x10.length; i++) {
+
+		int[] squares = board.getPositionBB().getSquares();
+		for(int i = 0; i < squares.length; i++) {
 			int index;
 			if(player_id == 'w') { 
 				index = i;
-				switch (board_12x10[i]) {
-				case Position12x10.WPAWN:
+				switch (squares[i]) {
+				case Piece.WPAWN:
 					score += PawnTable[index];
 					break;
-				case Position12x10.WKNIGHT:
+				case Piece.WKNIGHT:
 					score += KnightTable[index];
 					break;
-				case Position12x10.WBISHOP:
+				case Piece.WBISHOP:
 					score += BishopTable[index];
 					break;
-				case Position12x10.WKING:
+				case Piece.WKING:
 					score += KingTable[index];
 					//TODO score king end game
 					break;
 				}
 			} else {
-				index  = board_12x10.length - i;
-				switch (board_12x10[i]) {
-				case Position12x10.BPAWN:
+				index  = squares.length - i;
+				switch (squares[i]) {
+				case Piece.BPAWN:
 					score += PawnTable[index];
 					break;
-				case Position12x10.BKNIGHT:
+				case Piece.BKNIGHT:
 					score += KnightTable[index];
 					break;
-				case Position12x10.BBISHOP:
+				case Piece.BBISHOP:
 					score += BishopTable[index];
 					break;
-				case Position12x10.BKING:
+				case Piece.BKING:
 					score += KingTable[index];
 					//TODO score king end game
 					break;
 				}
 			}
-			/*if(board_12x10[i] == Position12x10.WPAWN) score += PawnTable[index];
-			if(board_12x10[i] == Position12x10.WKNIGHT) score += KnightTable[index];	
-			if(board_12x10[i] == Position12x10.WBISHOP) score += BishopTable[index];
-			if(board_12x10[i] == Position12x10.WKING) score += KingTable[index];	
-				//System.out.println("pawn table white");
-			/*} else if (board_12x10[i] == Position12x10.BPAWN){
-				score+= PawnTable[board_12x10.length - i];
-				score += KnightTable[board_12x10.length - i];
-				score += BishopTable[board_12x10.length - i];
-				//System.out.println("pawn table black");
-			}*/
 		}
 		return score;
 	}

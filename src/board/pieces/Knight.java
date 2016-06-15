@@ -58,11 +58,6 @@ public class Knight extends Piece {
 		}
 
 	}
-
-	@Override
-	public int getID() {
-		return KNIGHT;
-	}
 	
 	@Override
 	public int getValue() {

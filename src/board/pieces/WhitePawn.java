@@ -22,9 +22,4 @@ public class WhitePawn extends Pawn {
 		actions.add(new Action(-1, 1, true)); // allow move forward and take on the left
 		*/
 	}
-
-	@Override
-	public int getID() {
-		return WHITE_PAWN;
-	}
 }

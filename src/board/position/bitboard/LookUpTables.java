@@ -60,5 +60,7 @@ public class LookUpTables {
             0x00ffff5dff65cfb6L, 0x007fffbaffd1c5aeL, 0x003fff71ff6cbceaL, 0x001fffd9ffd4756eL,
             0x000ffff5fff338e6L, 0x0007fffdfffe24f6L, 0x0003ffef27eebe74L, 0x0001ffff23ff605eL
         };
+	
+	public static final long maskCorners   = 0x8100000000000081L;
 
 }

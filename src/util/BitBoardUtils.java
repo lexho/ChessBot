@@ -1,5 +1,6 @@
 package util;
 
+import board.pieces.Piece;
 import board.position.Position12x10;
 import board.position.PositionBB;
 
@@ -11,43 +12,43 @@ public class BitBoardUtils {
 
 		switch (p) {
 		case 'K':
-			piece = PositionBB.WKING;
+			piece = Piece.WKING;
 			break;
 		case 'R':
-			piece = PositionBB.WROOKS;
+			piece = Piece.WROOK;
 			break;
 		case 'N':
-			piece = PositionBB.WKNIGHTS;
+			piece = Piece.WKNIGHT;
 			break;
 		case 'B':
-			piece = PositionBB.WBISHOPS;
+			piece = Piece.WBISHOP;
 			break;
 		case 'Q':
-			piece = PositionBB.WQUEENS;
+			piece = Piece.WQUEEN;
 			break;
 		case 'P':
-			piece = PositionBB.WPAWNS;
+			piece = Piece.WPAWN;
 			break;
 		case 'k':
-			piece = PositionBB.BKING;
+			piece = Piece.BKING;
 			break;
 		case 'r':
-			piece = PositionBB.BROOKS;
+			piece = Piece.BROOK;
 			break;
 		case 'n':
-			piece = PositionBB.BKNIGHTS;
+			piece = Piece.BKNIGHT;
 			break;
 		case 'b':
-			piece = PositionBB.BBISHOPS;
+			piece = Piece.BBISHOP;
 			break;
 		case 'q':
-			piece = PositionBB.BQUEENS;
+			piece = Piece.BQUEEN;
 			break;
 		case 'p':
-			piece = PositionBB.BPAWNS;
+			piece = Piece.BPAWN;
 			break;
 		default:
-			piece = PositionBB.EMPTY;
+			piece = Piece.EMPTY;
 		}
 		return piece;
 	}

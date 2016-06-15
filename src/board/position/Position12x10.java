@@ -309,13 +309,13 @@ public class Position12x10 implements PositionInterface {
 		} else return false;
 	}
 	
-	@Override
+	//@Override
 	public boolean isFree(int[] coord) {
 		int index = coordToIndex(coord);
 		return isFree(index);
 	}
 
-	@Override
+	//@Override
 	public boolean isValid(int[] coord) {
 		int x = coord[0];
 		int y = coord[1];
@@ -375,7 +375,7 @@ public class Position12x10 implements PositionInterface {
 		for(int i = 0; i < board_12x10.length; i++) {
 			
 			if(board_12x10[i] != INVALID && board_12x10[i] != EMPTY)
-				pieces.add(getPieceAt(i));
+				pieces.add(getPieceAt1(i));
 		}
 	}
 	
@@ -383,12 +383,13 @@ public class Position12x10 implements PositionInterface {
 		return getPieceAt(new int[]{x,y});
 	}
 	
-	public Piece getPieceAt(int index) {
+	@Deprecated
+	public Piece getPieceAt1(int index) {
 		return PieceCreator.createPiece((char)board_12x10[index], index);
 	}
 	
 	public Piece getPieceAt(int[] coord) {
-		return getPieceAt(coordToIndex(coord));
+		return getPieceAt1(coordToIndex(coord));
 	}
 	
 	public List<Piece> getPieceByID(int pieceID) {
@@ -420,7 +421,7 @@ public class Position12x10 implements PositionInterface {
 		}
 	}
 	
-	@Override
+	//@Override
 	public void setPieceAt(Piece p, int[] coord) {
 		int index = coordToIndex(coord);
 		setPieceAt(p.getCharRep(), index);
@@ -435,7 +436,7 @@ public class Position12x10 implements PositionInterface {
 		}
 	}
 	
-	@Override
+	//@Override
 	public void clear(int[] coord) {
 		int index = coordToIndex(coord);
 		clear(index);
@@ -587,5 +588,17 @@ public class Position12x10 implements PositionInterface {
 			if((i + 1) % 10 == 0) outstr += '\n';
 		}
 		return outstr;
+	}
+
+	@Override
+	public boolean whiteMove() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public int getPieceAt(int index) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 }

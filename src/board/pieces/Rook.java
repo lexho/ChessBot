@@ -40,11 +40,6 @@ public class Rook extends Piece {
 			actions.add(new Action(1 * d, 0 * d, true));
 		}*/
 	}
-
-	@Override
-	public int getID() {
-		return ROOK;
-	}
 	
 	@Override
 	public int getValue() {

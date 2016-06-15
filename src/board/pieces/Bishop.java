@@ -40,11 +40,6 @@ public class Bishop extends Piece {
 			actions.add(new Action(-1 * d, -1 * d, true));
 		}*/
 	}
-	
-	@Override
-	public int getID() {
-		return BISHOP;
-	}
 
 	@Override
 	public int getValue() {
