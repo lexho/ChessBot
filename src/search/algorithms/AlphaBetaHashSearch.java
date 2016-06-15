@@ -27,13 +27,13 @@ public class AlphaBetaHashSearch extends AlphaBetaSearch {
 		/* Return value from hashmap */
 		Pair<Node, Double> val;
 		if((val = hashmap.ProbeHash(current, depthleft, alpha, beta)) != null) {
-			return val; //hashmap.get(current.hashCode()).getPair();
+			return val; //hashmap.get(current.hashCode64()).getPair();
 		}
 		if ( depthleft == 0 || current.isLeaf() ) {
 			NrOfLeafNodes++;
 			val = new Pair<Node, Double>(current, evalFunction.apply(current));
 			// store current node in hashmap
-			hashmap.put(current.hashCode(), new HashTableEntry(val, HashTableEntry.hashfEXACT)); 
+			hashmap.put(current.hashCode64(), new HashTableEntry(val, HashTableEntry.hashfEXACT)); 
 			return val;
 		}
 		   int current_depth = depth;
@@ -47,7 +47,7 @@ public class AlphaBetaHashSearch extends AlphaBetaSearch {
 		    	  betaCount += current.adjacent().size() - i;
 		    	  // store beta node in hashmap
 		    	  try {
-		    		  hashmap.put(beta.hashCode(), new HashTableEntry(beta.s, beta.f.getDepth(), HashTableEntry.hashfBETA));
+		    		  hashmap.put(beta.hashCode64(), new HashTableEntry(beta.s, beta.f.getDepth(), HashTableEntry.hashfBETA));
 		    	  } catch (NullPointerException e) {}
 		         return beta;   // fail hard beta-cutoff
 		      }
@@ -57,7 +57,7 @@ public class AlphaBetaHashSearch extends AlphaBetaSearch {
 		   i++;
 		   }
 		   try {
-			   hashmap.put(alpha.hashCode(), new HashTableEntry(alpha, HashTableEntry.hashfALPHA)); // store alpha node in hashmap
+			   hashmap.put(alpha.hashCode64(), new HashTableEntry(alpha, HashTableEntry.hashfALPHA)); // store alpha node in hashmap
 		   } catch (NullPointerException e) {}
 		   return alpha;
 		}
@@ -68,13 +68,13 @@ public class AlphaBetaHashSearch extends AlphaBetaSearch {
 		/* Return value from hashmap */
 		Pair<Node, Double> val;
 		if((val = hashmap.ProbeHash(current, depthleft, alpha, beta)) != null) {
-			return val; //hashmap.get(current.hashCode()).getPair();
+			return val; //hashmap.get(current.hashCode64()).getPair();
 		}
 		if ( depthleft == 0 || current.isLeaf() ) {
 			NrOfLeafNodes++;
 			val = new Pair<Node, Double>(current, evalFunction.apply(current));
 			// store current node in hashmap
-			hashmap.put(current.hashCode(), new HashTableEntry(val, HashTableEntry.hashfEXACT)); 
+			hashmap.put(current.hashCode64(), new HashTableEntry(val, HashTableEntry.hashfEXACT)); 
 			return val;
 		}
 		   int current_depth = depth;
@@ -89,7 +89,7 @@ public class AlphaBetaHashSearch extends AlphaBetaSearch {
 		    	  // store beta node in hashmap
 		    	  alphaCount += current.adjacent().size() - i;
 		    	  try {
-		    		  hashmap.put(alpha.hashCode(), new HashTableEntry(alpha, HashTableEntry.hashfALPHA));
+		    		  hashmap.put(alpha.hashCode64(), new HashTableEntry(alpha, HashTableEntry.hashfALPHA));
 		    	  } catch (NullPointerException e) {}
 		    	  return alpha; // fail hard alpha-cutoff
 		      }
@@ -101,7 +101,7 @@ public class AlphaBetaHashSearch extends AlphaBetaSearch {
 		      i++;
 		   }
 		   try {
-			   hashmap.put(beta.hashCode(), new HashTableEntry(beta, HashTableEntry.hashfBETA)); // store alpha node in hashmap
+			   hashmap.put(beta.hashCode64(), new HashTableEntry(beta, HashTableEntry.hashfBETA)); // store alpha node in hashmap
 		   } catch (NullPointerException e) {}
 		   return beta;
 		}
