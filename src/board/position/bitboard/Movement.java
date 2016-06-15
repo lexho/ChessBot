@@ -3,8 +3,11 @@ package board.position.bitboard;
 import java.util.ArrayList;
 import java.util.List;
 
+import board.Move;
+import board.pieces.Piece;
 import board.position.BitBoard;
 import board.position.PositionBB;
+import board.position.UndoInfo;
 
 public class Movement {
 	static final short FILE_A = 0;
@@ -161,31 +164,31 @@ public class Movement {
     }
 	
 	public static long whiteKingValid(PositionBB pos) {
-		return Movement.compute_king_incomplete(pos.pieceTypeBB[PositionBB.WKING], pos.whiteBB);
+		return Movement.compute_king_incomplete(pos.pieceTypeBB[Piece.WKING], pos.whiteBB);
 	}
 	
 	public static long blackKingValid(PositionBB pos) {
-		return Movement.compute_king_incomplete(pos.pieceTypeBB[PositionBB.BKING], pos.blackBB);
+		return Movement.compute_king_incomplete(pos.pieceTypeBB[Piece.BKING], pos.blackBB);
 	}
 	
 	public static long whiteKnightsValid(PositionBB pos) {
-		return compute_knight(pos.pieceTypeBB[PositionBB.WKNIGHTS], pos.whiteBB);
+		return compute_knight(pos.pieceTypeBB[Piece.WKNIGHT], pos.whiteBB);
 	}
 	
 	public static long blackKnightsValid(PositionBB pos) {
-		return compute_knight(pos.pieceTypeBB[PositionBB.BKNIGHTS], pos.blackBB);
+		return compute_knight(pos.pieceTypeBB[Piece.BKNIGHT], pos.blackBB);
 	}
 	
 	public static long whitePawnsValid(PositionBB pos) {
-		return compute_white_pawns(pos.pieceTypeBB[PositionBB.WPAWNS], pos.allBB, pos.blackBB);
+		return compute_white_pawns(pos.pieceTypeBB[Piece.WPAWN], pos.allBB, pos.blackBB);
 	}
 	
 	public static long blackPawnsValid(PositionBB pos) {
-		return compute_black_pawns(pos.pieceTypeBB[PositionBB.BPAWNS], pos.allBB, pos.whiteBB);
+		return compute_black_pawns(pos.pieceTypeBB[Piece.BPAWN], pos.allBB, pos.whiteBB);
 	}
 	
 	public static long whiteBishopsValid(PositionBB pos) {
-        long squares = pos.pieceTypeBB[PositionBB.WBISHOPS];
+        long squares = pos.pieceTypeBB[Piece.WBISHOP];
         long m = 0x0L;
 		while (squares != 0) {
             int sq = BitBoard.numberOfTrailingZeros(squares);
@@ -204,7 +207,7 @@ public class Movement {
 	}
 	
 	public static long blackBishopsValid(PositionBB pos) {
-        long squares = pos.pieceTypeBB[PositionBB.BBISHOPS];
+        long squares = pos.pieceTypeBB[Piece.BBISHOP];
         long m = 0x0L;
 		while (squares != 0) {
             int sq = BitBoard.numberOfTrailingZeros(squares);
@@ -226,17 +229,17 @@ public class Movement {
 		List<Move> possible = new ArrayList<Move>();
 		
 		// Pawn moves
-        long pawns = pos.pieceTypeBB[PositionBB.WPAWNS];
+        long pawns = pos.pieceTypeBB[Piece.WPAWN];
         long m = (pawns << 8) & ~pos.occupied;
         if (addPawnMovesByMask(possible, pos, m, -8, true)) return possible;
         /*m = ((m & BitBoard.maskRow3) << 8) & ~occupied;
         addPawnDoubleMovesByMask(possible, pos, m, -16);*/
 		
-		/*long pawnAttacks = Movement.compute_white_pawns(pos.pieceTypeBB[PositionBB.WPAWNS], pos.allBB, pos.blackBB);
+		/*long pawnAttacks = Movement.compute_white_pawns(pos.pieceTypeBB[Piece.WPAWN], pos.allBB, pos.blackBB);
         long m = pawnAttacks & ~pos.whiteBB;
 
         
-        int sq = BitBoard.numberOfTrailingZeros(pos.pieceTypeBB[PositionBB.WPAWNS]);
+        int sq = BitBoard.numberOfTrailingZeros(pos.pieceTypeBB[Piece.WPAWN]);
         addMovesByMask(possible, pos, sq, m);*/
         return possible;
 	}
@@ -245,18 +248,18 @@ public class Movement {
 		List<Move> possible = new ArrayList<Move>();
 		
 		// Pawn moves
-        long pawns = pos.pieceTypeBB[PositionBB.BPAWNS];
+        long pawns = pos.pieceTypeBB[Piece.BPAWN];
         long m = (pawns >> 8) & ~pos.occupied;
         if (addPawnMovesByMask(possible, pos, m, 8, true)) return possible;
         return possible;
 	}
 	
 	public static List<Move> whiteKingMoves(PositionBB pos) {
-		long kingAttacks = Movement.compute_king_incomplete(pos.pieceTypeBB[PositionBB.WKING], pos.whiteBB);
+		long kingAttacks = Movement.compute_king_incomplete(pos.pieceTypeBB[Piece.WKING], pos.whiteBB);
         long m = kingAttacks & ~pos.whiteBB;
         List<Move> possible = new ArrayList<Move>();
         
-        int sq = BitBoard.numberOfTrailingZeros(pos.pieceTypeBB[PositionBB.WKING]);
+        int sq = BitBoard.numberOfTrailingZeros(pos.pieceTypeBB[Piece.WKING]);
         
         addMovesByMask(possible, pos, sq, m);
         /*long mask = m;
@@ -270,11 +273,11 @@ public class Movement {
 	}
 	
 	public static List<Move> blackKingMoves(PositionBB pos) {
-		long kingAttacks = Movement.compute_king_incomplete(pos.pieceTypeBB[PositionBB.BKING], pos.blackBB);
+		long kingAttacks = Movement.compute_king_incomplete(pos.pieceTypeBB[Piece.BKING], pos.blackBB);
         long m = kingAttacks & ~pos.blackBB;
         List<Move> possible = new ArrayList<Move>();
         
-        int sq = BitBoard.numberOfTrailingZeros(pos.pieceTypeBB[PositionBB.BKING]);
+        int sq = BitBoard.numberOfTrailingZeros(pos.pieceTypeBB[Piece.BKING]);
         
         addMovesByMask(possible, pos, sq, m);
         /*long mask = m;
@@ -288,7 +291,7 @@ public class Movement {
 	}
 	
 	public static List<Move> whiteBishopsMoves(PositionBB pos) {
-        long squares = pos.pieceTypeBB[PositionBB.WBISHOPS];
+        long squares = pos.pieceTypeBB[Piece.WBISHOP];
         long m = 0x0L;
         List<Move> possible = new ArrayList<Move>();
         
@@ -311,7 +314,7 @@ public class Movement {
 	}
 
 	public static List<Move> blackBishopsMoves(PositionBB pos) {
-        long squares = pos.pieceTypeBB[PositionBB.BBISHOPS];
+        long squares = pos.pieceTypeBB[Piece.BBISHOP];
         long m = 0x0L;
         List<Move> possible = new ArrayList<Move>();
         
@@ -335,7 +338,7 @@ public class Movement {
 	
 	/** Get the white rooks possible moves */
 	public static List<Move> whiteRooksMoves(PositionBB pos) {
-        long squares = pos.pieceTypeBB[PositionBB.WROOKS];
+        long squares = pos.pieceTypeBB[Piece.WROOK];
         long m = 0x0L;
         List<Move> possible = new ArrayList<Move>();
 
@@ -359,7 +362,7 @@ public class Movement {
 	
 	/** Get the black rooks possible moves */
 	public static List<Move> blackRooksMoves(PositionBB pos) {
-        long squares = pos.pieceTypeBB[PositionBB.BROOKS];
+        long squares = pos.pieceTypeBB[Piece.BROOK];
         long m = 0x0L;
         List<Move> possible = new ArrayList<Move>();
 
@@ -545,7 +548,7 @@ public class Movement {
     }
     
     private final static boolean addMovesByMask(List<Move> moveList, PositionBB pos, int sq0, long mask) {
-        long oKingMask = pos.pieceTypeBB[pos.whiteMove() ? PositionBB.BKING : PositionBB.WKING];
+        long oKingMask = pos.pieceTypeBB[pos.whiteMove() ? Piece.BKING : Piece.WKING];
         if ((mask & oKingMask) != 0) {
             int sq = BitBoard.numberOfTrailingZeros(mask & oKingMask);
             //moveList.size = 0;
@@ -566,10 +569,10 @@ public class Movement {
             int delta, boolean allPromotions) {
 		if (mask == 0)
 			return false;
-		long oKingMask = pos.pieceTypeBB[pos.whiteMove() ? PositionBB.BKING : PositionBB.WKING];
+		long oKingMask = pos.pieceTypeBB[pos.whiteMove() ? Piece.BKING : Piece.WKING];
         if ((mask & oKingMask) != 0) {
             int sq = BitBoard.numberOfTrailingZeros(mask & oKingMask);
-            moveList.add(new Move(sq + delta, sq, PositionBB.EMPTY));
+            moveList.add(new Move(sq + delta, sq, Piece.EMPTY));
             return true;
         }
         long promMask = mask & maskRow1Row8;
@@ -578,27 +581,81 @@ public class Movement {
             int sq = BitBoard.numberOfTrailingZeros(promMask);
             int sq0 = sq + delta;
             if (sq >= 56) { // White promotion
-                moveList.add(new Move(sq0, sq, PositionBB.WQUEENS));
-                moveList.add(new Move(sq0, sq, PositionBB.WKNIGHTS));
+                moveList.add(new Move(sq0, sq, Piece.WQUEEN));
+                moveList.add(new Move(sq0, sq, Piece.WKNIGHT));
                 if (allPromotions) {
-                    moveList.add(new Move(sq0, sq, PositionBB.WROOKS));
-                    moveList.add(new Move(sq0, sq, PositionBB.WBISHOPS));
+                    moveList.add(new Move(sq0, sq, Piece.WROOK));
+                    moveList.add(new Move(sq0, sq, Piece.WBISHOP));
                 }
             } else { // Black promotion
-                moveList.add(new Move(sq0, sq, PositionBB.BQUEENS));
-                moveList.add(new Move(sq0, sq, PositionBB.BKNIGHTS));
+                moveList.add(new Move(sq0, sq, Piece.BQUEEN));
+                moveList.add(new Move(sq0, sq, Piece.BKNIGHT));
                 if (allPromotions) {
-                    moveList.add(new Move(sq0, sq, PositionBB.BROOKS));
-                    moveList.add(new Move(sq0, sq, PositionBB.BBISHOPS));
+                    moveList.add(new Move(sq0, sq, Piece.BROOK));
+                    moveList.add(new Move(sq0, sq, Piece.BBISHOP));
                 }
             }
             promMask &= (promMask - 1);
         }
         while (mask != 0) {
             int sq = BitBoard.numberOfTrailingZeros(mask);
-            moveList.add(new Move(sq + delta, sq, PositionBB.EMPTY));
+            moveList.add(new Move(sq + delta, sq, Piece.EMPTY));
             mask &= (mask - 1);
         }
         return false;
+    }
+    
+    /**
+     * Remove all illegal moves from moveList.
+     * "moveList" is assumed to be a list of pseudo-legal moves.
+     * This function removes the moves that don't defend from check threats.
+     * @author petero
+     */
+    public static final void removeIllegal(PositionBB pos, List<Move> moveList) {
+        int length = 0;
+        UndoInfo ui = new UndoInfo();
+        List<Move> legalMoves = new ArrayList<Move>();
+
+        boolean isInCheck = pos.isInCheck();
+        final long occupied = pos.whiteBB | pos.blackBB;
+        int kSq = pos.getKingSq(pos.whiteMove);
+        long kingAtks = rookAttacks(kSq, occupied) | bishopAttacks(kSq, occupied);
+        int epSquare = pos.getEpSquare();
+        if (isInCheck) {
+            kingAtks |= pos.pieceTypeBB[pos.whiteMove ? Piece.BKNIGHT : Piece.WKNIGHT];
+            for (int mi = 0; mi < moveList.size(); mi++) {
+            	Move m = moveList.get(mi);
+                boolean legal;
+                if ((m.getSource8x8Index() != kSq) && ((kingAtks & (1L<<m.getTarget8x8Index())) == 0) && (m.getTarget8x8Index() != epSquare)) {
+                    legal = false;
+                } else {
+                    pos.makeMove(m, ui);
+                    pos.setWhiteMove(!pos.whiteMove);
+                    legal = !pos.isInCheck();
+                    pos.setWhiteMove(!pos.whiteMove);
+                    pos.unMakeMove(m, ui);
+                }
+                if (legal)
+                	legalMoves.add(new Move(m));
+            }
+        } else {
+        	for (int mi = 0; mi < moveList.size(); mi++) {
+                Move m = moveList.get(mi);
+                boolean legal;
+                if ((m.getSource8x8Index() != kSq) && ((kingAtks & (1L<<m.getSource8x8Index())) == 0) && (m.getTarget8x8Index() != epSquare)) {
+                    legal = true;
+                } else {
+                    pos.makeMove(m, ui);
+                    pos.setWhiteMove(!pos.whiteMove);
+                    legal = !pos.isInCheck();
+                    pos.setWhiteMove(!pos.whiteMove);
+                    pos.unMakeMove(m, ui);
+                }
+                if (legal)
+                	legalMoves.add(new Move(m));
+            }
+        }
+        moveList = legalMoves;
+        //moveList.size = length;
     }
 }

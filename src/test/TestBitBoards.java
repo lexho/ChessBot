@@ -7,6 +7,7 @@ import java.util.function.Function;
 import org.junit.Test;
 
 import board.Board;
+import board.pieces.Piece;
 import board.position.BitBoard;
 import board.position.PositionBB;
 import board.position.bitboard.Movement;
@@ -32,7 +33,7 @@ public class TestBitBoards {
 		pos.createStartpos();
 		
 		/* Modify startpos */
-		pos.pieceTypeBB[pos.WPAWNS] = 0b0000000000000000000000000000000000000000000000000000000000000000L; // WhitePawns
+		pos.pieceTypeBB[Piece.WPAWN] = 0b0000000000000000000000000000000000000000000000000000000000000000L; // WhitePawns
 		pos.whiteBB = 0b0000000000000000000000000000000000000000000000000000000011111111L;
 		pos.allBB = 0b1111111111111111000000000000000000000000000000000000000011111111L;
 		System.out.println(pos.toString());
@@ -81,7 +82,7 @@ public class TestBitBoards {
 		pos.createStartpos();
 		
 		/* Modify startpos */
-		pos.pieceTypeBB[pos.WPAWNS] = 0b0000000000000000000000000000000000000000000000000000000000000000L; // WhitePawns
+		pos.pieceTypeBB[Piece.WPAWN] = 0b0000000000000000000000000000000000000000000000000000000000000000L; // WhitePawns
 		pos.whiteBB = 0b0000000000000000000000000000000000000000000000000000000011111111L;
 		pos.allBB = 0b1111111111111111000000000000000000000000000000000000000011111111L;
 		System.out.println(pos.toString());

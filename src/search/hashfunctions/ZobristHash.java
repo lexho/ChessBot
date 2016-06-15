@@ -2,6 +2,7 @@ package search.hashfunctions;
 
 import java.util.Random;
 
+import board.pieces.Piece;
 import board.position.Position12x10;
 import board.position.PositionBB;
 
@@ -101,43 +102,43 @@ public class ZobristHash {
 		int[] board = pos.getSquares();
 	       int h = 0;
 	       for(int i = 0; i < board.length; i++) { //    # loop over the board positions
-	           if(board[i] != PositionBB.EMPTY) {
+	           if(board[i] != Piece.EMPTY) {
 	        	   int j = 0;
 	        	   switch(board[i]) {
-	        	   case PositionBB.WPAWNS:
+	        	   case Piece.WPAWN:
 	        		   j = 0;
 	        		   break;
-	        	   case PositionBB.WROOKS:
+	        	   case Piece.WROOK:
 	        		   j = 1;
 	        		   break;
-	        	   case PositionBB.WKNIGHTS:
+	        	   case Piece.WKNIGHT:
 	        		   j = 2;
 	        		   break;
-	        	   case PositionBB.WBISHOPS:
+	        	   case Piece.WBISHOP:
 	        		   j = 3;
 	        		   break;
-	        	   case PositionBB.WQUEENS:
+	        	   case Piece.WQUEEN:
 	        		   j = 4;
 	        		   break;
-	        	   case PositionBB.WKING:
+	        	   case Piece.WKING:
 	        		   j = 5;
 	        		   break;
-	        	   case PositionBB.BPAWNS:
+	        	   case Piece.BPAWN:
 	        		   j = 6;
 	        		   break;
-	        	   case PositionBB.BROOKS:
+	        	   case Piece.BROOK:
 	        		   j = 7;
 	        		   break;
-	        	   case PositionBB.BKNIGHTS:
+	        	   case Piece.BKNIGHT:
 	        		   j = 8;
 	        		   break;
-	        	   case PositionBB.BBISHOPS:
+	        	   case Piece.BBISHOP:
 	        		   j = 9;
 	        		   break;
-	        	   case PositionBB.BQUEENS:
+	        	   case Piece.BQUEEN:
 	        		   j = 10;
 	        		   break;
-	        	   case PositionBB.BKING:
+	        	   case Piece.BKING:
 	        		   j = 11;
 	        		   break;
 	        	   }

@@ -53,11 +53,6 @@ public class King extends Piece {
 		}
 		return moves;
 	}
-
-	@Override
-	public int getID() {
-		return KING;
-	}
 	
 	@Override
 	public int getValue() {

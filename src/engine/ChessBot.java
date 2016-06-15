@@ -18,6 +18,7 @@ import search.algorithms.AlphaBetaSearch;
 import search.algorithms.RS;
 import search.datastructures.Pair;
 import search.evalfunctions.ScoreBoard;
+import search.evalfunctions.ScoreBoard12x10;
 import search.evalfunctions.ScoreBoardBB;
 import search.functions.BoardFunction;
 import search.functions.BoardPredicate;
@@ -36,7 +37,7 @@ public class ChessBot {
 	private Board board;
 	
 	public static int NR_OF_THREADS;
-	int depthLimit = 4;
+	int depthLimit = 9;
 	private MainTranspositionTable hashmap;
 	
 	/* Optional Enhancements */
@@ -63,7 +64,7 @@ public class ChessBot {
 	
 	/** Create a new (internal) board with the given fenstring */
 	public ChessBot(String fenstr) {
-		board = new Board(new Position12x10(new Fen(fenstr)));
+		board = new Board(new PositionBB(new Fen(fenstr)));
 		init();
 	}
 	
@@ -259,7 +260,7 @@ public class ChessBot {
 		long searchtime = System.currentTimeMillis(); // current time in milliseconds
 		
 		/* AlphaBeta Search */
-		ScoreBoard scoreboard = new ScoreBoard(board.copy());
+		ScoreBoard scoreboard = new ScoreBoard12x10(board.copy());
 		Function<Node, Double> evalFunction = new BoardFunction(scoreboard);
 		
 		long starttime = System.currentTimeMillis();
@@ -299,7 +300,7 @@ public class ChessBot {
 		
 		/* AlphaBeta Search */
 		//ScoreBoard scoreboard = new ScoreBoard(board.copy());
-		Function<Board, Double> scoreboard = new ScoreBoardBB(board.copy());
+		ScoreBoardBB scoreboard = new ScoreBoardBB(board.copy());
 		Function<Node, Double> evalFunction = new BoardFunction(scoreboard);
 		
 		long starttime = System.currentTimeMillis();
@@ -325,7 +326,7 @@ public class ChessBot {
 		
 		searchtime = System.currentTimeMillis() - searchtime;
 		
-		//printSearchStats(searchtime, scoreboard);
+		printSearchStats(searchtime, scoreboard);
 		
 		return nextMove;
 	}
@@ -334,7 +335,7 @@ public class ChessBot {
 		System.out.println("score: " + currentScore);
 		System.out.println("Possible moves: " + board.getPossibleMoves().size());
 		System.out.println("searchtime: " + searchtime / 1000 + " s");
-		System.out.println("scores: " + scoreboard.scoreCounter);
+		System.out.println("scores: " + scoreboard.getScoreCounter());
 		System.out.println("aspiration window: " + alphabeta.getBounds()[0] + " " + alphabeta.getBounds()[1]);
 		System.out.println("hashmap size: " + hashmap.size());
 		System.out.println("pruning alpha: " + alphabeta.getPruningStats().get(0) + ", beta: " + alphabeta.getPruningStats().get(1));

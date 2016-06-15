@@ -14,13 +14,29 @@ public class Piece {
 	int index; // 12x10 board index
 	
 	public static final int nPieceTypes = 13;
-	public static final int WHITE_PAWN = 3;
+	/*public static final int WHITE_PAWN = 3;
 	public static final int BLACK_PAWN = 4;
 	public static final int KING = 1;
 	public static final int QUEEN = 2;
 	public static final int BISHOP = 6;
 	public static final int KNIGHT = 5;
-	public static final int ROOK = 7;
+	public static final int ROOK = 7;*/
+	
+    /* Piece bitboard indices */
+    public static final short EMPTY = 0;
+    public static final short WPAWN = 1;
+    public static final short WKNIGHT = 2;
+    public static final short WBISHOP = 3;
+    public static final short WROOK = 4;
+    public static final short WQUEEN = 5;
+    public static final short WKING = 6;
+    
+    public static final short BPAWN = 7;
+    public static final short BKNIGHT = 8;
+    public static final short BBISHOP = 9;
+    public static final short BROOK = 10;
+    public static final short BQUEEN = 11;
+    public static final short BKING = 12;
 	
 	public static final int KING_V = 10000;
 	public static final int QUEEN_V = 900;
@@ -88,18 +104,18 @@ public class Piece {
 	
 	public static int getValue(int piece) {
 		switch(piece) {
-		case PositionBB.WPAWNS: return PAWN_V;
-		case PositionBB.WKNIGHTS: return KNIGHT_V;
-		case PositionBB.WBISHOPS: return BISHOP_V;
-		case PositionBB.WROOKS: return ROOK_V;
-		case PositionBB.WQUEENS: return QUEEN_V;
-		case PositionBB.WKING: return KING_V;
-		case PositionBB.BPAWNS: return PAWN_V;
-		case PositionBB.BKNIGHTS: return KNIGHT_V;
-		case PositionBB.BBISHOPS: return BISHOP_V;
-		case PositionBB.BROOKS: return ROOK_V;
-		case PositionBB.BQUEENS: return QUEEN_V;
-		case PositionBB.BKING: return KING_V;
+		case WPAWN: return PAWN_V;
+		case WKNIGHT: return KNIGHT_V;
+		case WBISHOP: return BISHOP_V;
+		case WROOK: return ROOK_V;
+		case WQUEEN: return QUEEN_V;
+		case WKING: return KING_V;
+		case BPAWN: return PAWN_V;
+		case BKNIGHT: return KNIGHT_V;
+		case BBISHOP: return BISHOP_V;
+		case BROOK: return ROOK_V;
+		case BQUEEN: return QUEEN_V;
+		case BKING: return KING_V;
 		default: return 0;
 		}
 	}

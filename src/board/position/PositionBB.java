@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import board.Move;
 import board.pieces.Piece;
 import board.pieces.PieceList;
+import board.position.bitboard.LookUpTables;
+import board.Move;
 import board.position.bitboard.Movement;
-import util.BitBoardUtils;
 
 public class PositionBB implements PositionInterface {
 	
@@ -19,35 +19,37 @@ public class PositionBB implements PositionInterface {
     public long whiteBB, blackBB, allBB;
     public long occupied; // will be dynamically created
     
-    public boolean whiteMove;
     int wMtrl;
     int bMtrl;
     
+    public boolean whiteMove;
+    
+    /** Bit definitions for the castleMask bit mask. */
+    public static final int A1_CASTLE = 0; /** White long castle. */
+    public static final int H1_CASTLE = 1; /** White short castle. */
+    public static final int A8_CASTLE = 2; /** Black long castle. */
+    public static final int H8_CASTLE = 3; /** Black short castle. */
+    
+    private int castleMask;
+
+    private int epSquare;
+    
+    /** Number of half-moves since last 50-move reset. */
+    int halfMoveClock;
+    
+    /** Game move number, starting from 1. */
+    public int fullMoveCounter;
+    
     char[] board = new char[64]; // 8x8 printable board
-    int[] squares = {WROOKS, WKNIGHTS, WBISHOPS, WQUEENS, WKING, WBISHOPS, WKNIGHTS, WROOKS, 
-    		WPAWNS, WPAWNS, WPAWNS, WPAWNS, WPAWNS, WPAWNS, WPAWNS, WPAWNS, 
-    		EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, 
-    		EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, 
-    		EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, 
-    		EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, 
-    		BPAWNS, BPAWNS, BPAWNS, BPAWNS, BPAWNS, BPAWNS, BPAWNS, BPAWNS, 
-    		WROOKS, WKNIGHTS, WBISHOPS, WQUEENS, WKING, WBISHOPS, WKNIGHTS, WROOKS}; //new int[64];
-    
-    /* Piece bitboard indices */
-    public static final short EMPTY = 0;
-    public static final short WPAWNS = 1;
-    public static final short WKNIGHTS = 2;
-    public static final short WBISHOPS = 3;
-    public static final short WROOKS = 4;
-    public static final short WQUEENS = 5;
-    public static final short WKING = 6;
-    
-    public static final short BPAWNS = 7;
-    public static final short BKNIGHTS = 8;
-    public static final short BBISHOPS = 9;
-    public static final short BROOKS = 10;
-    public static final short BQUEENS = 11;
-    public static final short BKING = 12;
+    int[] squares = {Piece.WROOK, Piece.WKNIGHT, Piece.WBISHOP, Piece.WQUEEN, Piece.WKING, Piece.WBISHOP, Piece.WKNIGHT, Piece.WROOK, 
+    				 Piece.WPAWN, Piece.WPAWN, Piece.WPAWN, Piece.WPAWN, Piece.WPAWN, Piece.WPAWN, Piece.WPAWN, Piece.WPAWN,	   
+    				 Piece.EMPTY, Piece.EMPTY, Piece.EMPTY, Piece.EMPTY, Piece.EMPTY, Piece.EMPTY, Piece.EMPTY, Piece.EMPTY,
+    			     Piece.EMPTY, Piece.EMPTY, Piece.EMPTY, Piece.EMPTY, Piece.EMPTY, Piece.EMPTY, Piece.EMPTY, Piece.EMPTY,
+    			     Piece.EMPTY, Piece.EMPTY, Piece.EMPTY, Piece.EMPTY, Piece.EMPTY, Piece.EMPTY, Piece.EMPTY, Piece.EMPTY,
+    			     Piece.EMPTY, Piece.EMPTY, Piece.EMPTY, Piece.EMPTY, Piece.EMPTY, Piece.EMPTY, Piece.EMPTY, Piece.EMPTY,
+    			     Piece.BPAWN, Piece.BPAWN, Piece.BPAWN, Piece.BPAWN, Piece.BPAWN, Piece.BPAWN, Piece.BPAWN, Piece.BPAWN,
+    			     Piece.BROOK, Piece.BKNIGHT, Piece.BBISHOP, Piece.BQUEEN, Piece.BKING, Piece.BBISHOP, Piece.BKNIGHT, Piece.BROOK};
+    //new int[64];
     
     /** Initialize board to empty position. */
     public PositionBB() {
@@ -62,8 +64,6 @@ public class PositionBB implements PositionInterface {
     }
     
     public PositionBB(PositionBB pos) {
-    	//super(pos);
-    	//pos.updateBitBoards(); // update bitboards before copy
     	pieceTypeBB = new long[Piece.nPieceTypes];
     	for(int i = 0; i < Piece.nPieceTypes; i++) {
     		pieceTypeBB[i] = pos.pieceTypeBB[i];
@@ -79,7 +79,12 @@ public class PositionBB implements PositionInterface {
     	this.bMtrl = pos.bMtrl;
     	
     }
-    public void updateBitBoards() {
+    
+    public PositionBB(Fen fen) {
+		// TODO implement PositionBB byFen-constructor
+	}
+
+	public void updateBitBoards() {
     	createWhiteBB();
     	createBlackBB();
     	createAllPiecesBB();
@@ -128,14 +133,162 @@ public class PositionBB implements PositionInterface {
     	}
     }
     
-    public List<Move> getPossibleMoves() {
+    /** Apply a move to the current position. */
+    public final void makeMove(Move move, UndoInfo ui) {
+        ui.capturedPiece = squares[move.getTarget8x8Index()];
+        ui.castleMask = castleMask;
+        ui.epSquare = epSquare;
+        ui.halfMoveClock = halfMoveClock;
+        boolean wtm = whiteMove;
+        
+        final int p = squares[move.getSource8x8Index()];
+        int capP = squares[move.getTarget8x8Index()];
+        long fromMask = 1L << move.getSource8x8Index();
+
+        int prevEpSquare = epSquare;
+        setEpSquare(-1);
+
+        if ((capP != Piece.EMPTY) || (((pieceTypeBB[Piece.WPAWN] | pieceTypeBB[Piece.BPAWN]) & fromMask) != 0)) {
+            halfMoveClock = 0;
+
+            // Handle en passant and epSquare
+            if (p == Piece.WPAWN) {
+                if (move.getTarget8x8Index() - move.getSource8x8Index() == 2 * 8) {
+                    int x = getX(move.getTarget8x8Index());
+                    if (    ((x > 0) && (squares[move.getTarget8x8Index() - 1] == Piece.BPAWN)) ||
+                            ((x < 7) && (squares[move.getTarget8x8Index() + 1] == Piece.BPAWN))) {
+                        setEpSquare(move.getSource8x8Index() + 8);
+                    }
+                } else if (move.getTarget8x8Index() == prevEpSquare) {
+                    setPiece(move.getTarget8x8Index() - 8, Piece.EMPTY);
+                }
+            } else if (p == Piece.BPAWN) {
+                if (move.getTarget8x8Index() - move.getSource8x8Index() == -2 * 8) {
+                    int x = getX(move.getTarget8x8Index());
+                    if (    ((x > 0) && (squares[move.getTarget8x8Index() - 1] == Piece.WPAWN)) ||
+                            ((x < 7) && (squares[move.getTarget8x8Index() + 1] == Piece.WPAWN))) {
+                        setEpSquare(move.getSource8x8Index() - 8);
+                    }
+                } else if (move.getTarget8x8Index() == prevEpSquare) {
+                    setPiece(move.getTarget8x8Index() + 8, Piece.EMPTY);
+                }
+            }
+
+            if (((pieceTypeBB[Piece.WKING] | pieceTypeBB[Piece.BKING]) & fromMask) != 0) {
+                if (wtm) {
+                    setCastleMask(castleMask & ~(1 << A1_CASTLE));
+                    setCastleMask(castleMask & ~(1 << H1_CASTLE));
+                } else {
+                    setCastleMask(castleMask & ~(1 << A8_CASTLE));
+                    setCastleMask(castleMask & ~(1 << H8_CASTLE));
+                }
+            }
+
+            // Perform move
+            setPiece(move.getSource8x8Index(), Piece.EMPTY);
+            // Handle promotion
+            if (move.getPromoteTo() != Piece.EMPTY) {
+                setPiece(move.getTarget8x8Index(), move.getPromoteTo());
+            } else {
+                setPiece(move.getTarget8x8Index(), p);
+            }
+        } else {
+            halfMoveClock++;
+
+            // Handle castling
+            if (((pieceTypeBB[Piece.WKING] | pieceTypeBB[Piece.BKING]) & fromMask) != 0) {
+                int k0 = move.getSource8x8Index();
+                if (move.getTarget8x8Index() == k0 + 2) { // O-O
+                    movePieceNotPawn(k0 + 3, k0 + 1);
+                } else if (move.getTarget8x8Index() == k0 - 2) { // O-O-O
+                    movePieceNotPawn(k0 - 4, k0 - 1);
+                }
+                if (wtm) {
+                    setCastleMask(castleMask & ~(1 << A1_CASTLE));
+                    setCastleMask(castleMask & ~(1 << H1_CASTLE));
+                } else {
+                    setCastleMask(castleMask & ~(1 << A8_CASTLE));
+                    setCastleMask(castleMask & ~(1 << H8_CASTLE));
+                }
+            }
+
+            // Perform move
+            movePieceNotPawn(move.getSource8x8Index(), move.getTarget8x8Index());
+        }
+        if (wtm) {
+            // Update castling rights when rook moves
+            if ((LookUpTables.maskCorners & fromMask) != 0) {
+                if (p == Piece.WROOK)
+                    removeCastleRights(move.getSource8x8Index());
+            }
+            if ((LookUpTables.maskCorners & (1L << move.getTarget8x8Index())) != 0) {
+                if (capP == Piece.BROOK)
+                    removeCastleRights(move.getTarget8x8Index());
+            }
+        } else {
+            fullMoveCounter++;
+            // Update castling rights when rook moves
+            if ((LookUpTables.maskCorners & fromMask) != 0) {
+                if (p == Piece.BROOK)
+                    removeCastleRights(move.getSource8x8Index());
+            }
+            if ((LookUpTables.maskCorners & (1L << move.getTarget8x8Index())) != 0) {
+                if (capP == Piece.WROOK)
+                    removeCastleRights(move.getTarget8x8Index());
+            }
+        }
+
+        //hashKey ^= whiteHashKey;
+        whiteMove = !wtm;
+    }
+    
+    public final void unMakeMove(Move move, UndoInfo ui) {
+        //hashKey ^= whiteHashKey;
+        whiteMove = !whiteMove;
+        int p = squares[move.getTarget8x8Index()];
+        setPiece(move.getSource8x8Index(), p);
+        setPiece(move.getTarget8x8Index(), ui.capturedPiece);
+        setCastleMask(ui.castleMask);
+        setEpSquare(ui.epSquare);
+        halfMoveClock = ui.halfMoveClock;
+        boolean wtm = whiteMove;
+        if (move.getPromoteTo() != Piece.EMPTY) {
+            p = wtm ? Piece.WPAWN : Piece.BPAWN;
+            setPiece(move.getSource8x8Index(), p);
+        }
+        if (!wtm) {
+            fullMoveCounter--;
+        }
+        
+        // Handle castling
+        int king = wtm ? Piece.WKING : Piece.BKING;
+        if (p == king) {
+            int k0 = move.getSource8x8Index();
+            if (move.getTarget8x8Index() == k0 + 2) { // O-O
+                movePieceNotPawn(k0 + 1, k0 + 3);
+            } else if (move.getTarget8x8Index() == k0 - 2) { // O-O-O
+                movePieceNotPawn(k0 - 1, k0 - 4);
+            }
+        }
+
+        // Handle en passant
+        if (move.getTarget8x8Index() == epSquare) {
+            if (p == Piece.WPAWN) {
+                setPiece(move.getTarget8x8Index() - 8, Piece.BPAWN);
+            } else if (p == Piece.BPAWN) {
+                setPiece(move.getTarget8x8Index() + 8, Piece.WPAWN);
+            }
+        }
+    }
+    
+    public List<board.Move> getPossibleMoves() {
     	/* Update Bitboards */
 		createWhiteBB();
 		createBlackBB();
 		createAllPiecesBB();
     	occupied = whiteBB | blackBB;
     	
-    	List<Move> possible = new ArrayList<Move>();
+    	List<board.Move> possible = new ArrayList<board.Move>();
     	
     	if(whiteMove) {
 	    	possible.addAll(Movement.whiteRooksMoves(this));
@@ -149,13 +302,11 @@ public class PositionBB implements PositionInterface {
 	    	possible.addAll(Movement.blackBishopsMoves(this));
     	}
 
+    	//TODO implement missing methods getKingSq(),...
+    	//Movement.removeIllegal(this, possible); // remove illegal moves (check situations)
     	return possible;
     }
 
-	public boolean whiteMove() {
-		return whiteMove;
-	}
-	
 	public int getWhiteMaterial() {
 		return wMtrl;
 	}
@@ -163,6 +314,28 @@ public class PositionBB implements PositionInterface {
 	public int getBlackMaterial() {
 		return bMtrl;
 	}
+	
+	public boolean whiteMove() {
+		return whiteMove;
+	}
+	
+	public void setWhiteMove(boolean whiteMove) {
+		this.whiteMove = whiteMove;
+	}
+	
+    public final void setCastleMask(int castleMask) {
+        //hashKey ^= castleHashKeys[this.castleMask];
+        //hashKey ^= castleHashKeys[castleMask];
+        this.castleMask = castleMask;
+    }
+    
+    public final void setEpSquare(int epSquare) {
+        if (this.epSquare != epSquare) {
+            //hashKey ^= epHashKeys[(this.epSquare >= 0) ? getX(this.epSquare) + 1 : 0];
+            //hashKey ^= epHashKeys[(epSquare >= 0) ? getX(epSquare) + 1 : 0];
+            this.epSquare = epSquare;
+        }
+    }
 	
     /** Return x position (file) corresponding to a square. */
     public final static int getX(int square) {
@@ -175,6 +348,16 @@ public class PositionBB implements PositionInterface {
     
     public final static int getSquare(int x, int y) {
         return y * 8 + x;
+    }
+    
+    public int getKingSq(boolean isWhite) {
+    	//TODO implement getKingSq()
+    	return -1;
+    }
+    
+    public int getEpSquare() {
+    	//TODO implement getEpSquare()
+    	return -1;
     }
     
     public int[] getSquares() {
@@ -195,7 +378,7 @@ public class PositionBB implements PositionInterface {
     	System.out.println("piece: " + piece);
         
     	int removedPiece = squares[square];
-    	if (removedPiece != EMPTY) {
+    	if (removedPiece != Piece.EMPTY) {
             if (Piece.isWhite(removedPiece)) {
             	wMtrl -= Piece.getValue(removedPiece);
             } else {
@@ -210,7 +393,7 @@ public class PositionBB implements PositionInterface {
         pieceTypeBB[removedPiece] &= ~sqMask;
         pieceTypeBB[piece] |= sqMask;
 
-        if (removedPiece != EMPTY) {
+        if (removedPiece != Piece.EMPTY) {
             if (Piece.isWhite(removedPiece)) {
                 whiteBB &= ~sqMask;
             } else {
@@ -218,7 +401,7 @@ public class PositionBB implements PositionInterface {
             }
         }
 
-        if (piece != EMPTY) {
+        if (piece != Piece.EMPTY) {
             if (Piece.isWhite(piece)) {
                 whiteBB |= sqMask;
                 System.out.println("white bitboard: ");
@@ -234,7 +417,7 @@ public class PositionBB implements PositionInterface {
 	
 	public final void movePieceNotPawn(int from, int to) {
 		final int piece = squares[from];
-		squares[from] = EMPTY;
+		squares[from] = Piece.EMPTY;
 		squares[to] = piece;
 		//final int piece = BitBoardUtils.charPieceToPieceType(this.getPieceAt(from).getCharRep());
 		
@@ -259,7 +442,7 @@ public class PositionBB implements PositionInterface {
 	
 	@Override
 	public void switchActiveColor() {
-		whiteMove = whiteMove ? false : true;
+		whiteMove = !whiteMove;
 	}
 	
 	@Override
@@ -293,6 +476,18 @@ public class PositionBB implements PositionInterface {
 		// TODO Auto-generated method stub
 		
 	}
+	
+	private final void removeCastleRights(int square) {
+        if (square == getSquare(0, 0)) {
+            setCastleMask(castleMask & ~(1 << A1_CASTLE));
+        } else if (square == getSquare(7, 0)) {
+            setCastleMask(castleMask & ~(1 << H1_CASTLE));
+        } else if (square == getSquare(0, 7)) {
+            setCastleMask(castleMask & ~(1 << A8_CASTLE));
+        } else if (square == getSquare(7, 7)) {
+            setCastleMask(castleMask & ~(1 << H8_CASTLE));
+        }
+    }
 
 	@Override
 	public PieceList getPieces() {
@@ -361,7 +556,7 @@ public class PositionBB implements PositionInterface {
 
 	@Override
 	public boolean isInCheck() {
-		// TODO Auto-generated method stub
+		// TODO implement isInCheck()
 		return false;
 	}
 

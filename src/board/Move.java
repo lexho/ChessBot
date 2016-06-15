@@ -2,15 +2,15 @@ package board;
 
 import java.util.List;
 
+import board.pieces.Piece;
 import board.position.Position12x10;
+import board.position.PositionBB;
 import util.BitBoardUtils;
 
 public class Move {
 	protected String command;
-	//int src[];
-	//int[] trg;
-	protected int i_src;
-	protected int i_trg;
+	int promPiece = Piece.EMPTY;
+	
 	protected int i8x8_src;
 	protected int i8x8_trg;
 	public Move (String cmd) {
@@ -30,14 +30,9 @@ public class Move {
 		trg[0] = x;
 		trg[1] = y;
 		
-		/* Create 12x10 board index */
-		this.i_src = Position12x10.coordToIndex(src);
-		this.i_trg = Position12x10.coordToIndex(trg);
-		
 		/* Create 8x8 board index */
-		this.i8x8_src = BitBoardUtils.index12x10ToBBSquare(i_src);
-		this.i8x8_trg = BitBoardUtils.index12x10ToBBSquare(i_trg);
-		//System.out.println("i_src " + i_src);
+		this.i8x8_src = PositionBB.getSquare(src[0], src[1]);
+		this.i8x8_trg = PositionBB.getSquare(trg[0], trg[1]);
 		
 	}
 	
@@ -47,66 +42,41 @@ public class Move {
 	 * @param trg the target coordinates
 	 * */
 	public Move(int[]src, int[] trg) {
-		
-		/*this.src = new int[2];
-		this.trg = new int[2];
-		this.src[0] = src[0];
-		this.src[1] = src[1];
-		this.trg[0] = trg[0];
-		this.trg[1] = trg[1];*/
-		
-		this.i_src = Position12x10.coordToIndex(src);
-		this.i_trg = Position12x10.coordToIndex(trg);
-		/*System.out.print(src[0] + "/"+ src[1] + " --> ");
-		System.out.print(i_src);
-		
-		int[] coord = Position12x10.indexToCoord(i_src);
-		System.out.println(" --> " + coord[0] + "/"+ coord[1]);
-		if(coord[0] != src[0] || coord[1] != src[1]) System.exit(-1);*/
-		
-		/* create command string */
-		/*char alpha = (char) ((char) src[0] + 'a');
-		char num = (char) ((char) src[1] + '0' + 1);
-		char alpha1 = (char) ((char) trg[0] + 'a');
-		char num1 = (char) ((char) trg[1] + '0' + 1);
-		this.command = Character.toString(alpha) + Character.toString(num) + Character.toString(alpha1) + Character.toString(num1);
-		*/
-	}
-	
-	/** Create a Move by source and target indexes of a 12x10 board 
-	 * @param src 12x10 board index of move's source
-	 * @param trg 12x10 board index of move'S target
-	 * */
-	public Move(int src, int trg) {
-		this.i_src = src;
-		this.i_trg = trg;
-		
-		/* Create 8x8 board index */
-		this.i8x8_src = BitBoardUtils.index12x10ToBBSquare(i_src);
-		this.i8x8_trg = BitBoardUtils.index12x10ToBBSquare(i_trg);
+		this.i8x8_src = PositionBB.getSquare(src[0], src[1]);
+		this.i8x8_trg = PositionBB.getSquare(trg[0], trg[1]);
 	}
 	
 	/** Create a Move by source and target indexes of board 
 	 * @param src board index of move's source
 	 * @param trg board index of move'S target
-	 * @param type type of the board (12x10, 8x8,...)
+	 * @param promPiece the piece to promote to
 	 * */
-	public Move(int src, int trg, int type) {
+	public Move(int src8x8, int trg8x8, int promPiece) {
+		createMove(src8x8, trg8x8, 1);
+		this.promPiece = promPiece;
+	}
+	
+	public Move(int src8x8, int trg8x8) {
+		createMove(src8x8, trg8x8, 1);
+		
+	}
+	
+	public Move(Move m) {
+		createMove(m.getSource8x8Index(), m.getSource8x8Index(), 1);
+	}
+	
+	private void createMove(int src, int trg, int type) {
 		switch(type) {
-		case 1: // 8x8 board indices
+		case 1: // create by 8x8 board indices
 			this.i8x8_src = src;
 			this.i8x8_trg = trg;
 			
-			this.i_src = BitBoardUtils.squareTo12x10(src);
-			this.i_trg = BitBoardUtils.squareTo12x10(trg);	
 			break;
-		default: // 12x10 board indices
-			this.i_src = src;
-			this.i_trg = trg;	
+		default: // create by 12x10 board indices
 			
 			/* Create 8x8 board index */
-			this.i8x8_src = BitBoardUtils.index12x10ToBBSquare(i_src);
-			this.i8x8_trg = BitBoardUtils.index12x10ToBBSquare(i_trg);
+			this.i8x8_src = BitBoardUtils.index12x10ToBBSquare(src);
+			this.i8x8_trg = BitBoardUtils.index12x10ToBBSquare(trg);
 		}
 	}
 	
@@ -115,7 +85,7 @@ public class Move {
 	 * @return the source coordinates
 	 */
 	public int[] getSource() {
-		return Position12x10.indexToCoord(i_src);
+		return new int[] {PositionBB.getX(i8x8_src), PositionBB.getY(i8x8_src)};
 	}
 	
 	/**
@@ -123,7 +93,7 @@ public class Move {
 	 * @return the target coordinates
 	 */
 	public int[] getTarget() {
-		return Position12x10.indexToCoord(i_trg);
+		return new int[] {PositionBB.getX(i8x8_trg), PositionBB.getY(i8x8_trg)};
 	}
 	
 	/**
@@ -131,7 +101,7 @@ public class Move {
 	 * @return the source index
 	 */
 	public int getSourceIndex() {
-		return i_src;
+		return BitBoardUtils.squareTo12x10(i8x8_src);
 	}
 	
 	/**
@@ -139,7 +109,7 @@ public class Move {
 	 * @return the target index
 	 */
 	public int getTargetIndex() {
-		return i_trg;
+		return BitBoardUtils.squareTo12x10(i8x8_trg);
 	}
 	
 	/**
@@ -154,18 +124,9 @@ public class Move {
 		return i8x8_trg;
 	}
 	
-	/**
-	 * convert the move into an action
-	 * @return an action that can be applied
-	 */
-	//TODO remove this
-	/*public Action getAction() {
-		int[] src = getSource();
-		int[] trg = getTarget();
-		int[] delta = {trg[0] - src[0], trg[1] - src[1]};
-		
-		return new Action(delta, false);
-	}*/
+	public int getPromoteTo() {
+		return promPiece;
+	}
 	
 	/**
 	 * @return the move in long algebraic notation
@@ -173,8 +134,8 @@ public class Move {
 	public String toString() {
 		if(command != null) return command;
 		/* create long algebraic move string */
-		int[] src = Position12x10.indexToCoord(this.i_src);
-		int[] trg = Position12x10.indexToCoord(this.i_trg);
+		int[] src = new int[] {PositionBB.getX(i8x8_src), PositionBB.getY(i8x8_src)};
+		int[] trg = new int[] {PositionBB.getX(i8x8_trg), PositionBB.getY(i8x8_trg)};
 		char alpha = (char) ((char) src[0] + 'a');
 		char num = (char) ((char) src[1] + '0' + 1);
 		char alpha1 = (char) ((char) trg[0] + 'a');

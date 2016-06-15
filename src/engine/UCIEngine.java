@@ -30,10 +30,12 @@ public class UCIEngine {
 		
 		Scanner terminalInput = new Scanner(System.in);
 		try {
-			cmdlog = new PrintWriter("/home/alex/Code/java/ChessBot/log/cmds.txt", "UTF-8");
+			//cmdlog = new PrintWriter("/home/alex/Code/java/ChessBot/log/cmds.txt", "UTF-8");
+			cmdlog = new PrintWriter("/home/guest/workspace/java/ChessBot/log/cmds.txt", "UTF-8");
 			
 			//System.setOut(new PrintStream(new File("/home/alex/Code/java/ChessBot/log/output.txt")));
 			//System.setErr(new PrintStream(new File("/home/alex/Code/java/ChessBot/log/error.txt")));
+			//System.setErr(new PrintStream(new File("/home/guest/workspace/java/ChessBot/log/error.txt")));
 			bot = new ChessBot();
 		
 			/* Wait for commands */

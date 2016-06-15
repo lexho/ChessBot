@@ -1,16 +1,23 @@
 package board.position.bitboard;
 
-import board.position.PositionBB;
+import board.pieces.Piece;
 
-public class Move extends board.Move{
+/*public class Move extends board.Move{
 
+	int promPiece = Piece.EMPTY;
+	
 	public Move(int src8x8, int trg8x8, int promPiece) {
 		super(src8x8, trg8x8, 1);
+		this.promPiece = promPiece;
 	}
 	
 	public Move(int src8x8, int trg8x8) {
 		super(src8x8, trg8x8, 1);
 		
+	}
+	
+	public Move(Move m) {
+		super(m.getSource8x8Index(), m.getSource8x8Index(), 1);
 	}
 	
 	/*@Override
@@ -25,6 +32,10 @@ public class Move extends board.Move{
 		char num1 = (char) ((char) trg[1] + '0' + 1);
 		command = Character.toString(alpha) + Character.toString(num) + Character.toString(alpha1) + Character.toString(num1);
 		return command;
-	}*/
+	}
+	
+	public int getPromoteTo() {
+		return promPiece;
+	}
 
-}
+}*/

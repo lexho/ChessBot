@@ -118,11 +118,13 @@ public class PieceList extends ArrayList<Piece> {
 		return null;*/
 	}
 	
+	@Deprecated
 	public King getKing(char color) {
-		if(color == 'w')
+		/*if(color == 'w')
 			return (King) whitePieces.get(Piece.KING);
 		else
-			return (King) blackPieces.get(Piece.KING);
+			return (King) blackPieces.get(Piece.KING);*/
+		return null;
 	}
 	
 	public List<Piece> getByID(int pieceID) {

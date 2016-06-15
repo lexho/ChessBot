@@ -15,7 +15,7 @@ public class MoveValidator {
 		
 		boolean validSquares = position.isValid(m.getSourceIndex()) && position.isValid(m.getTargetIndex());
 		
-		Piece piece = position.getPieceAt(m.getSourceIndex());
+		Piece piece = position.getPieceAt1(m.getSourceIndex());
 		
 		/* Source is not our piece */
 		if(position.getActiveColor() != piece.getColor()) {
@@ -68,13 +68,13 @@ public class MoveValidator {
 		//TODO maybe this rule should be implemented in action context
 		//TODO inefficient (?)
 		// Pawn: two-square initial move rule
-		if(piece.getID() == Piece.WHITE_PAWN && m.getSource()[1] == 1 && m.getTarget()[1] == 3) {
+		if(piece.getID() == Piece.WPAWN && m.getSource()[1] == 1 && m.getTarget()[1] == 3) {
 			// don't jump over other pieces
 			if(position.isFree(new int[]{ m.getSource()[0], 2 }) &&
 			   position.isFree(new int[]{ m.getSource()[0], 3 })) {
 				return true;
 			}
-		} else if(piece.getID() == Piece.BLACK_PAWN && m.getSource()[1] == 6 && m.getTarget()[1] == 4) {
+		} else if(piece.getID() == Piece.BPAWN && m.getSource()[1] == 6 && m.getTarget()[1] == 4) {
 			// don't jump over other pieces
 			if(position.isFree(new int[]{ m.getSource()[0], 5 }) &&
 			   position.isFree(new int[]{ m.getSource()[0], 4 })) {
