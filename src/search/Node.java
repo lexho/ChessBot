@@ -15,5 +15,6 @@ public interface Node {
 	public int getDepth();
 
 	public int hashCode();
+	public long hashCode64();
 	public boolean equals(Object obj);
 }

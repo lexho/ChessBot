@@ -29,6 +29,15 @@ public final class Pair<F, S> implements Serializable
 		result = prime * result + ((s == null) ? 0 : s.hashCode());
 		return result;
 	}
+	
+	public long hashCode64()
+	{
+		final long prime = 31;
+		long result = 1;
+		result = prime * result + ((f == null) ? 0 : f.hashCode());
+		result = prime * result + ((s == null) ? 0 : s.hashCode());
+		return result;
+	}
 
 	@Override
 	public boolean equals(Object obj)

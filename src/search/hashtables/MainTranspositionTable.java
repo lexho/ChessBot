@@ -5,7 +5,7 @@ import java.util.HashMap;
 import search.Node;
 import search.datastructures.Pair;
 
-public class MainTranspositionTable extends HashMap<Integer, HashTableEntry> {
+public class MainTranspositionTable extends HashMap<Long, HashTableEntry> {
 
 	/**
 	 * 
@@ -14,9 +14,9 @@ public class MainTranspositionTable extends HashMap<Integer, HashTableEntry> {
 	public static final int valUNKNOWN = -1;
 	
 	public Pair<Node, Double> ProbeHash(Node current, int depth, Pair<Node, Double> alpha, Pair<Node, Double> beta) {
-		if(this.containsKey(current.hashCode())) {
-			//System.out.println("hashmap contains key: " + current.hashCode());
-			HashTableEntry entry = (HashTableEntry) this.get(current.hashCode());
+		if(this.containsKey(current.hashCode64())) {
+			//System.out.println("hashmap contains key: " + current.hashCode64());
+			HashTableEntry entry = (HashTableEntry) this.get(current.hashCode64());
 			if(entry.getDepth() >= depth) {
 				if(entry.checkFlag(HashTableEntry.hashfEXACT))
 					return new Pair<Node, Double>(current, entry.getScore());

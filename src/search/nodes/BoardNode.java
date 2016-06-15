@@ -110,12 +110,22 @@ public class BoardNode implements Node
 	}
 
 	@Override
+	/** @return a 32-Bit hash-code */
 	public int hashCode() {
 		/*final int prime = 31;
 		int result = 1;
 		result = prime * result + ((board == null) ? 0 : board.hashCode());
 		return result;*/
-		return ZobristHash.hash(board.getPositionBB());
+		return (int) ZobristHash.hash(board.getPosition12x10());
+	}
+	
+	/** @return a 64-Bit hash-code */
+	public long hashCode64() {
+		/*final int prime = 31;
+		int result = 1;
+		result = prime * result + ((board == null) ? 0 : board.hashCode());
+		return result;*/
+		return ZobristHash.hash(board.getPosition12x10());
 	}
 
 	@Override
