@@ -62,7 +62,7 @@ public class Move {
 	}
 	
 	public Move(Move m) {
-		createMove(m.getSource8x8Index(), m.getSource8x8Index(), 1);
+		createMove(m.getSource8x8Index(), m.getTarget8x8Index(), 1);
 	}
 	
 	private void createMove(int src, int trg, int type) {

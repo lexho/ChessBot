@@ -26,8 +26,6 @@ public interface PositionInterface {
 	void increaseMoveNr();
 	boolean isInCheck();
 	boolean isInCheck(char color);
-	/** Prints a list of all pieces and their location (for Debugging) */
-	void printPieceLocationList();
 	String toString();
 	
 }

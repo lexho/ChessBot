@@ -13,6 +13,7 @@ import board.pieces.PieceList;
 import board.position.Position12x10;
 import board.position.PositionBB;
 import board.position.PositionInterface;
+import board.position.UndoInfo;
 import board.position.bitboard.Movement;
 import engine.ChessBot;
 import util.BitBoardUtils;
@@ -178,8 +179,10 @@ public class Board {
 		
 		int src = m.getSource8x8Index(); //BitBoardUtils.index12x10ToBBSquare(m.getSourceIndex());
 		int trg = m.getTarget8x8Index(); //BitBoardUtils.index12x10ToBBSquare(m.getTargetIndex());
-		currentPosition.movePieceNotPawn(src, trg);
-		currentPosition.switchActiveColor();
+		//currentPosition.movePieceNotPawn(src, trg);
+		UndoInfo ui = new UndoInfo();
+		currentPosition.makeMove(m, ui);
+		//currentPosition.switchActiveColor();
 		return false;
 	}
 	

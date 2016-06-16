@@ -122,4 +122,11 @@ public class TestBitBoards {
 				evalFunction);	
 		System.out.println(result.f.getAction() + " " + result.s);
 	}
+	
+	@Test
+	public void testMaterial() {
+		PositionBB pos = new PositionBB();
+		System.out.println(pos.getWhiteMaterial() + " " +
+		pos.getBlackMaterial());
+	}
 }

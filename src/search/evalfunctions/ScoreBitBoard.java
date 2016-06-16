@@ -63,9 +63,9 @@ public class ScoreBitBoard<V> implements ScoreBoard
 		{
 			// Who is checkmate?
 			if(board.getPosition().isInCheck(opponent_id)) {
-				return 10000d;
+				return 100000d;
 			} else if (board.getPosition().isInCheck(player_id)) {
-				return -10000d;
+				return -100000d;
 			} else {
 				return 0d;
 			}
@@ -85,7 +85,10 @@ public class ScoreBitBoard<V> implements ScoreBoard
 			score += board.getPositionBB().getBlackMaterial();
 			score -= board.getPositionBB().getWhiteMaterial();
 		}
-		
+		/*System.out.println("white Material: " + board.getPositionBB().getWhiteMaterial());
+		System.out.println("black Material: " + board.getPositionBB().getBlackMaterial());
+		System.out.println("diff: " + (board.getPositionBB().getWhiteMaterial() - board.getPositionBB().getBlackMaterial()));
+		*/
 		return score;
 	}
 	

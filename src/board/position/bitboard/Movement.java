@@ -237,9 +237,8 @@ public class Movement {
 		
 		/*long pawnAttacks = Movement.compute_white_pawns(pos.pieceTypeBB[Piece.WPAWN], pos.allBB, pos.blackBB);
         long m = pawnAttacks & ~pos.whiteBB;
-
-        
         int sq = BitBoard.numberOfTrailingZeros(pos.pieceTypeBB[Piece.WPAWN]);
+        
         addMovesByMask(possible, pos, sq, m);*/
         return possible;
 	}
@@ -251,14 +250,20 @@ public class Movement {
         long pawns = pos.pieceTypeBB[Piece.BPAWN];
         long m = (pawns >> 8) & ~pos.occupied;
         if (addPawnMovesByMask(possible, pos, m, 8, true)) return possible;
+        
+		/*long pawnAttacks = Movement.compute_black_pawns(pos.pieceTypeBB[Piece.BPAWN], pos.allBB, pos.whiteBB);
+        long m = pawnAttacks & ~pos.blackBB;
+        int sq = BitBoard.numberOfTrailingZeros(pos.pieceTypeBB[Piece.BPAWN]);
+
+        addMovesByMask(possible, pos, sq, m);*/
         return possible;
 	}
 	
 	public static List<Move> whiteKingMoves(PositionBB pos) {
-		long kingAttacks = Movement.compute_king_incomplete(pos.pieceTypeBB[Piece.WKING], pos.whiteBB);
-        long m = kingAttacks & ~pos.whiteBB;
         List<Move> possible = new ArrayList<Move>();
         
+		long kingAttacks = Movement.compute_king_incomplete(pos.pieceTypeBB[Piece.WKING], pos.whiteBB);
+        long m = kingAttacks & ~pos.whiteBB;
         int sq = BitBoard.numberOfTrailingZeros(pos.pieceTypeBB[Piece.WKING]);
         
         addMovesByMask(possible, pos, sq, m);
@@ -548,14 +553,15 @@ public class Movement {
     }
     
     private final static boolean addMovesByMask(List<Move> moveList, PositionBB pos, int sq0, long mask) {
-        long oKingMask = pos.pieceTypeBB[pos.whiteMove() ? Piece.BKING : Piece.WKING];
+        /*long oKingMask = pos.pieceTypeBB[pos.whiteMove() ? Piece.BKING : Piece.WKING];
         if ((mask & oKingMask) != 0) {
+        	System.out.println("oKingmask: " + BitBoard.toString(mask));
             int sq = BitBoard.numberOfTrailingZeros(mask & oKingMask);
             //moveList.size = 0;
             //setMove(moveList, sq0, sq, Piece.EMPTY);
             moveList.add(new Move(sq0, sq));
             return true;
-        }
+        }*/
         while (mask != 0) {
             int sq = BitBoard.numberOfTrailingZeros(mask);
             //setMove(moveList, sq0, sq, Piece.EMPTY);
@@ -611,7 +617,7 @@ public class Movement {
      * This function removes the moves that don't defend from check threats.
      * @author petero
      */
-    public static final void removeIllegal(PositionBB pos, List<Move> moveList) {
+    public static final List<Move> removeIllegal(PositionBB pos, List<Move> moveList) {
         int length = 0;
         UndoInfo ui = new UndoInfo();
         List<Move> legalMoves = new ArrayList<Move>();
@@ -619,6 +625,8 @@ public class Movement {
         boolean isInCheck = pos.isInCheck();
         final long occupied = pos.whiteBB | pos.blackBB;
         int kSq = pos.getKingSq(pos.whiteMove);
+        if(kSq == -1) return moveList; //TODO fix workaround
+        
         long kingAtks = rookAttacks(kSq, occupied) | bishopAttacks(kSq, occupied);
         int epSquare = pos.getEpSquare();
         if (isInCheck) {
@@ -635,8 +643,8 @@ public class Movement {
                     pos.setWhiteMove(!pos.whiteMove);
                     pos.unMakeMove(m, ui);
                 }
-                if (legal)
-                	legalMoves.add(new Move(m));
+                if (legal) 
+                	legalMoves.add(m);
             }
         } else {
         	for (int mi = 0; mi < moveList.size(); mi++) {
@@ -651,11 +659,12 @@ public class Movement {
                     pos.setWhiteMove(!pos.whiteMove);
                     pos.unMakeMove(m, ui);
                 }
-                if (legal)
-                	legalMoves.add(new Move(m));
+                if (legal) 
+                	legalMoves.add(m);
             }
         }
-        moveList = legalMoves;
-        //moveList.size = length;
+        
+        //moveList = legalMoves; // does not work
+        return legalMoves;
     }
 }

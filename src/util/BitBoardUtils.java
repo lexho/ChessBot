@@ -69,4 +69,31 @@ public class BitBoardUtils {
         return index;
 	}
 	
+	public static String bitboardToString(long bitboard, char label) {
+		char[] board = new char[64];
+		
+		/* Bit-Masks for detecting pieces on squares */
+		long mask = 0b0000000000000000000000000000000000000000000000000000000000000001L;
+		long[] masks = new long[64];
+		for(int i = 0; i < 64; i++) {
+			masks[i] = mask;
+			mask = mask << 1;
+		}
+		
+		for(int sq = 0; sq < 64; sq++) {
+			if((bitboard & masks[sq]) == masks[sq]) {
+				board[63 - sq] = label;
+			} else board[63 - sq] = '.';
+		}
+		
+		StringBuilder result = new StringBuilder();
+		String boardstr = new String(board);
+		
+		/* Add newlines after each rank */
+		for(int j = 0; j < 64; j += 8) {
+		result.append(boardstr.substring(j, j+8));
+		result.append(System.lineSeparator());
+		}
+		return result.toString();
+	}
 }

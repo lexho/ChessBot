@@ -19,6 +19,7 @@ import board.Board;
 import board.pieces.Piece;
 import board.position.Fen;
 import board.position.Position12x10;
+import board.position.PositionBB;
 import board.position.PositionInterface;
 
 @RunWith(Parameterized.class)
@@ -61,12 +62,36 @@ public class TestCheckSituations {
 	}
 	
 	@Test
-	public void testCheckSituations() {
+	public void testCheckSituations12x10() {
 		Board b = new Board(new Position12x10(new Fen(fenstring)));
 		b.print();
 		if(inCheck) {
 			PositionInterface pos = b.getPosition();
 			List<Piece> opponentsPieces = pos.getPieces().getPieces(pos.getUnactiveColor());
+			/*for(Piece p : opponentsPieces) {
+				System.out.println(p + " " + p.getPossibleMoves());
+				for(Move m : p.getPossibleMoves()) {
+					System.out.print(m + " ");
+					if(MoveValidator.validate(pos, m)) System.out.print("valid");
+					else System.out.print("invalid");
+					System.out.println();	
+				}
+			}*/
+			//pos.printPieceLocationList();
+			
+			assertTrue(pos.isInCheck());
+		} else {
+			assertFalse(b.getPosition().isInCheck());
+		}
+	}
+	
+	@Test
+	public void testCheckSituationsBB() {
+		Board b = new Board(new PositionBB(new Fen(fenstring)));
+		b.print();
+		if(inCheck) {
+			PositionInterface pos = b.getPosition();
+			//List<Piece> opponentsPieces = pos.getPieces().getPieces(pos.getUnactiveColor());
 			/*for(Piece p : opponentsPieces) {
 				System.out.println(p + " " + p.getPossibleMoves());
 				for(Move m : p.getPossibleMoves()) {

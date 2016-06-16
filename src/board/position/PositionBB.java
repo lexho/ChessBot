@@ -5,10 +5,13 @@ import java.util.Iterator;
 import java.util.List;
 
 import board.pieces.Piece;
+import board.pieces.PieceCreator;
 import board.pieces.PieceList;
 import board.position.bitboard.LookUpTables;
 import board.Move;
 import board.position.bitboard.Movement;
+import util.BitBoardUtils;
+import util.StringUtils;
 
 public class PositionBB implements PositionInterface {
 	
@@ -82,6 +85,36 @@ public class PositionBB implements PositionInterface {
     
     public PositionBB(Fen fen) {
 		// TODO implement PositionBB byFen-constructor
+    	whiteMove = fen.getActiveColor() == 'w' ? true : false;
+    	
+    	pieceTypeBB = new long[Piece.nPieceTypes];
+    	
+    	/* Initialize Bitboards */
+    	for (int i = 0; i < Piece.nPieceTypes; i++) {
+             pieceTypeBB[i] = 0L;
+        }
+    	whiteBB = blackBB = 0L;
+    	
+    	squares = new int[64];
+    	
+		// rnbqkbnr/pppp1ppp/8/8/8/8/PPPPQPPP/RNB1KBNR
+		String piecestr = fen.getPiecePlacement();
+		List<String> rows = StringUtils.splitString(piecestr, '/');
+
+		//pieces = new PieceList(this);
+		for(int y = 7; y >= 0; y--) {
+			String row = rows.get(7 - y);
+			for(int x = 0, i = 0; x < 8; x++, i++) {
+				char p = row.charAt(i);
+				if(Character.isDigit(p)) {
+					x += Character.getNumericValue(p); 
+					continue;
+				}
+				int square = BitBoardUtils.index12x10ToBBSquare(Position12x10.coordToIndex(new int[] {x, y}));
+				int piece = BitBoardUtils.charPieceToPieceType(p);
+				setPiece(square, piece);
+			}
+		}
 	}
 
 	public void updateBitBoards() {
@@ -115,10 +148,6 @@ public class PositionBB implements PositionInterface {
     	wMtrl = bMtrl = 8 * Piece.PAWN_V + 2 * Piece.ROOK_V + 2 * Piece.BISHOP_V + Piece.KNIGHT_V + Piece.QUEEN_V + Piece.KING_V;
     }
     
-    private void createAllPiecesBB() {
-    	allBB = whiteBB | blackBB;
-    }
-    
     private void createWhiteBB() {
     	whiteBB = 0L; // init white pieces bitboard with zeros
     	for(int i = 1; i < 7; i++) {
@@ -131,6 +160,10 @@ public class PositionBB implements PositionInterface {
     	for(int i = 7; i < 13; i++) {
     		blackBB |= pieceTypeBB[i];
     	}
+    }
+    
+    private void createAllPiecesBB() {
+    	allBB = whiteBB | blackBB;
     }
     
     /** Apply a move to the current position. */
@@ -283,6 +316,33 @@ public class PositionBB implements PositionInterface {
     
     public List<board.Move> getPossibleMoves() {
     	/* Update Bitboards */
+		/*createWhiteBB();
+		createBlackBB();
+		createAllPiecesBB();
+    	occupied = whiteBB | blackBB;
+    	
+    	List<board.Move> possible = new ArrayList<board.Move>();
+    	
+    	if(whiteMove) {
+	    	possible.addAll(Movement.whiteRooksMoves(this));
+	    	possible.addAll(Movement.whiteKingMoves(this));
+	    	possible.addAll(Movement.whitePawnMoves(this));
+	    	possible.addAll(Movement.whiteBishopsMoves(this));
+	    	//TODO add missing moves
+    	} else {
+	    	possible.addAll(Movement.blackRooksMoves(this));
+	    	possible.addAll(Movement.blackKingMoves(this));
+	    	possible.addAll(Movement.blackPawnMoves(this));
+	    	possible.addAll(Movement.blackBishopsMoves(this));
+    	}*/
+
+    	List<board.Move> possible = getPseudoLegalMoves();
+    	possible = Movement.removeIllegal(this, possible); // remove illegal moves (check situations)
+    	return possible;
+    }
+    
+    public List<board.Move> getPseudoLegalMoves() {
+    	/* Update Bitboards */
 		createWhiteBB();
 		createBlackBB();
 		createAllPiecesBB();
@@ -295,6 +355,7 @@ public class PositionBB implements PositionInterface {
 	    	possible.addAll(Movement.whiteKingMoves(this));
 	    	possible.addAll(Movement.whitePawnMoves(this));
 	    	possible.addAll(Movement.whiteBishopsMoves(this));
+	    	//TODO add missing moves
     	} else {
 	    	possible.addAll(Movement.blackRooksMoves(this));
 	    	possible.addAll(Movement.blackKingMoves(this));
@@ -302,8 +363,6 @@ public class PositionBB implements PositionInterface {
 	    	possible.addAll(Movement.blackBishopsMoves(this));
     	}
 
-    	//TODO implement missing methods getKingSq(),...
-    	//Movement.removeIllegal(this, possible); // remove illegal moves (check situations)
     	return possible;
     }
 
@@ -350,8 +409,16 @@ public class PositionBB implements PositionInterface {
         return y * 8 + x;
     }
     
+    /** Get the square index with the king on */
     public int getKingSq(boolean isWhite) {
-    	//TODO implement getKingSq()
+    	if(isWhite)
+	    	for(int i = 0; i < squares.length; i++) {
+	    		if(squares[i] == Piece.WKING) return i;
+	    	}
+    	else
+	    	for(int i = 0; i < squares.length; i++) {
+	    		if(squares[i] == Piece.BKING) return i;
+	    	}
     	return -1;
     }
     
@@ -375,7 +442,6 @@ public class PositionBB implements PositionInterface {
     	/*System.out.println("piece: " + board_12x10[squareTo10x12(square)]);
     	System.out.println("BBIndex: " + charPieceToPieceType(board_12x10[squareTo10x12(square)]));
         */
-    	System.out.println("piece: " + piece);
         
     	int removedPiece = squares[square];
     	if (removedPiece != Piece.EMPTY) {
@@ -403,20 +469,20 @@ public class PositionBB implements PositionInterface {
 
         if (piece != Piece.EMPTY) {
             if (Piece.isWhite(piece)) {
-                whiteBB |= sqMask;
-                System.out.println("white bitboard: ");
-                System.out.println(BitBoard.toString(whiteBB));
-            } else {
-                blackBB |= sqMask;
-                System.out.println("black bitboard: ");
-                System.out.println(BitBoard.toString(blackBB));
+            	whiteBB |= sqMask;
+            	wMtrl += Piece.getValue(piece);
+            }
+            else {
+            	blackBB |= sqMask;
+            	bMtrl += Piece.getValue(piece);
             }
         }
     }
 
 	
-	public final void movePieceNotPawn(int from, int to) {
+	private final void movePieceNotPawn(int from, int to) {
 		final int piece = squares[from];
+
 		squares[from] = Piece.EMPTY;
 		squares[to] = piece;
 		//final int piece = BitBoardUtils.charPieceToPieceType(this.getPieceAt(from).getCharRep());
@@ -556,13 +622,37 @@ public class PositionBB implements PositionInterface {
 
 	@Override
 	public boolean isInCheck() {
-		// TODO implement isInCheck()
-		return false;
+		return isInCheck(whiteMove);
+	}
+	
+	@Override
+	@Deprecated
+	public boolean isInCheck(char color) {
+		return color == 'w' ? isInCheck(true) : isInCheck(false);
 	}
 
-	@Override
-	public boolean isInCheck(char color) {
-		// TODO Auto-generated method stub
+	public boolean isInCheck(boolean isWhite) {
+		PositionBB temp = new PositionBB(this);
+		int king;
+
+		temp.setWhiteMove(!isWhite);
+		try {
+		king = temp.getKingSq(isWhite);
+		} catch (IndexOutOfBoundsException e) {
+			return true; //TODO handle no king error
+		}
+
+		//System.out.println("possible moves: " + temp.getPossibleMoves());
+		
+		/* Is any of the opponent's pieces threatening the king? */
+		for(Move m : temp.getPseudoLegalMoves()) { 
+			//System.out.println(m + " " + m.getTarget8x8Index() + " =? " + king);
+			if(m.getTarget8x8Index() == king) {
+				//System.out.println(m + " is threatening the king");
+				return true;
+			}
+		}
+
 		return false;
 	}
 	
@@ -602,7 +692,7 @@ public class PositionBB implements PositionInterface {
 		    int sq = iter.next();
 
 			if(!((allBB & masks[sq]) == masks[sq])) {
-				board[63 - sq] = '.';
+				board[sq] = '.';
 				iter.remove();
 			}
 		}
@@ -610,42 +700,69 @@ public class PositionBB implements PositionInterface {
 		/* Detect pieces */
 		int pieceIndex = 0;
 		for(long bitboard : pieceTypeBB) {
-
+			
 			iter = squares.iterator();
 			while (iter.hasNext()) {
 			    int sq = iter.next();
 
 				if((bitboard & masks[sq]) == masks[sq]) {
-					board[63 - sq] = pieceLabels[pieceIndex];
+					board[sq] = pieceLabels[pieceIndex];
 					iter.remove();
 				}
 			}
 			pieceIndex++;
 		}
 	}
-
-	@Override
-	public void printPieceLocationList() {
-		// TODO Auto-generated method stub
+	
+	private void printSingleBB(int p) {
+		long bitboard = pieceTypeBB[p];
+		char[] pieceLabels = {'.', 'P', 'N', 'B', 'R', 'Q', 'K', 'p', 'n', 'b', 'r', 'q', 'k'};
 		
+		System.out.println(BitBoardUtils.bitboardToString(bitboard, pieceLabels[p]));
+		
+	}
+	
+	private void printBitBoards() {
+		System.out.println("all");
+		System.out.println(BitBoardUtils.bitboardToString(allBB, 'x'));
+		System.out.println("white");
+		System.out.println(BitBoardUtils.bitboardToString(whiteBB, 'w'));
+		System.out.println("black");
+		System.out.println(BitBoardUtils.bitboardToString(blackBB, 'b'));
+		for(int p = 0; p < 13; p++) {
+			printSingleBB(p);
+		}
 	}
 	
 	/** Prints a human-readable 8x8 board*/
 	@Override
 	public String toString() {
 		//System.out.println("Bitboards: ");
-		System.out.println(getActiveColor() + "Bitboards: ");
+		String inCheck = isInCheck() ? "ch" : "";
+		System.out.println(getActiveColor() + " " + inCheck);
 		updateBitBoards();
+		pieceTypeBB[0] = 0L; //TODO empty square bitboard is not up to date
 		convertBitBoardTo8x8Board(); // create 8x8 board
 		
 		StringBuilder result = new StringBuilder();
 		String boardstr = new String(board);
 		
 		/* Add newlines after each rank */
-		for(int j = 0; j < 64; j += 8) {
-		result.append(boardstr.substring(j, j+8));
-		result.append(System.lineSeparator());
+		for(int j = 64 - 8; j >= 0; j -= 8) {
+			result.append(boardstr.substring(j, j + 8));
+			result.append(System.lineSeparator());
 		}
+		//result.append("ABCDEFGH");
+		
+		/* Squares */
+		/*for(int j = 63; j >= 0; j -= 8) {
+			for(int i = j; i > j - 8; i--) {
+				result.append(squares[i] + " ");
+			}
+		result.append(System.lineSeparator());
+		}*/
+		
+		//System.out.println(BitBoard.toString(pieceTypeBB[9]));
 		
 		/*for(BitBoard bitboard : pieceTypeBB) {
 			result.append(bitboard.toString() + System.lineSeparator());
