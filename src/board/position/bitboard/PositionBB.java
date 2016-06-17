@@ -1,4 +1,4 @@
-package board.position;
+package board.position.bitboard;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -7,9 +7,10 @@ import java.util.List;
 import board.pieces.Piece;
 import board.pieces.PieceCreator;
 import board.pieces.PieceList;
-import board.position.bitboard.LookUpTables;
+import board.position.Fen;
+import board.position.Position12x10;
+import board.position.PositionInterface;
 import board.Move;
-import board.position.bitboard.Movement;
 import util.BitBoardUtils;
 import util.StringUtils;
 
@@ -104,14 +105,15 @@ public class PositionBB implements PositionInterface {
 		//pieces = new PieceList(this);
 		for(int y = 7; y >= 0; y--) {
 			String row = rows.get(7 - y);
-			for(int x = 0, i = 0; x < 8; x++, i++) {
+			for(int x = -1, i = 0; x < 8; x++, i++) {
 				char p = row.charAt(i);
 				if(Character.isDigit(p)) {
 					x += Character.getNumericValue(p); 
 					continue;
 				}
-				int square = BitBoardUtils.index12x10ToBBSquare(Position12x10.coordToIndex(new int[] {x, y}));
+				int square = PositionBB.getSquare(x, y);
 				int piece = BitBoardUtils.charPieceToPieceType(p);
+				//System.out.println("set " + p + " to " + x + " / " + y);
 				setPiece(square, piece);
 			}
 		}
@@ -348,6 +350,8 @@ public class PositionBB implements PositionInterface {
 		createAllPiecesBB();
     	occupied = whiteBB | blackBB;
     	
+		//printBitBoards();
+    	
     	List<board.Move> possible = new ArrayList<board.Move>();
     	
     	if(whiteMove) {
@@ -355,12 +359,16 @@ public class PositionBB implements PositionInterface {
 	    	possible.addAll(Movement.whiteKingMoves(this));
 	    	possible.addAll(Movement.whitePawnMoves(this));
 	    	possible.addAll(Movement.whiteBishopsMoves(this));
-	    	//TODO add missing moves
+	    	possible.addAll(Movement.whiteQueenMoves(this));
+	    	possible.addAll(Movement.whiteKnightsMoves(this));
+
     	} else {
 	    	possible.addAll(Movement.blackRooksMoves(this));
 	    	possible.addAll(Movement.blackKingMoves(this));
 	    	possible.addAll(Movement.blackPawnMoves(this));
 	    	possible.addAll(Movement.blackBishopsMoves(this));
+	    	possible.addAll(Movement.blackQueenMoves(this));
+	    	possible.addAll(Movement.blackKnightsMoves(this));
     	}
 
     	return possible;
@@ -722,7 +730,7 @@ public class PositionBB implements PositionInterface {
 		
 	}
 	
-	private void printBitBoards() {
+	public void printBitBoards() {
 		System.out.println("all");
 		System.out.println(BitBoardUtils.bitboardToString(allBB, 'x'));
 		System.out.println("white");

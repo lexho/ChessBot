@@ -5,8 +5,8 @@ import java.util.function.Function;
 import board.Board;
 import board.pieces.Piece;
 import board.pieces.PieceList;
-import board.position.PositionBB;
 import board.position.bitboard.Movement;
+import board.position.bitboard.PositionBB;
 
 /**
  * This is how a scoring function could look like. It's not a very sophisticated

@@ -5,7 +5,7 @@ import java.util.Scanner;
 
 import board.Board;
 import board.Move;
-import board.position.PositionBB;
+import board.position.bitboard.PositionBB;
 import commands.Command;
 import engine.ChessBot;
 

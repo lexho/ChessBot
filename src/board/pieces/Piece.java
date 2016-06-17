@@ -6,7 +6,7 @@ import java.util.List;
 import board.Move;
 import board.actions.Action;
 import board.position.Position12x10;
-import board.position.PositionBB;
+import board.position.bitboard.PositionBB;
 
 public class Piece {
 	char rep;

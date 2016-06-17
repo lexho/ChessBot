@@ -11,10 +11,10 @@ import java.util.concurrent.Future;
 import board.pieces.Piece;
 import board.pieces.PieceList;
 import board.position.Position12x10;
-import board.position.PositionBB;
 import board.position.PositionInterface;
-import board.position.UndoInfo;
 import board.position.bitboard.Movement;
+import board.position.bitboard.PositionBB;
+import board.position.bitboard.UndoInfo;
 import engine.ChessBot;
 import util.BitBoardUtils;
 
@@ -171,18 +171,9 @@ public class Board {
 	 *  */
 	public boolean executeBitboardMove(Move m) {
 		PositionBB currentPosition = (PositionBB) this.currentPosition;
-		
-		/*int piece12x10 = currentPosition.get12x10Board()[m.getSourceIndex()];
-		int piece = BitBoardUtils.charPieceToPieceType(piece12x10);
-		System.out.println("set piece " + piece + " to " + BitBoardUtils.index12x10ToBBSquare(m.getTargetIndex()));
-		((PositionBB) currentPosition).setPiece(BitBoardUtils.index12x10ToBBSquare(m.getTargetIndex()), piece); */
-		
-		int src = m.getSource8x8Index(); //BitBoardUtils.index12x10ToBBSquare(m.getSourceIndex());
-		int trg = m.getTarget8x8Index(); //BitBoardUtils.index12x10ToBBSquare(m.getTargetIndex());
-		//currentPosition.movePieceNotPawn(src, trg);
 		UndoInfo ui = new UndoInfo();
 		currentPosition.makeMove(m, ui);
-		//currentPosition.switchActiveColor();
+
 		return false;
 	}
 	

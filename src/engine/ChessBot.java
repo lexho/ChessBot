@@ -9,8 +9,8 @@ import board.Move;
 import board.NullMove;
 import board.position.Fen;
 import board.position.Position12x10;
-import board.position.PositionBB;
 import board.position.PositionInterface;
+import board.position.bitboard.PositionBB;
 import exceptions.SearchFailException;
 import search.Node;
 import search.algorithms.AlphaBetaHashSearch;
@@ -37,18 +37,18 @@ public class ChessBot {
 	private Board board;
 	
 	public static int NR_OF_THREADS;
-	int depthLimit = 8;
+	int depthLimit = 6;
 	private MainTranspositionTable hashmap;
 	
 	/* Optional Enhancements */
 	boolean useHashTable = false; //TODO change back to true
-	boolean useAspWindows = false; //TODO change back to true
+	boolean useAspWindows = true;
 	
 	/**
 	 * Create a new (internal) board with initial position
 	 */
 	public ChessBot() {
-		System.out.println("ChessBot by Alexander Hoertenhuber | May 2016");
+		System.out.println("ChessBot by Alexander Hoertenhuber | June 2016");
 		board = new Board(new PositionBB());
 		init();
 	}

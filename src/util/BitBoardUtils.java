@@ -2,7 +2,7 @@ package util;
 
 import board.pieces.Piece;
 import board.position.Position12x10;
-import board.position.PositionBB;
+import board.position.bitboard.PositionBB;
 
 public class BitBoardUtils {
 	

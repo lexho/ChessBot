@@ -19,8 +19,8 @@ import board.Board;
 import board.pieces.Piece;
 import board.position.Fen;
 import board.position.Position12x10;
-import board.position.PositionBB;
 import board.position.PositionInterface;
+import board.position.bitboard.PositionBB;
 
 @RunWith(Parameterized.class)
 public class TestCheckSituations {

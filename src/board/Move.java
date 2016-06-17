@@ -4,7 +4,7 @@ import java.util.List;
 
 import board.pieces.Piece;
 import board.position.Position12x10;
-import board.position.PositionBB;
+import board.position.bitboard.PositionBB;
 import util.BitBoardUtils;
 
 public class Move {
@@ -141,17 +141,51 @@ public class Move {
 		char alpha1 = (char) ((char) trg[0] + 'a');
 		char num1 = (char) ((char) trg[1] + '0' + 1);
 		command = Character.toString(alpha) + Character.toString(num) + Character.toString(alpha1) + Character.toString(num1);
+		
+		/* add promotion piece */
+		switch (promPiece) {
+        case Piece.WQUEEN:
+        case Piece.BQUEEN:
+            command += "q";
+            break;
+        case Piece.WROOK:
+        case Piece.BROOK:
+            command += "r";
+            break;
+        case Piece.WBISHOP:
+        case Piece.BBISHOP:
+            command += "b";
+            break;
+        case Piece.WKNIGHT:
+        case Piece.BKNIGHT:
+            command += "n";
+            break;
+        default:
+            break;
+		}
 		return command;
 	}
 	
 	/** Does the moveList contain the Move move? 
 	 * @return contains move */
-	public static boolean contains(List<Move> moveList, Move move) {
+	/*public static boolean contains(List<Move> moveList, Move move) {
 		for(Move m : moveList) {
 			if(m.toString().equals(move.toString())) {
 				return true;
 			}
 		}
 		return false;
+	}*/
+	
+	@Override
+	public final boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (!(obj instanceof Move))
+			return false;
+		Move other = (Move) obj;
+		return this.command.equals(other.command);
 	}
 }
