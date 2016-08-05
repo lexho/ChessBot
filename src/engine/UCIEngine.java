@@ -30,8 +30,8 @@ public class UCIEngine {
 		
 		Scanner terminalInput = new Scanner(System.in);
 		try {
-			//cmdlog = new PrintWriter("/home/alex/Code/java/ChessBot/log/cmds.txt", "UTF-8");
-			cmdlog = new PrintWriter("/home/guest/workspace/java/ChessBot/log/cmds.txt", "UTF-8");
+			cmdlog = new PrintWriter("/home/alex/Code/java/ChessBot/log/cmds.txt", "UTF-8");
+			//cmdlog = new PrintWriter("/home/guest/workspace/java/ChessBot/log/cmds.txt", "UTF-8");
 			
 			//System.setOut(new PrintStream(new File("/home/alex/Code/java/ChessBot/log/output.txt")));
 			//System.setErr(new PrintStream(new File("/home/alex/Code/java/ChessBot/log/error.txt")));
@@ -74,7 +74,13 @@ public class UCIEngine {
 		case "isready":
 			System.out.println("readyok");
 			break;
-		case "set": // set option name
+		case "setoption": // setoption name
+			switch(cmds.get(2)) {
+			case "Depth":
+				bot.setDepthLimit(Integer.parseInt(cmds.get(4)));
+				System.out.println("depth limit set to " + cmds.get(4));
+				break;
+			}
 			break;
 		case "register":
 			break;

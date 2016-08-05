@@ -27,5 +27,24 @@ public class StringUtils {
 		
 		return str_splitted;
 	}
+	
+	public static List<String> splitString(String str, String sep) {
+		List<String> str_splitted= new ArrayList<String>();
+		
+		int e = str.indexOf(sep);
+		
+		while(e != -1) {
+			str_splitted.add(str.substring(0, e));
+			//System.out.println("add: " + cmd.substring(0, e));
+			str = str.substring(e + sep.length());
+			e = str.indexOf(sep);
+		}
+		
+		/* Add last word */
+		//System.out.println("add: " + cmd);
+		str_splitted.add(str);
+		
+		return str_splitted;
+	}
 
 }

@@ -19,5 +19,5 @@ public interface AdversarialSearch {
 	 * @param evalFunction the eval function that scores a leaf
 	 * @return Pair<T, Double> a pair (bestMove, score)
 	 */
-	Pair<Node, Double> search(Node start, Function<Node, Double> evalFunction);
+	Pair<Node, Integer> search(Node start, Function<Node, Integer> evalFunction);
 }

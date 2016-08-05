@@ -15,6 +15,7 @@ import exceptions.SearchFailException;
 import search.Node;
 import search.algorithms.AlphaBetaHashSearch;
 import search.algorithms.AlphaBetaSearch;
+import search.algorithms.AlphaBetaSearchInt;
 import search.algorithms.RS;
 import search.datastructures.Pair;
 import search.evalfunctions.ScoreBoard;
@@ -170,9 +171,9 @@ public class ChessBot {
 		return nextMove;
 	}
 	
-	private AlphaBetaSearch alphabeta;
-	private double currentScore = 0d;
-	private double[] aspwindow = {25d, 25d};
+	private AlphaBetaSearchInt alphabeta;
+	private int currentScore = 0;
+	private int[] aspwindow = {25, 25};
 	
 	/** use AlphaBeta Search with aspiration windows and a hashtable as search engine
 	 * @return best move found
@@ -182,22 +183,22 @@ public class ChessBot {
 		long searchtime = System.currentTimeMillis(); // current time in milliseconds
 		
 		/* AlphaBeta Search */
-		Function<Board, Double> scoreboard = new ScoreBitBoard(board.copy());
-		Function<Node, Double> evalFunction = new BoardFunction(scoreboard);
+		Function<Board, Integer> scoreboard = new ScoreBitBoard(board.copy());
+		Function<Node, Integer> evalFunction = new BoardFunction(scoreboard);
 		
 		/* Reset aspiration window */
-		aspwindow[0] = 25d;
-		aspwindow[1] = 25d;
+		aspwindow[0] = 25;
+		aspwindow[1] = 25;
 
 		for(int depth = 1; depth <= depthLimit; depth++) {
 			/* Use hashmap? */
 			if(useHashTable) 
-				alphabeta = new AlphaBetaHashSearch(depth, hashmap, searchtime);
+				alphabeta = null; //new AlphaBetaHashSearch(depth, hashmap, searchtime);
 			else 
-				alphabeta = new AlphaBetaSearch(depth, searchtime);
+				alphabeta = new AlphaBetaSearchInt(depth, searchtime);
 				
-			Pair<Node, Double> result = null;
-			double[] aspReset = {new Double(aspwindow[0]), new Double(aspwindow[1])};
+			Pair<Node, Integer> result = null;
+			int[] aspReset = {new Integer(aspwindow[0]), new Integer(aspwindow[1])};
 			boolean failed = false;
 			do {
 				/* Prune search tree at higher depths to reduce search time */
@@ -214,10 +215,10 @@ public class ChessBot {
 				} catch (SearchFailException e) {
 					failed = true;
 					if(e.isAlphaFail()) {
-						aspwindow[0] = Math.pow(Math.abs(aspwindow[0]), 1.2);
+						aspwindow[0] = (int) Math.pow(Math.abs(aspwindow[0]), 1.2);
 					}
 					else {
-						aspwindow[1] = Math.pow(aspwindow[1], 1.2);
+						aspwindow[1] = (int) Math.pow(aspwindow[1], 1.2);
 					}
 					System.out.println("new aspiration window: " + (currentScore - aspwindow[0]) + " " + (currentScore + aspwindow[1]));
 				}
@@ -229,7 +230,7 @@ public class ChessBot {
 					System.out.println("aspwindow is bigger than 10000 and no move found yet");
 					System.err.println("starting search without full range window (-infinity and +infinity)");
 					System.out.println("starting search without full range window (-infinity and +infinity)");
-					alphabeta.setBounds(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+					alphabeta.setBounds(Integer.MIN_VALUE, Integer.MAX_VALUE);
 					result = alphabeta.search(
 							new BoardNode(board.copy()),
 							evalFunction);	
@@ -257,9 +258,10 @@ public class ChessBot {
 	 * */
 	private Move alphaBetaSearchHashTable() {
 		Move nextMove = null;
-		long searchtime = System.currentTimeMillis(); // current time in milliseconds
+		// TODO uncomment and fix
+		/*long searchtime = System.currentTimeMillis(); // current time in milliseconds
 		
-		/* AlphaBeta Search */
+		// AlphaBeta Search 
 		ScoreBoard scoreboard = new ScoreBoard12x10(board.copy());
 		Function<Node, Double> evalFunction = new BoardFunction(scoreboard);
 		
@@ -287,7 +289,7 @@ public class ChessBot {
 		searchtime = System.currentTimeMillis() - searchtime;
 		
 		printSearchStats(searchtime, scoreboard);
-		
+		*/
 		return nextMove;
 	}
 	
@@ -301,16 +303,16 @@ public class ChessBot {
 		/* AlphaBeta Search */
 		//ScoreBoard scoreboard = new ScoreBoard(board.copy());
 		ScoreBitBoard scoreboard = new ScoreBitBoard(board.copy());
-		Function<Node, Double> evalFunction = new BoardFunction(scoreboard);
+		Function<Node, Integer> evalFunction = new BoardFunction(scoreboard);
 		
 		long starttime = System.currentTimeMillis();
 		for(int depth = 1; depth <= depthLimit; depth++) {
-			alphabeta = new AlphaBetaSearch(depth, starttime);
+			alphabeta = new AlphaBetaSearchInt(depth, starttime);
 			
-			Pair<Node, Double> result = null;
+			Pair<Node, Integer> result = null;
 			double[] aspReset = {new Double(aspwindow[0]), new Double(aspwindow[1])};
 			boolean failed = false;
-			alphabeta.setBounds(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+			alphabeta.setBounds(Integer.MIN_VALUE, Integer.MAX_VALUE);
 			result = alphabeta.search(
 					new BoardNode(board.copy()),
 					evalFunction);	
@@ -356,6 +358,12 @@ public class ChessBot {
 	 * @param threads number of threads */
 	public void setNrOfThreads(int threads) {
 		NR_OF_THREADS = threads;
+	}
+	
+	/** Set the depth limit
+	 * @param depth limit */
+	public void setDepthLimit(int limit) {
+		depthLimit = limit;
 	}
 	
 	/** Turn Debug-Mode on/off */

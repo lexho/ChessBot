@@ -395,14 +395,6 @@ public class PositionBB implements PositionInterface {
         //hashKey ^= castleHashKeys[castleMask];
         this.castleMask = castleMask;
     }
-    
-    public final void setEpSquare(int epSquare) {
-        if (this.epSquare != epSquare) {
-            //hashKey ^= epHashKeys[(this.epSquare >= 0) ? getX(this.epSquare) + 1 : 0];
-            //hashKey ^= epHashKeys[(epSquare >= 0) ? getX(epSquare) + 1 : 0];
-            this.epSquare = epSquare;
-        }
-    }
 	
     /** Return x position (file) corresponding to a square. */
     public final static int getX(int square) {
@@ -430,9 +422,17 @@ public class PositionBB implements PositionInterface {
     	return -1;
     }
     
-    public int getEpSquare() {
-    	//TODO implement getEpSquare()
-    	return -1;
+    /** En passant square, or -1 if no ep possible. */
+    public final int getEpSquare() {
+        return epSquare;
+    }
+    
+    public final void setEpSquare(int epSquare) {
+        if (this.epSquare != epSquare) {
+            //hashKey ^= epHashKeys[(this.epSquare >= 0) ? getX(this.epSquare) + 1 : 0];
+            //hashKey ^= epHashKeys[(epSquare >= 0) ? getX(epSquare) + 1 : 0];
+            this.epSquare = epSquare;
+        }
     }
     
     public int[] getSquares() {
