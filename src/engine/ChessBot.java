@@ -113,8 +113,10 @@ public class ChessBot {
 	 * @return the next move to be played
 	 */
 	public String getNextMove() {
-		//board.setColor(board.getActiveColor());
+		board.setColor(board.getActiveColor());
+		/*System.out.println("bot color: " + board.getColor());
 		System.out.println("active color: " + board.getActiveColor());
+		System.out.println("bot color: " + board.getColor());*/
 		
 		Move nextMove = null;
 		if(useAspWindows) nextMove = alphaBetaSearchAspWindows();
@@ -343,6 +345,11 @@ public class ChessBot {
 		System.out.println("pruning alpha: " + alphabeta.getPruningStats().get(0) + ", beta: " + alphabeta.getPruningStats().get(1));
 		System.out.println("leaf nodes: " + alphabeta.getLeafNodeStatistics());
 		System.out.println();
+	}
+	
+	/** @return current bestmove score */
+	public int getScore() {
+		return currentScore;
 	}
 	
 	/**

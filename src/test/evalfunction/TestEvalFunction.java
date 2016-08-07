@@ -1,18 +1,60 @@
 package test.evalfunction;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 
 import board.Board;
 import board.Move;
+import board.pieces.Piece;
 import board.position.Fen;
 import board.position.bitboard.PositionBB;
 import search.datastructures.ScoreData;
 import search.evalfunctions.ScoreBitBoard;
 import test.bitboard.TestMoves;
+import util.StringUtils;
 
+@RunWith(Parameterized.class)
 public class TestEvalFunction {
+	@Parameters
+	public static Collection<Object[]> generateParams() {
+		List<Object[]> params = new ArrayList<Object[]>();
+		try {
+			List<String> positions = Files.readAllLines(
+			Paths.get("assets/positions/bratko-kopec-test.txt"), StandardCharsets.UTF_8);
+			
+			for (String str : positions) {
+				List<String> strs = StringUtils.splitString(str, "bm");
+				String bestmove = strs.get(1).substring(1); // remove space character
+				params.add(new Object[] {strs.get(0), bestmove });
+			}
+		} catch (Exception e)
+		{
+			throw new RuntimeException(e);
+		}
+		return params;
+	}
+	
+	String fenstr;
+	String bestmove;
+	
+	public TestEvalFunction(String fenstr, String bestmove) {
+		this.fenstr = fenstr;
+		this.bestmove = bestmove;
+	}
+	
 	@Test
 	public void testEvalFunction() {
 		Board  board = new Board(new PositionBB());
@@ -48,5 +90,51 @@ public class TestEvalFunction {
 		for(String move : expected) {
 			TestMoves.contains(possible, move);
 		}*/
+	}
+	
+	@Test
+	public void testMaterialScore() {
+		String[] poslist = {"rnbqkbnr/pppppppp/8/8/8/8/1PPPPPPP/RNBQKBNR w KQkq - 0 2", 
+				"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKB1R w KQkq - 0 2",
+				"rn1qkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKB1R w KQkq - 0 2"};
+		int[] expectedScores = {0 - Piece.PAWN_V, 0 - Piece.KNIGHT_V, 0 - Piece.KNIGHT_V + Piece.BISHOP_V};
+		List<Integer> results = new ArrayList<Integer>();
+		
+		List<String> positions = new ArrayList<String>(Arrays.asList(poslist));
+		for(int i = 0; i < positions.size(); i++) {
+			PositionBB pos = new PositionBB(new Fen(positions.get(i)));
+			System.out.println(pos);
+			Board  board = new Board(pos);
+			ScoreBitBoard scoreboard = new ScoreBitBoard(board.copy());
+			
+			int mtrlScore = scoreboard.scoreMaterial(board);
+			assertEquals(mtrlScore, expectedScores[i]);
+			results.add(mtrlScore);
+			System.out.println(mtrlScore);
+		}
+		
+		assertTrue(results.get(0) < 0); // position is bad for white
+		assertTrue(results.get(1) < 0); // position is bad for white
+		assertTrue(results.get(0) > results.get(1));
+		assertTrue(results.get(2) > results.get(1));
+	}
+	
+	@Test
+	public void testMobilityScore() {
+		//Board board = new Board(new PositionBB(new Fen("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2")));
+		Board board = new Board(new PositionBB(new Fen(fenstr)));
+		ScoreBitBoard scoreboard = new ScoreBitBoard(board.copy());
+		
+		int mobScore = scoreboard.scoreMobility(board);
+		int expected = board.getPossibleMoves().size();
+		board.getPositionBB().setWhiteMove(false);
+		expected -= board.getPossibleMoves().size();
+		int diff = Math.abs(expected - mobScore);
+		
+		System.out.print("expected: " + expected + ", ");
+		System.out.print("function: " + mobScore + ", ");
+		System.out.println("diff: " + diff);
+		assertTrue(expected >= 0 && mobScore >= 0 );
+		//assertEquals(expected, mobScore);
 	}
 }

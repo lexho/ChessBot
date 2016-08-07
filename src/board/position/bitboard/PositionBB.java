@@ -23,8 +23,8 @@ public class PositionBB implements PositionInterface {
     public long whiteBB, blackBB, allBB;
     public long occupied; // will be dynamically created
     
-    int wMtrl;
-    int bMtrl;
+    int wMtrl = 0;
+    int bMtrl = 0;
     
     public boolean whiteMove;
     
@@ -105,16 +105,22 @@ public class PositionBB implements PositionInterface {
 		//pieces = new PieceList(this);
 		for(int y = 7; y >= 0; y--) {
 			String row = rows.get(7 - y);
-			for(int x = -1, i = 0; x < 8; x++, i++) {
+			for(int x = 0, i = 0; x < 8; x++, i++) {
+				if(i == row.length()) break;
 				char p = row.charAt(i);
 				if(Character.isDigit(p)) {
-					x += Character.getNumericValue(p); 
+					x += Character.getNumericValue(p - 1); 
 					continue;
 				}
 				int square = PositionBB.getSquare(x, y);
 				int piece = BitBoardUtils.charPieceToPieceType(p);
+				//System.out.println("set " + piece + " to " + x + " / " + y);
 				//System.out.println("set " + p + " to " + x + " / " + y);
 				setPiece(square, piece);
+				if(piece < 7) 
+					wMtrl += Piece.getValue(piece);
+				else 
+					bMtrl += Piece.getValue(piece);
 			}
 		}
 	}
@@ -147,7 +153,7 @@ public class PositionBB implements PositionInterface {
     	blackBB = 0b1111111111111111000000000000000000000000000000000000000000000000L;
     	allBB = 0b1111111111111111000000000000000000000000000000001111111111111111L;
     	whiteMove = true;
-    	wMtrl = bMtrl = 8 * Piece.PAWN_V + 2 * Piece.ROOK_V + 2 * Piece.BISHOP_V + Piece.KNIGHT_V + Piece.QUEEN_V + Piece.KING_V;
+    	wMtrl = bMtrl = 8 * Piece.PAWN_V + 2 * Piece.ROOK_V + 2 * Piece.BISHOP_V + 2 * Piece.KNIGHT_V + Piece.QUEEN_V + Piece.KING_V;
     }
     
     private void createWhiteBB() {

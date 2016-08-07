@@ -150,7 +150,7 @@ public class AlphaBetaSearchInt implements AdversarialSearch {
 		nodecount++;   
 		if ( depthleft == 0 || current.isLeaf() ) {
 			NrOfLeafNodes++;
-			return new Pair<Node, Integer>(current, evalFunction.apply(current));
+			return new Pair<Node, Integer>(current, -evalFunction.apply(current));
 		}
 		   int current_depth = depth;
 		   int i = 0;

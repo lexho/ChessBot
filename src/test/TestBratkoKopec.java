@@ -1,5 +1,8 @@
 package test;
 
+import static org.junit.Assert.assertTrue;
+
+import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -16,6 +19,7 @@ import board.Board;
 import board.position.Fen;
 import board.position.bitboard.PositionBB;
 import engine.ChessBot;
+import util.NullPrinter;
 import util.StringUtils;
 
 @RunWith(Parameterized.class)
@@ -50,11 +54,29 @@ public class TestBratkoKopec {
 	
 	@Test
 	public void testBratkoKopec() {
-		System.out.println(fenstr);
-		System.out.println("bestmove: " + bestmove);
+		//System.out.println(fenstr);
+		//System.out.println("bestmove: " + bestmove);
+		
+		// disable output stream
+		PrintStream outputStream = System.out;
+		System.setOut(NullPrinter.out);
+		
 		ChessBot bot = new ChessBot(fenstr);
+		bot.useAspWindows(false);
+		bot.useHashTable(false);
+		bot.setDepthLimit(6);
 		String bestmove_bot = bot.getNextMove();
-		System.out.println("bestmove: " + bestmove_bot + " (expected " + bestmove + ")");
+		String target = bestmove_bot.substring(2);
+		
+		// enable output stream
+		System.setOut(outputStream);
+		
+		System.out.print("bestmove: " + bestmove_bot + " (expected " + bestmove + ")");
+		if(bestmove.contains(target)) 
+			System.out.println(" <ok> "); 
+		else
+			System.out.println(" <fail> ");
+		assertTrue(bestmove.contains(target));
 	}
 
 }

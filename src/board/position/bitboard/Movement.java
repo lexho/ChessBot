@@ -6,6 +6,7 @@ import java.util.List;
 import board.Move;
 import board.pieces.Piece;
 import board.position.BitBoard;
+import util.BitBoardUtils;
 
 public class Movement {
 	static final short FILE_A = 0;
@@ -153,12 +154,12 @@ public class Movement {
     
     public static long whitePiecesValid(PositionBB pos) {
     	return whiteKingValid(pos) | whiteKnightsValid(pos) |
-    			whiteBishopsValid(pos) | whitePawnsValid(pos);
+    			whiteBishopsValid(pos) | whiteRooksValid(pos) | whiteQueensValid(pos) | whitePawnsValid(pos);
     }
     
     public static long blackPiecesValid(PositionBB pos) {
     	return blackKingValid(pos) | blackKnightsValid(pos) |
-    			blackBishopsValid(pos) | blackPawnsValid(pos);
+    			blackBishopsValid(pos) | blackRooksValid(pos) | blackQueensValid(pos) | blackPawnsValid(pos);
     }
 	
 	public static long whiteKingValid(PositionBB pos) {
@@ -220,6 +221,81 @@ public class Movement {
             
             squares &= squares-1;
         }
+		return m;
+	}
+	
+	
+	public static long whiteRooksValid(PositionBB pos) {
+		long squares = pos.pieceTypeBB[Piece.WROOK];
+        long m = 0x0L;
+		
+		squares = pos.pieceTypeBB[Piece.WROOK];
+		while (squares != 0) {
+            int sq = BitBoard.numberOfTrailingZeros(squares);
+            m |= rookAttacks(sq, pos.allBB) & ~pos.whiteBB;
+            squares &= squares-1;
+        }
+		
+		//System.out.println(BitBoardUtils.bitboardToString(m, '1'));
+		
+		return m;
+	}
+	
+	public static long blackRooksValid(PositionBB pos) {
+		long squares = pos.pieceTypeBB[Piece.BROOK];
+        long m = 0x0L;
+		
+		squares = pos.pieceTypeBB[Piece.BROOK];
+		while (squares != 0) {
+            int sq = BitBoard.numberOfTrailingZeros(squares);
+            m |= rookAttacks(sq, pos.allBB) & ~pos.blackBB;
+            squares &= squares-1;
+        }
+		
+		//System.out.println(BitBoardUtils.bitboardToString(m, '1'));
+		
+		return m;
+	}
+	
+	public static long whiteQueensValid(PositionBB pos) {
+		long squares = pos.pieceTypeBB[Piece.WQUEEN];
+        long m = 0x0L;
+		while (squares != 0) {
+            int sq = BitBoard.numberOfTrailingZeros(squares);
+            m |= bishopAttacks(sq, pos.allBB) & ~pos.whiteBB;
+            squares &= squares-1;
+        }
+		
+		squares = pos.pieceTypeBB[Piece.WQUEEN];
+		while (squares != 0) {
+            int sq = BitBoard.numberOfTrailingZeros(squares);
+            m |= rookAttacks(sq, pos.allBB) & ~pos.whiteBB;
+            squares &= squares-1;
+        }
+		
+		//System.out.println(BitBoardUtils.bitboardToString(m, '1'));
+		
+		return m;
+	}
+	
+	public static long blackQueensValid(PositionBB pos) {
+		long squares = pos.pieceTypeBB[Piece.BQUEEN];
+        long m = 0x0L;
+		while (squares != 0) {
+            int sq = BitBoard.numberOfTrailingZeros(squares);
+            m |= bishopAttacks(sq, pos.allBB) & ~pos.blackBB;
+            squares &= squares-1;
+        }
+		
+		squares = pos.pieceTypeBB[Piece.BQUEEN];
+		while (squares != 0) {
+            int sq = BitBoard.numberOfTrailingZeros(squares);
+            m |= rookAttacks(sq, pos.allBB) & ~pos.blackBB;
+            squares &= squares-1;
+        }
+		
+		//System.out.println(BitBoardUtils.bitboardToString(m, '1'));
+		
 		return m;
 	}
 	

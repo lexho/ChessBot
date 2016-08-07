@@ -4,6 +4,7 @@ import board.Board;
 import board.pieces.Piece;
 import board.position.bitboard.Movement;
 import board.position.bitboard.PositionBB;
+import util.BitBoardUtils;
 
 /**
  * This is how a scoring function could look like. It's not a very sophisticated
@@ -54,7 +55,7 @@ public class ScoreBitBoard<V> implements ScoreBoard
 			
 			/* scoring dimensions */
 			int mtrl = scoreMaterial(board);
-			int mobility = scoreMobility(board);
+			int mobility = scoreMobility(board) * 2;
 			int pos = scorePosition(board);
 			
 			score = mtrl + mobility + pos;
@@ -84,6 +85,8 @@ public class ScoreBitBoard<V> implements ScoreBoard
 		int score;
 		score = board.getPositionBB().getWhiteMaterial();
 		score -= board.getPositionBB().getBlackMaterial();
+		//System.out.println(board);
+		//System.out.println(board.getPositionBB().getWhiteMaterial() + " " + board.getPositionBB().getBlackMaterial());
 		return score;
 	}
 	
@@ -91,11 +94,17 @@ public class ScoreBitBoard<V> implements ScoreBoard
 	public int scoreMobility(Board board) {
 		
 		/* get number of pieces and active color */
+		//TODO fix bitboard move count
+		board.getPositionBB().updateBitBoards();
 		long validMovesW = Movement.whitePiecesValid(board.getPositionBB());
 		long validMovesB = Movement.blackPiecesValid(board.getPositionBB());
 		
 		int wMobility = Long.bitCount(validMovesW); // number of valid white moves
 		int bMobility = Long.bitCount(validMovesB); // number of valid black moves
+		
+		/*System.out.println(BitBoardUtils.bitboardToString(validMovesW, 'w'));
+		System.out.println(BitBoardUtils.bitboardToString(validMovesB, 'b'));
+		System.out.println("w mob: " + wMobility + ", b mob: " + bMobility);*/
 		
 		/* compute score */
 		int score = (wMobility - bMobility);
@@ -106,16 +115,11 @@ public class ScoreBitBoard<V> implements ScoreBoard
 	public int scorePosition(Board board) {
 		int score = 0;
 
-		//board.getPositionBB().updateBitBoards();
 		int[] squares = board.getPositionBB().getSquares();
-		
-		//board.getPositionBB().printBitBoards();
 		
 		for(int i = 0; i < squares.length; i++) {
 			switch (squares[i]) {
 			case Piece.WPAWN:
-				//System.out.print("wp (" + PositionBB.getX(i) + " / "+ PositionBB.getY(i) + ")");
-				//System.out.println(" " + PawnTable[i]);
 				score += PawnTable[i];
 				break;
 			case Piece.WKNIGHT:
@@ -129,16 +133,16 @@ public class ScoreBitBoard<V> implements ScoreBoard
 				//TODO score king end game
 				break;
 			case Piece.BPAWN:
-				score -= PawnTable[(squares.length - 1) - i];
+				score -= PawnTable[(int)(((int)(i + 56)) - (int)((int)(i / 8) * 16))];
 				break;
 			case Piece.BKNIGHT:
-				score -= KnightTable[(squares.length - 1) - i];
+				score -= KnightTable[(int)(((int)(i + 56)) - (int)((int)(i / 8) * 16))];
 				break;
 			case Piece.BBISHOP:
-				score -= BishopTable[(squares.length - 1) - i];
+				score -= BishopTable[(int)(((int)(i + 56)) - (int)((int)(i / 8) * 16))];
 				break;
 			case Piece.BKING:
-				score -= KingTable[(squares.length - 1) - i];
+				score -= KingTable[(int)(((int)(i + 56)) - (int)((int)(i / 8) * 16))];
 				//TODO score king end game
 				break;
 			}

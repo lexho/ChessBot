@@ -22,7 +22,7 @@ public class Board {
 	public static boolean DEBUG = false;
 	PositionInterface currentPosition;
 	//PieceList pieces;
-	char color; // our color (white or black) TODO this is probably buggy
+	char color; // our color (white or black)
 	
 	/**
 	 *  Create a Board by Position 
