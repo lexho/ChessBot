@@ -30,7 +30,7 @@ public class UCIEngine {
 		
 		Scanner terminalInput = new Scanner(System.in);
 		try {
-			cmdlog = new PrintWriter("/home/alex/Code/java/ChessBot/log/cmds.txt", "UTF-8");
+			//cmdlog = new PrintWriter("/home/alex/Code/java/ChessBot/log/cmds.txt", "UTF-8");
 			//cmdlog = new PrintWriter("/home/guest/workspace/java/ChessBot/log/cmds.txt", "UTF-8");
 			
 			//System.setOut(new PrintStream(new File("/home/alex/Code/java/ChessBot/log/output.txt")));
@@ -43,8 +43,8 @@ public class UCIEngine {
 			Command.setBot(bot); // give command class a bot to pass the commands to
 			while(true) {
 				String command = terminalInput.nextLine(); // read user input
-				cmdlog.println(command);
-				cmdlog.flush();
+				//cmdlog.println(command);
+				//cmdlog.flush();
 				parseCommand(command);
 			}
 		} catch (Exception e) {

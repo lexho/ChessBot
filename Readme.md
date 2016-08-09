@@ -7,6 +7,10 @@ Partner or Fritz) in order to be used comfortably. Read the
 documentation for your GUI of choice for information about how to use
 ChessBot with it.
 
+### Run ChessBot
+
+To execute ChessBot as an UCI-Engine run `java -jar ./ChessBot.jar`.
+
 ### Terms of use
 
 ChessBot is free, and distributed under the **GNU General Public License**
