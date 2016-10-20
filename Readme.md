@@ -7,6 +7,9 @@ Partner or Fritz) in order to be used comfortably. Read the
 documentation for your GUI of choice for information about how to use
 ChessBot with it.
 
+### System Requirements
+Install the latest (>= Java 1.8) Java Runtime Environment from https://java.com/en/download/, or install the Open JDK (`sudo apt-get install openjdk-8-jre`)
+
 ### Run ChessBot
 
 To execute ChessBot as an UCI-Engine run `java -jar ./ChessBot.jar`.
