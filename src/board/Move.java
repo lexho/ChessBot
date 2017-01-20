@@ -128,6 +128,15 @@ public class Move {
 		return promPiece;
 	}
 	
+	/** Invert move for flipped board */
+	public void invertMove() {
+		System.out.println(i8x8_src + " " + i8x8_trg);
+		System.out.println("invert " + i8x8_src + " to " + (i8x8_src ^ 56));
+		i8x8_src = i8x8_src ^ 56;
+		i8x8_trg = i8x8_trg ^ 56;
+		System.out.println(i8x8_src + " " + i8x8_trg);
+	}
+	
 	/**
 	 * @return the move in long algebraic notation
 	 */
@@ -136,6 +145,7 @@ public class Move {
 		/* create long algebraic move string */
 		int[] src = new int[] {PositionBB.getX(i8x8_src), PositionBB.getY(i8x8_src)};
 		int[] trg = new int[] {PositionBB.getX(i8x8_trg), PositionBB.getY(i8x8_trg)};
+		//System.out.println(src[1] + " " + trg[1]);
 		char alpha = (char) ((char) src[0] + 'a');
 		char num = (char) ((char) src[1] + '0' + 1);
 		char alpha1 = (char) ((char) trg[0] + 'a');

@@ -3,18 +3,26 @@ package board.position.bitboard;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import board.pieces.Piece;
 import board.pieces.PieceCreator;
 import board.pieces.PieceList;
 import board.position.Fen;
 import board.position.Position12x10;
-import board.position.PositionInterface;
+import board.position.Position;
+import engine.ChessBot;
+import board.Board;
 import board.Move;
 import util.BitBoardUtils;
 import util.StringUtils;
 
-public class PositionBB implements PositionInterface {
+public class PositionBB implements Position {
 	
     // Bitboards
     //public long[] pieceTypeBB;
@@ -82,6 +90,23 @@ public class PositionBB implements PositionInterface {
     	this.wMtrl = pos.wMtrl;
     	this.bMtrl = pos.bMtrl;
     	
+    }
+    
+    public PositionBB(Position position) {
+    	PositionBB pos = position.getPositionBB();
+    	pieceTypeBB = new long[Piece.nPieceTypes];
+    	for(int i = 0; i < Piece.nPieceTypes; i++) {
+    		pieceTypeBB[i] = pos.pieceTypeBB[i];
+    	}
+    	
+    	this.whiteMove = pos.whiteMove;
+    	
+    	for(int i = 0; i < this.squares.length; i++) {
+    		this.squares[i] = pos.squares[i];
+    	}
+    	
+    	this.wMtrl = pos.wMtrl;
+    	this.bMtrl = pos.bMtrl;
     }
     
     public PositionBB(Fen fen) {
@@ -154,6 +179,39 @@ public class PositionBB implements PositionInterface {
     	allBB = 0b1111111111111111000000000000000000000000000000001111111111111111L;
     	whiteMove = true;
     	wMtrl = bMtrl = 8 * Piece.PAWN_V + 2 * Piece.ROOK_V + 2 * Piece.BISHOP_V + 2 * Piece.KNIGHT_V + Piece.QUEEN_V + Piece.KING_V;
+    }
+    
+    /**
+     * Flip a bitboard vertically about the centre ranks.
+     * Rank 1 is mapped to rank 8 and vice versa.
+     * @param x any bitboard
+     * @return bitboard x flipped vertically
+     */
+    private long flipVertical(long x) {
+        return  ( (x << 56)                           ) |
+                ( (x << 40) & 0x00ff000000000000L ) |
+                ( (x << 24) & 0x0000ff0000000000L ) |
+                ( (x <<  8) & 0x000000ff00000000L ) |
+                ( (x >>>  8) & 0x00000000ff000000L ) |
+                ( (x >>> 24) & 0x0000000000ff0000L ) |
+                ( (x >>> 40) & 0x000000000000ff00L ) |
+                ( (x >>> 56) );
+    }
+    
+    public void flip() {
+    	for(int i = 0; i < pieceTypeBB.length; i++) {
+    		pieceTypeBB[i] = flipVertical(pieceTypeBB[i]);
+    	}
+    	//updateBitBoards();
+    }
+    
+    public void swapPieceColors() {
+    	for(int i = 1; i < 7; i++) {
+    		long swap = pieceTypeBB[i];
+    		pieceTypeBB[i] = pieceTypeBB[i + 6];
+    		pieceTypeBB[i + 6] = swap;
+    	}
+    	switchActiveColor();
     }
     
     private void createWhiteBB() {
@@ -349,6 +407,9 @@ public class PositionBB implements PositionInterface {
     	return possible;
     }
     
+	/** ExecutorService for multi-threading move generator in getPossibleMoves() */
+	//private ExecutorService service;
+    
     public List<board.Move> getPseudoLegalMoves() {
     	/* Update Bitboards */
 		createWhiteBB();
@@ -360,23 +421,155 @@ public class PositionBB implements PositionInterface {
     	
     	List<board.Move> possible = new ArrayList<board.Move>();
     	
+    	List<Future<List<Move>>> futures = new ArrayList<Future<List<Move>>>();
+    	//service = Executors.newFixedThreadPool(ChessBot.NR_OF_THREADS);
+    	//ExecutorService service = ChessBot.service;
+    	ExecutorService executor = Executors.newFixedThreadPool(4);
+    	final PositionBB pos = this;
+    	
     	if(whiteMove) {
-	    	possible.addAll(Movement.whiteRooksMoves(this));
+    		
+	        /*Callable<List<Move>> whiteRooksMoves = new Callable<List<Move>>() {
+	        	
+	            public List<Move> call() throws Exception {
+	            	 return Movement.whiteRooksMoves(pos);
+	            }
+	        };
+	        
+	        Callable<List<Move>> whiteKingsMoves = new Callable<List<Move>>() {
+	        	
+	            public List<Move> call() throws Exception {
+	            	 return Movement.whiteKingMoves(pos);
+	            }
+	        };
+	        
+	        Callable<List<Move>> whitePawnMoves = new Callable<List<Move>>() {
+	        	
+	            public List<Move> call() throws Exception {
+	            	 return Movement.whitePawnMoves(pos);
+	            }
+	        };
+	        
+	        Callable<List<Move>> whiteBishopsMoves = new Callable<List<Move>>() {
+	        	
+	            public List<Move> call() throws Exception {
+	            	 return Movement.whiteBishopsMoves(pos);
+	            }
+	        };
+	        
+	        Callable<List<Move>> whiteQueenMoves = new Callable<List<Move>>() {
+	        	
+	            public List<Move> call() throws Exception {
+	            	 return Movement.whiteQueenMoves(pos);
+	            }
+	        };
+	        
+	        Callable<List<Move>> whiteKnightsMoves = new Callable<List<Move>>() {
+	        	
+	            public List<Move> call() throws Exception {
+	            	 return Movement.whiteKnightsMoves(pos);
+	            }
+	        };
+	        
+	        futures.add(executor.submit(whiteRooksMoves));
+	        futures.add(executor.submit(whiteKingsMoves));
+	        futures.add(executor.submit(whitePawnMoves));
+	        futures.add(executor.submit(whiteBishopsMoves));
+	        futures.add(executor.submit(whiteQueenMoves));
+	        futures.add(executor.submit(whiteKnightsMoves));
+	        
+	        executor.shutdown();
+
+	        try {
+				executor.awaitTermination(10, TimeUnit.SECONDS);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}*/
+	        
+	    	possible.addAll(Movement.whiteRooksMoves(pos.pieceTypeBB[Piece.WROOK], pos.allBB, pos.whiteBB));
 	    	possible.addAll(Movement.whiteKingMoves(this));
-	    	possible.addAll(Movement.whitePawnMoves(this));
-	    	possible.addAll(Movement.whiteBishopsMoves(this));
-	    	possible.addAll(Movement.whiteQueenMoves(this));
-	    	possible.addAll(Movement.whiteKnightsMoves(this));
+	    	possible.addAll(Movement.whitePawnMoves(this, pos.pieceTypeBB[Piece.WPAWN], pos.occupied, pos.blackBB));
+	    	possible.addAll(Movement.whiteBishopsMoves(pos.pieceTypeBB[Piece.WBISHOP], pos.allBB, pos.whiteBB));
+	    	possible.addAll(Movement.whiteQueenMoves(pos.pieceTypeBB[Piece.WQUEEN], pos.allBB, pos.whiteBB));
+	    	possible.addAll(Movement.whiteKnightsMoves(pos.pieceTypeBB[Piece.WKNIGHT], pos.whiteBB));
 
     	} else {
-	    	possible.addAll(Movement.blackRooksMoves(this));
+	        /*Callable<List<Move>> blackRooksMoves = new Callable<List<Move>>() {
+	        	
+	            public List<Move> call() throws Exception {
+	            	 return Movement.blackRooksMoves(pos);
+	            }
+	        };
+	        
+	        Callable<List<Move>> blackKingsMoves = new Callable<List<Move>>() {
+	        	
+	            public List<Move> call() throws Exception {
+	            	 return Movement.blackKingMoves(pos);
+	            }
+	        };
+	        
+	        Callable<List<Move>> blackPawnMoves = new Callable<List<Move>>() {
+	        	
+	            public List<Move> call() throws Exception {
+	            	 return Movement.blackPawnMoves(pos);
+	            }
+	        };
+	        
+	        Callable<List<Move>> blackBishopsMoves = new Callable<List<Move>>() {
+	        	
+	            public List<Move> call() throws Exception {
+	            	 return Movement.blackBishopsMoves(pos);
+	            }
+	        };
+	        
+	        Callable<List<Move>> blackQueenMoves = new Callable<List<Move>>() {
+	        	
+	            public List<Move> call() throws Exception {
+	            	 return Movement.blackQueenMoves(pos);
+	            }
+	        };
+	        
+	        Callable<List<Move>> blackKnightsMoves = new Callable<List<Move>>() {
+	        	
+	            public List<Move> call() throws Exception {
+	            	 return Movement.blackKnightsMoves(pos);
+	            }
+	        };
+	        
+	        futures.add(executor.submit(blackRooksMoves));
+	        futures.add(executor.submit(blackKingsMoves));
+	        futures.add(executor.submit(blackPawnMoves));
+	        futures.add(executor.submit(blackBishopsMoves));
+	        futures.add(executor.submit(blackQueenMoves));
+	        futures.add(executor.submit(blackKnightsMoves));
+	        
+	        executor.shutdown();*/
+	        
+	    	possible.addAll(Movement.blackRooksMoves(pos.pieceTypeBB[Piece.BROOK], pos.allBB, pos.blackBB));
 	    	possible.addAll(Movement.blackKingMoves(this));
-	    	possible.addAll(Movement.blackPawnMoves(this));
-	    	possible.addAll(Movement.blackBishopsMoves(this));
-	    	possible.addAll(Movement.blackQueenMoves(this));
-	    	possible.addAll(Movement.blackKnightsMoves(this));
+	    	possible.addAll(Movement.blackPawnMoves(this, pos.pieceTypeBB[Piece.BPAWN], pos.occupied, pos.whiteBB));
+	    	possible.addAll(Movement.blackBishopsMoves(pos.pieceTypeBB[Piece.BBISHOP], pos.allBB, pos.blackBB));
+	    	possible.addAll(Movement.blackQueenMoves(pos.pieceTypeBB[Piece.BQUEEN], pos.allBB, pos.blackBB));
+	    	possible.addAll(Movement.blackKnightsMoves(pos.pieceTypeBB[Piece.BKNIGHT], pos.blackBB));
     	}
-
+    	
+	    for (Future<List<Move>> future : futures) {
+	        try {
+				possible.addAll(future.get());
+			} catch (InterruptedException e) {
+				//e.printStackTrace();
+				// Interrupt search and return the moves found yet 
+				executor.shutdown();
+				return possible;
+				// TODO Auto-generated catch block
+				//e.printStackTrace();
+			} catch (ExecutionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	    }
+	    
     	return possible;
     }
 
@@ -408,7 +601,7 @@ public class PositionBB implements PositionInterface {
     }
     /** Return y position (rank) corresponding to a square. */
     public final static int getY(int square) {
-        return square >> 3;
+        return square >>> 3;
     }
     
     public final static int getSquare(int x, int y) {
@@ -445,7 +638,7 @@ public class PositionBB implements PositionInterface {
     	return squares;
     }
 	
-	public final int getPieceAt(int src) {
+	public int getPieceAt(int src) {
 		return squares[src];
 	}
 
@@ -520,7 +713,6 @@ public class PositionBB implements PositionInterface {
 	    }
 	}
 	
-	@Override
 	public void switchActiveColor() {
 		whiteMove = !whiteMove;
 	}
@@ -532,7 +724,6 @@ public class PositionBB implements PositionInterface {
 		else return 'b';
 	}
 	
-	@Override
 	@Deprecated
 	public char getUnactiveColor() {
 		if(!whiteMove) return 'w';
@@ -543,18 +734,6 @@ public class PositionBB implements PositionInterface {
 	@Deprecated
 	public void setActiveColor(char color) {
 		whiteMove = color == 'w' ? true : false;
-	}
-
-	@Override
-	public boolean[] getCastling() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void disableCastling(int index) {
-		// TODO Auto-generated method stub
-		
 	}
 	
 	private final void removeCastleRights(int square) {
@@ -569,77 +748,10 @@ public class PositionBB implements PositionInterface {
         }
     }
 
-	@Override
-	public PieceList getPieces() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Piece getPieceAt(int x, int y) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Piece getPieceAt(int[] coord) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void updatePieceList() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void setPieceAt(Piece p, int[] coord) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void clear(int[] coord) {
-		// TODO Auto-generated method stub
-		
-	}
-	
-	public void clear(int index) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public boolean isFree(int[] coord) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean isValid(int[] coord) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public int getMoveNr() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public void increaseMoveNr() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
 	public boolean isInCheck() {
 		return isInCheck(whiteMove);
 	}
 	
-	@Override
 	@Deprecated
 	public boolean isInCheck(char color) {
 		return color == 'w' ? isInCheck(true) : isInCheck(false);
@@ -728,7 +840,7 @@ public class PositionBB implements PositionInterface {
 		}
 	}
 	
-	private void printSingleBB(int p) {
+	public void printSingleBB(int p) {
 		long bitboard = pieceTypeBB[p];
 		char[] pieceLabels = {'.', 'P', 'N', 'B', 'R', 'Q', 'K', 'p', 'n', 'b', 'r', 'q', 'k'};
 		
@@ -782,5 +894,39 @@ public class PositionBB implements PositionInterface {
 			result.append(bitboard.toString() + System.lineSeparator());
 		}*/
 		return result.toString();
+	}
+
+	@Override
+	public Position copy() {
+		return new PositionBB(this);
+	}
+
+	@Override
+	public boolean makeMove(Move m) {
+		UndoInfo ui = new UndoInfo();
+		this.makeMove(m, ui);
+		return false;
+	}
+
+	@Override
+	public PositionBB getPositionBB() {
+		return this;
+	}
+
+	@Override
+	public boolean isRunning() {
+		long validMoves;
+		if(whiteMove()) 
+			validMoves = Movement.whitePiecesValid(this);
+		else 
+			validMoves = Movement.blackPiecesValid(this);
+		
+		if(validMoves == 0L) return false;
+		else return true;
+	}
+
+	@Override
+	public int getMoveNr() {
+		return halfMoveClock;
 	}
 }

@@ -13,18 +13,19 @@ public class HashTableEntry {
 	public static short hashfBETA = 2;
 	
 	//Pair<Node, Double> pair;
-	double score;
+	int score;
 	int depth;
 	short flag;
 	
-	public HashTableEntry(Pair<Node, Double> p, short flag) {
+	public HashTableEntry(Pair<Node, Integer> p, int depth, short flag) {
 		//this.pair = p;
 		this.score = p.s;
-		this.depth = p.f.getDepth();
+		//this.depth = p.f.getDepth();
+		this.depth = depth;
 		this.flag = flag;
 	}
 	
-	public HashTableEntry(double score, int depth, short flag) {
+	public HashTableEntry(int score, int depth, short flag) {
 		//this.pair = p;
 		this.score = score;
 		this.depth = depth;
@@ -39,7 +40,7 @@ public class HashTableEntry {
 		return depth;
 	}
 	
-	public Double getScore() {
+	public Integer getScore() {
 		return score;
 	}
 	

@@ -2,6 +2,7 @@ package search.evalfunctions;
 
 import board.Board;
 import board.pieces.Piece;
+import board.position.Position;
 import board.position.bitboard.Movement;
 import board.position.bitboard.PositionBB;
 import util.BitBoardUtils;
@@ -20,11 +21,13 @@ import util.BitBoardUtils;
  */
 public class ScoreBitBoard<V> implements ScoreBoard
 {
-	private char player_id;
-	private char opponent_id;
-	private Board start;
+	private boolean player_id;
+	private boolean opponent_id;
+	private Position start;
 	public int scoreCounter;
 	private PositionBB position;
+	private static final boolean WHITE = true;
+	private static final boolean BLACK = false;
 
 	/**
 	 * This particular scoring function will get constructed each time a search is run.
@@ -34,19 +37,22 @@ public class ScoreBitBoard<V> implements ScoreBoard
 	 * @param player_id
 	 * @param opponent_id
 	 */
-	public ScoreBitBoard(Board start)
+	public ScoreBitBoard(Position start)
 	{
 		this.start = start;
-		this.player_id = start.getColor();
-		this.opponent_id = start.getOpponentsColor();
+		if(start.whiteMove())
+			this.player_id = WHITE;
+		else
+			this.player_id = BLACK;
+		this.opponent_id = !player_id;
 		this.scoreCounter = 0;
 	}
 
 	@Override
-	public Integer apply(Board board)
+	public Integer apply(Position board)
 	{
 		scoreCounter++;
-		this.position = (PositionBB) board.getPosition();
+		this.position = board.getPositionBB();
 
 		// nobody won or lost so far
 		if (board.isRunning())
@@ -59,7 +65,7 @@ public class ScoreBitBoard<V> implements ScoreBoard
 			int pos = scorePosition(board);
 			
 			score = mtrl + mobility + pos;
-			if(player_id == 'b') score *= -1;
+			if(player_id == BLACK) score *= -1;
 			
 			//if(mtrl > 0) System.out.println("material: " + mtrl + ", mobility: " + mobility + ", position: " + pos);
 			
@@ -67,9 +73,9 @@ public class ScoreBitBoard<V> implements ScoreBoard
 		  } else
 		{
 			// Who is checkmate?
-			if(board.getPosition().isInCheck(opponent_id)) {
+			if(board.isInCheck(opponent_id)) {
 				return 100000;
-			} else if (board.getPosition().isInCheck(player_id)) {
+			} else if (board.isInCheck(player_id)) {
 				return -100000;
 			} else {
 				return 0;
@@ -81,7 +87,7 @@ public class ScoreBitBoard<V> implements ScoreBoard
 		return scoreCounter;
 	}
 	
-	public int scoreMaterial(Board board) {
+	public int scoreMaterial(Position board) {
 		int score;
 		score = board.getPositionBB().getWhiteMaterial();
 		score -= board.getPositionBB().getBlackMaterial();
@@ -91,7 +97,7 @@ public class ScoreBitBoard<V> implements ScoreBoard
 	}
 	
 	/* side to move relative score */
-	public int scoreMobility(Board board) {
+	public int scoreMobility(Position board) {
 		
 		/* get number of pieces and active color */
 		//TODO fix bitboard move count
@@ -112,7 +118,7 @@ public class ScoreBitBoard<V> implements ScoreBoard
 		return score;
 	}
 
-	public int scorePosition(Board board) {
+	public int scorePosition(Position board) {
 		int score = 0;
 
 		int[] squares = board.getPositionBB().getSquares();
@@ -133,16 +139,20 @@ public class ScoreBitBoard<V> implements ScoreBoard
 				//TODO score king end game
 				break;
 			case Piece.BPAWN:
-				score -= PawnTable[(int)(((int)(i + 56)) - (int)((int)(i / 8) * 16))];
+				//score -= PawnTable[(int)(((int)(i + 56)) - (int)((int)(i / 8) * 16))];
+				score -= PawnTable[i ^ 56];
 				break;
 			case Piece.BKNIGHT:
-				score -= KnightTable[(int)(((int)(i + 56)) - (int)((int)(i / 8) * 16))];
+				//score -= KnightTable[(int)(((int)(i + 56)) - (int)((int)(i / 8) * 16))];
+				score -= KnightTable[i ^ 56];
 				break;
 			case Piece.BBISHOP:
-				score -= BishopTable[(int)(((int)(i + 56)) - (int)((int)(i / 8) * 16))];
+				//score -= BishopTable[(int)(((int)(i + 56)) - (int)((int)(i / 8) * 16))];
+				score -= BishopTable[i ^ 56];
 				break;
 			case Piece.BKING:
-				score -= KingTable[(int)(((int)(i + 56)) - (int)((int)(i / 8) * 16))];
+				//score -= KingTable[(int)(((int)(i + 56)) - (int)((int)(i / 8) * 16))];
+				score -= KingTable[i ^ 56];
 				//TODO score king end game
 				break;
 			}

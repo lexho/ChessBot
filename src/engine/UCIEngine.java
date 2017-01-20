@@ -67,7 +67,7 @@ public class UCIEngine {
 		List<String> cmds = StringUtils.splitString(cmd, ' ');
 		switch(cmds.get(0)) {
 		case "uci":
-			System.out.println("id name ChessBot");
+			System.out.println("id name ChessBotBB");
 			System.out.println("id author Alexander Hoertenhuber");
 			System.out.println("uciok");
 			break;

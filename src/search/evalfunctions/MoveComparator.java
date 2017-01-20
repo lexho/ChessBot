@@ -3,13 +3,14 @@ package search.evalfunctions;
 import java.util.Comparator;
 
 import board.Move;
+import board.pieces.Piece;
 import board.pieces.PieceCreator;
 import board.position.Position12x10;
 
 /** sorts moves by Most Valuable Victim - Least Valuable Aggressor */
 public class MoveComparator implements Comparator<Move> {
 	
-	private int[] board_raw;
+	private final int[] board_raw;
 	
 	public MoveComparator(int[] board_raw) {
 		this.board_raw = board_raw;
@@ -38,15 +39,20 @@ public class MoveComparator implements Comparator<Move> {
     
     private int getVictimValue(Move m) {
     	int trg = m.getTarget8x8Index();
-    	char rep = (char) board_raw[trg];
+    	int piece = board_raw[trg];
 		
-		if(rep != Position12x10.EMPTY)
-			return PieceCreator.createPiece(rep,trg).getValue();
+		if(piece != Piece.EMPTY)
+			return Piece.getValue(piece);
 		else return 0;
 		
     }
     
     private int getAggressorValue(Move m) {
-    	return 0;
+    	int src = m.getSource8x8Index();
+    	int piece = board_raw[src];
+		
+		if(piece != Piece.EMPTY)
+			return Piece.getValue(piece);
+		else return 0;
     }
 }

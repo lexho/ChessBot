@@ -5,6 +5,7 @@ import java.util.List;
 
 import board.Board;
 import board.Move;
+import board.position.Position;
 import search.Node;
 import search.evalfunctions.MoveComparator;
 import search.hashfunctions.ZobristHash;
@@ -12,15 +13,15 @@ import search.hashfunctions.ZobristHash;
 public class BoardNode implements Node
 {
 	protected BoardNode parent;
-	protected Board board;
+	protected Position board;
 	protected Move move;
 	
-	public BoardNode(Board board)
+	public BoardNode(Position board)
 	{
 		this(null, null, board);
 	}
 
-	public BoardNode(BoardNode parent, Move move, Board board)
+	public BoardNode(BoardNode parent, Move move, Position board)
 	{
 		this.parent = parent;
 		this.move = move;
@@ -39,19 +40,20 @@ public class BoardNode implements Node
 		/* Move Ordering */
 		//int[] board_raw = board.getPosition12x10().get12x10Board();
 		int[] board_raw = board.getPositionBB().getSquares();
+		
+		// sorts moves by Most Valuable Victim - Least Valuable Aggressor
 		possible.sort(new MoveComparator(board_raw));
 		
 		for (Move move : possible)
 		{
 			//System.out.println(move);
 			//System.out.println(move.getSource8x8Index() + " " + move.getTarget8x8Index());
-			Board next = board.copy();
+			Position next = board.copy();
 			next.makeMove(move);
 			//System.out.println(next);
 			successors.add(new BoardNode(this, move, next));
 		}
-
-	
+		
 		return successors;
 	}
 
@@ -83,13 +85,14 @@ public class BoardNode implements Node
 	}
 	
 	public int getDepth() {
-		int depth = 0;
+		return this.board.getMoveNr();
+		/*int depth = 0;
 		Node node = new BoardNode(this.board);
 		while(!node.isRoot()) {
 			depth++;
 			node = node.parent();
 		}
-		return depth;
+		return depth;*/
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -116,7 +119,7 @@ public class BoardNode implements Node
 		int result = 1;
 		result = prime * result + ((board == null) ? 0 : board.hashCode());
 		return result;*/
-		return (int) ZobristHash.hash(board.getPosition12x10());
+		return (int) ZobristHash.hash(board.getPositionBB());
 	}
 	
 	/** @return a 64-Bit hash-code */
@@ -125,7 +128,7 @@ public class BoardNode implements Node
 		int result = 1;
 		result = prime * result + ((board == null) ? 0 : board.hashCode());
 		return result;*/
-		return ZobristHash.hash(board.getPosition12x10());
+		return ZobristHash.hash(board.getPositionBB());
 	}
 
 	@Override

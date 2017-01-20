@@ -299,22 +299,22 @@ public class Movement {
 		return m;
 	}
 	
-	public static List<Move> whitePawnMoves(PositionBB pos) {
+	public static List<Move> whitePawnMoves(PositionBB pos, long pawnsBB, long occupied, long blackBB) {
 		List<Move> possible = new ArrayList<Move>();
 		
 		// Pawn moves
-        long pawns = pos.pieceTypeBB[Piece.WPAWN];
-        long m = (pawns << 8) & ~pos.occupied;
+        //long pawns = pos.pieceTypeBB[Piece.WPAWN];
+        long m = (pawnsBB << 8) & ~occupied;
         if (addPawnMovesByMask(possible, pos, m, -8, true)) return possible;
-        m = ((m & LookUpTables.maskRow3) << 8) & ~pos.occupied;
+        m = ((m & LookUpTables.maskRow3) << 8) & ~occupied;
         addPawnDoubleMovesByMask(possible, pos, m, -16);
 
         int epSquare = pos.getEpSquare();
         long epMask = (epSquare >= 0) ? (1L << epSquare) : 0L;
-        m = (pawns << 7) & LookUpTables.maskAToGFiles & (pos.blackBB | epMask);
+        m = (pawnsBB << 7) & LookUpTables.maskAToGFiles & (blackBB | epMask);
         if (addPawnMovesByMask(possible, pos, m, -7, true)) return possible;
 
-        m = (pawns << 9) & LookUpTables.maskBToHFiles & (pos.blackBB | epMask);
+        m = (pawnsBB << 9) & LookUpTables.maskBToHFiles & (blackBB | epMask);
         if (addPawnMovesByMask(possible, pos, m, -9, true)) return possible;
 
 		/*long pawnAttacks = Movement.compute_white_pawns(pos.pieceTypeBB[Piece.WPAWN], pos.allBB, pos.blackBB);
@@ -325,23 +325,23 @@ public class Movement {
         return possible;
 	}
 	
-	public static List<Move> blackPawnMoves(PositionBB pos) {
+	public static List<Move> blackPawnMoves(PositionBB pos, long pawnsBB, long occupied, long whiteBB) {
 		List<Move> possible = new ArrayList<Move>();
 		
 		// Pawn moves
         long pawns = pos.pieceTypeBB[Piece.BPAWN];
-        long m = (pawns >> 8) & ~pos.occupied;
+        long m = (pawns >>> 8) & ~occupied;
         if (addPawnMovesByMask(possible, pos, m, 8, true)) return possible;
         
-        m = ((m & LookUpTables.maskRow6) >>> 8) & ~pos.occupied;
+        m = ((m & LookUpTables.maskRow6) >>> 8) & ~occupied;
         addPawnDoubleMovesByMask(possible, pos, m, 16);
 
         int epSquare = pos.getEpSquare();
         long epMask = (epSquare >= 0) ? (1L << epSquare) : 0L;
-        m = (pawns >>> 9) & LookUpTables.maskAToGFiles & (pos.whiteBB | epMask);
+        m = (pawns >>> 9) & LookUpTables.maskAToGFiles & (whiteBB | epMask);
         if (addPawnMovesByMask(possible, pos, m, 9, true)) return possible;
 
-        m = (pawns >>> 7) & LookUpTables.maskBToHFiles & (pos.whiteBB | epMask);
+        m = (pawns >>> 7) & LookUpTables.maskBToHFiles & (whiteBB | epMask);
         if (addPawnMovesByMask(possible, pos, m, 7, true)) return possible;
         
 		/*long pawnAttacks = Movement.compute_black_pawns(pos.pieceTypeBB[Piece.BPAWN], pos.allBB, pos.whiteBB);
@@ -359,7 +359,7 @@ public class Movement {
         long m = kingAttacks & ~pos.whiteBB;
         int sq = BitBoard.numberOfTrailingZeros(pos.pieceTypeBB[Piece.WKING]);
         
-        addMovesByMask(possible, pos, sq, m);
+        addMovesByMask(possible, sq, m);
         /*long mask = m;
         while (mask != 0) {
             int sq1 = BitBoard.numberOfTrailingZeros(mask);
@@ -377,7 +377,7 @@ public class Movement {
         
         int sq = BitBoard.numberOfTrailingZeros(pos.pieceTypeBB[Piece.BKING]);
         
-        addMovesByMask(possible, pos, sq, m);
+        addMovesByMask(possible, sq, m);
         /*long mask = m;
         while (mask != 0) {
             int sq1 = BitBoard.numberOfTrailingZeros(mask);
@@ -388,14 +388,14 @@ public class Movement {
         return possible;
 	}
 	
-	public static List<Move> whiteBishopsMoves(PositionBB pos) {
-        long squares = pos.pieceTypeBB[Piece.WBISHOP];
+	public static List<Move> whiteBishopsMoves(long squares, long allBB, long whiteBB) {
+        //long squares = pos.pieceTypeBB[Piece.WBISHOP];
         long m = 0x0L;
         List<Move> possible = new ArrayList<Move>();
         
 		while (squares != 0) {
             int sq = BitBoard.numberOfTrailingZeros(squares);
-            m |= bishopAttacks(sq, pos.allBB) & ~pos.whiteBB;
+            m |= bishopAttacks(sq, allBB) & ~whiteBB;
 
             /* add move to movelist */
             while (m != 0) {
@@ -411,14 +411,14 @@ public class Movement {
 		return possible;
 	}
 
-	public static List<Move> blackBishopsMoves(PositionBB pos) {
-        long squares = pos.pieceTypeBB[Piece.BBISHOP];
+	public static List<Move> blackBishopsMoves(long squares, long allBB, long blackBB) {
+        //long squares = pos.pieceTypeBB[Piece.BBISHOP];
         long m = 0x0L;
         List<Move> possible = new ArrayList<Move>();
         
 		while (squares != 0) {
             int sq = BitBoard.numberOfTrailingZeros(squares);
-            m |= bishopAttacks(sq, pos.allBB) & ~pos.blackBB;
+            m |= bishopAttacks(sq, allBB) & ~blackBB;
 
             /* add move to movelist */
             while (m != 0) {
@@ -435,14 +435,14 @@ public class Movement {
 	}
 	
 	/** Get the white rooks possible moves */
-	public static List<Move> whiteRooksMoves(PositionBB pos) {
-        long squares = pos.pieceTypeBB[Piece.WROOK];
+	public static List<Move> whiteRooksMoves(long squares, long allBB, long whiteBB) {
+        //long squares = pos.pieceTypeBB[Piece.WROOK];
         long m = 0x0L;
         List<Move> possible = new ArrayList<Move>();
 
 		while (squares != 0) {
             int sq = BitBoard.numberOfTrailingZeros(squares);
-            m |= rookAttacks(sq, pos.allBB) & ~pos.whiteBB;
+            m |= rookAttacks(sq, allBB) & ~whiteBB;
             
             /* add move to movelist */
             while (m != 0) {
@@ -459,14 +459,14 @@ public class Movement {
 	}
 	
 	/** Get the black rooks possible moves */
-	public static List<Move> blackRooksMoves(PositionBB pos) {
-        long squares = pos.pieceTypeBB[Piece.BROOK];
+	public static List<Move> blackRooksMoves(long squares, long allBB, long blackBB) {
+        //long squares = pos.pieceTypeBB[Piece.BROOK];
         long m = 0x0L;
         List<Move> possible = new ArrayList<Move>();
 
 		while (squares != 0) {
             int sq = BitBoard.numberOfTrailingZeros(squares);
-            m |= rookAttacks(sq, pos.allBB) & ~pos.blackBB;
+            m |= rookAttacks(sq, allBB) & ~blackBB;
             
             /* add move to movelist */
             while (m != 0) {
@@ -483,15 +483,15 @@ public class Movement {
 	}
 	
 	/** Get the white queens possible moves */
-	public static List<Move> whiteQueenMoves(PositionBB pos) {
-        long squares = pos.pieceTypeBB[Piece.WQUEEN];
+	public static List<Move> whiteQueenMoves(long squares, long allBB, long whiteBB) {
+        //long squares = pos.pieceTypeBB[Piece.WQUEEN];
         long m = 0x0L;
         List<Move> possible = new ArrayList<Move>();
 
 		while (squares != 0) {
             int sq = BitBoard.numberOfTrailingZeros(squares);
-            m |= rookAttacks(sq, pos.allBB) & ~pos.whiteBB;
-            m |= bishopAttacks(sq, pos.allBB) & ~pos.whiteBB;
+            m |= rookAttacks(sq, allBB) & ~whiteBB;
+            m |= bishopAttacks(sq, allBB) & ~whiteBB;
             
             /* add move to movelist */
             while (m != 0) {
@@ -508,15 +508,15 @@ public class Movement {
 	}
 	
 	/** Get the black queens possible moves */
-	public static List<Move> blackQueenMoves(PositionBB pos) {
-        long squares = pos.pieceTypeBB[Piece.BQUEEN];
+	public static List<Move> blackQueenMoves(long squares, long allBB, long blackBB) {
+        //long squares = pos.pieceTypeBB[Piece.BQUEEN];
         long m = 0x0L;
         List<Move> possible = new ArrayList<Move>();
 
 		while (squares != 0) {
             int sq = BitBoard.numberOfTrailingZeros(squares);
-            m |= rookAttacks(sq, pos.allBB) & ~pos.blackBB;
-            m |= bishopAttacks(sq, pos.allBB) & ~pos.blackBB;
+            m |= rookAttacks(sq, allBB) & ~blackBB;
+            m |= bishopAttacks(sq, allBB) & ~blackBB;
             
             /* add move to movelist */
             while (m != 0) {
@@ -533,16 +533,15 @@ public class Movement {
 	}
 	
 	/** Get the white knight possible moves */
-	public static List<Move> whiteKnightsMoves(PositionBB pos) {
-        //long squares = pos.pieceTypeBB[Piece.WKNIGHT];
+	public static List<Move> whiteKnightsMoves(long squares, long whiteBB) {
         //long m = 0x0L;
         List<Move> possible = new ArrayList<Move>();
 
-        long squares = pos.pieceTypeBB[Piece.WKNIGHT];
+       // long squares = pos.pieceTypeBB[Piece.WKNIGHT];
         while (squares != 0) {
             int sq = BitBoard.numberOfTrailingZeros(squares);
-            long m = LookUpTables.knightAttacks[sq] & ~pos.whiteBB;
-            if (addMovesByMask(possible, pos, sq, m)) return possible;
+            long m = LookUpTables.knightAttacks[sq] & ~whiteBB;
+            if (addMovesByMask(possible, sq, m)) return possible;
             squares &= squares-1;
         }
         
@@ -550,16 +549,16 @@ public class Movement {
 	}
 	
 	/** Get the black knight possible moves */
-	public static List<Move> blackKnightsMoves(PositionBB pos) {
+	public static List<Move> blackKnightsMoves(long squares, long blackBB) {
         //long squares = pos.pieceTypeBB[Piece.WKNIGHT];
         //long m = 0x0L;
         List<Move> possible = new ArrayList<Move>();
 
-        long squares = pos.pieceTypeBB[Piece.BKNIGHT];
+        //long squares = pos.pieceTypeBB[Piece.BKNIGHT];
         while (squares != 0) {
             int sq = BitBoard.numberOfTrailingZeros(squares);
-            long m = LookUpTables.knightAttacks[sq] & ~pos.blackBB;
-            if (addMovesByMask(possible, pos, sq, m)) return possible;
+            long m = LookUpTables.knightAttacks[sq] & ~blackBB;
+            if (addMovesByMask(possible, sq, m)) return possible;
             squares &= squares-1;
         }
         
@@ -585,10 +584,10 @@ public class Movement {
 		long spot_3 = king_clip_file_h << 9; 
 		long spot_4 = king_clip_file_h << 1; 
 
-		long spot_5 = king_clip_file_a >> 7; 
-		long spot_6 = king_loc >> 8; 
-		long spot_7 = king_clip_file_a >> 9; 
-		long spot_8 = king_clip_file_a >> 1; 
+		long spot_5 = king_clip_file_a >>> 7; 
+		long spot_6 = king_loc >>> 8; 
+		long spot_7 = king_clip_file_a >>> 9; 
+		long spot_8 = king_clip_file_a >>> 1; 
 
 		long king_moves = spot_1 | spot_2 | spot_3 | spot_4 | spot_5 | spot_6 |
 	                    	spot_7 | spot_8; 
@@ -628,10 +627,10 @@ public class Movement {
 		long spot_3 = (knight_loc & spot_3_clip) << 17;
 		long spot_4 = (knight_loc & spot_4_clip) << 10;
 
-		long spot_5 = (knight_loc & spot_5_clip) >> 6;
-		long spot_6 = (knight_loc & spot_6_clip) >> 15;
-		long spot_7 = (knight_loc & spot_7_clip) >> 17;
-		long spot_8 = (knight_loc & spot_8_clip) >> 10;
+		long spot_5 = (knight_loc & spot_5_clip) >>> 6;
+		long spot_6 = (knight_loc & spot_6_clip) >>> 15;
+		long spot_7 = (knight_loc & spot_7_clip) >>> 17;
+		long spot_8 = (knight_loc & spot_8_clip) >>> 10;
 
 		long KnightValid = spot_1 | spot_2 | spot_3 | spot_4 | spot_5 | spot_6 |
 	                    spot_7 | spot_8;
@@ -687,13 +686,13 @@ public class Movement {
 	private static long compute_black_pawns(long black_pawn_loc, long all_pieces, 
 			long all_white_pieces) {
 	/* check the single space infront of the black pawn */
-	long black_pawn_one_step = (black_pawn_loc >> 8) & ~all_pieces; 
+	long black_pawn_one_step = (black_pawn_loc >>> 8) & ~all_pieces; 
 
 	/* for all moves that came from rank 2 (home row) and passed the above 
 		filter, thereby being on rank 3, check and see if I can move forward 
 		one more */
 	long black_pawn_two_steps = 
-		((black_pawn_one_step &  LookUpTables.maskRank[RANK_6]) >> 8) & ~all_pieces; 
+		((black_pawn_one_step &  LookUpTables.maskRank[RANK_6]) >>> 8) & ~all_pieces; 
 
 	/* the union of the movements dictate the possible moves forward 
 		available */
@@ -702,10 +701,10 @@ public class Movement {
 	/* next we calculate the pawn attacks */
 
 	/* check the left side of the pawn, minding the underflow File A */
-	long black_pawn_left_attack = (black_pawn_loc & LookUpTables.clearFile[FILE_A]) >> 7;
+	long black_pawn_left_attack = (black_pawn_loc & LookUpTables.clearFile[FILE_A]) >>> 7;
 
 	/* then check the right side of the pawn, minding the overflow File H */
-	long black_pawn_right_attack = (black_pawn_loc & LookUpTables.clearFile[FILE_H]) >> 9;
+	long black_pawn_right_attack = (black_pawn_loc & LookUpTables.clearFile[FILE_H]) >>> 9;
 
 	/* the union of the left and right attacks together make up all the 
 		possible attacks */
@@ -729,7 +728,7 @@ public class Movement {
         return rTables[sq][(int)(((occupied & rMasks[sq]) * LookUpTables.rMagics[sq]) >>> (64 - rBits[sq]))];
     }
     
-    private final static boolean addMovesByMask(List<Move> moveList, PositionBB pos, int sq0, long mask) {
+    private final static boolean addMovesByMask(List<Move> moveList, int sq0, long mask) {
         /*long oKingMask = pos.pieceTypeBB[pos.whiteMove() ? Piece.BKING : Piece.WKING];
         if ((mask & oKingMask) != 0) {
         	System.out.println("oKingmask: " + BitBoard.toString(mask));
@@ -809,13 +808,13 @@ public class Movement {
         UndoInfo ui = new UndoInfo();
         List<Move> legalMoves = new ArrayList<Move>();
 
-        boolean isInCheck = pos.isInCheck();
+        final boolean isInCheck = pos.isInCheck();
         final long occupied = pos.whiteBB | pos.blackBB;
-        int kSq = pos.getKingSq(pos.whiteMove);
+        final int kSq = pos.getKingSq(pos.whiteMove);
         if(kSq == -1) return moveList; //TODO fix workaround
         
         long kingAtks = rookAttacks(kSq, occupied) | bishopAttacks(kSq, occupied);
-        int epSquare = pos.getEpSquare();
+        final int epSquare = pos.getEpSquare();
         if (isInCheck) {
             kingAtks |= pos.pieceTypeBB[pos.whiteMove ? Piece.BKNIGHT : Piece.WKNIGHT];
             for (int mi = 0; mi < moveList.size(); mi++) {

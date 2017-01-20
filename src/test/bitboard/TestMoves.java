@@ -8,7 +8,7 @@ import org.junit.Test;
 
 import board.Board;
 import board.Move;
-import board.position.PositionInterface;
+import board.position.Position;
 import board.position.bitboard.PositionBB;
 
 public class TestMoves {

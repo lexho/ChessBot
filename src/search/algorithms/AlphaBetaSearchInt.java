@@ -15,7 +15,7 @@ import search.nodes.BoardNode;
 public class AlphaBetaSearchInt implements AdversarialSearch {
 	@SuppressWarnings("unused")
 	private BiPredicate<Integer, Node> searchLimitingPredicate;
-	private int depthLimit;
+	protected int depthLimit;
 	private final boolean VERBOSE = true;
 
 	/**
@@ -37,6 +37,7 @@ public class AlphaBetaSearchInt implements AdversarialSearch {
 		interrupted = false; // reset interrupt
 		alphaBound = Integer.MIN_VALUE;
 		betaBound = Integer.MAX_VALUE;
+		this.starttime = System.currentTimeMillis();
 	}
 	
 	public AlphaBetaSearchInt(int depthLimit, long starttime)
@@ -60,12 +61,12 @@ public class AlphaBetaSearchInt implements AdversarialSearch {
 	protected int depth = 0;
 	private boolean interrupted;
 	
-	public long nodecount = 0;
-	private long starttime;
-	private long lastinfo = 0; // the last time a info message was printed
-	private long lastnodes = 0; // the number of processed nodes at the last time a info message was printed
+	public static long nodecount = 0;
+	private final long starttime;
+	private static long lastinfo = 0; // the last time a info message was printed
+	private static long lastnodes = 0; // the number of processed nodes at the last time a info message was printed
 	private int lastdepth = 0; // the depth at last depth message
-	protected int NrOfLeafNodes = 0;
+	protected static int NrOfLeafNodes = 0;
 	
 	public int getLeafNodeStatistics() {
 		return NrOfLeafNodes;
@@ -89,6 +90,7 @@ public class AlphaBetaSearchInt implements AdversarialSearch {
 	Function<Node, Integer> evalFunction;
 
 	public Pair<Node, Integer> search(Node start, Function<Node, Integer> evalFunction) throws SearchFailException {
+		nodecount = 0;
 		lastinfo = System.currentTimeMillis();
 		
 		Pair<Node, Integer> alpha = new Pair<Node, Integer>(null, alphaBound); //Double.POSITIVE_INFINITY;
@@ -191,5 +193,13 @@ public class AlphaBetaSearchInt implements AdversarialSearch {
 				lastinfo = System.currentTimeMillis();
 			}
 		}
+	}
+	
+	public void printInfoMessage() {
+		long nps = (nodecount - lastnodes); // Nodes per second
+		lastnodes = nodecount;
+		long time = System.currentTimeMillis() - starttime;
+		System.out.println("info " + "depth " + depth + " seldepth " + depth + " multipv 1 " + "score cp " + "--" + " nodes " + nodecount + " nps " + nps + " tbhits 0 " + "time " + time + " pv " + " ----");
+		lastinfo = System.currentTimeMillis();
 	}
 }

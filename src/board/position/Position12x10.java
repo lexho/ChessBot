@@ -17,7 +17,7 @@ import board.pieces.WhitePawn;
 import exceptions.InvalidIndexException;
 import util.StringUtils;
 
-public class Position12x10 implements PositionInterface {
+public class Position12x10 implements Position {
 	int [] board_12x10;
 	char activeColor;
 	int moveNr;
@@ -109,7 +109,7 @@ public class Position12x10 implements PositionInterface {
 		this.moveNr = new Integer(position.getMoveNr());
 	}
 	
-	public Position12x10(PositionInterface position) {
+	public Position12x10(Position position) {
 		
 		activeColor = new Character(position.getActiveColor());
 		moveNr = new Integer(position.getMoveNr());

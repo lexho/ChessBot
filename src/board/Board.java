@@ -11,16 +11,17 @@ import java.util.concurrent.Future;
 import board.pieces.Piece;
 import board.pieces.PieceList;
 import board.position.Position12x10;
-import board.position.PositionInterface;
+import board.position.Position;
 import board.position.bitboard.Movement;
 import board.position.bitboard.PositionBB;
 import board.position.bitboard.UndoInfo;
 import engine.ChessBot;
 import util.BitBoardUtils;
 
+//TODO replace this class with Position Interface
 public class Board {
 	public static boolean DEBUG = false;
-	PositionInterface currentPosition;
+	Position currentPosition;
 	//PieceList pieces;
 	char color; // our color (white or black)
 	
@@ -29,7 +30,7 @@ public class Board {
 	 *  
 	 *  @param position the position that should be on the board
 	 *  */
-	public Board(PositionInterface position) {
+	public Board(Position position) {
 		this.currentPosition = position;
 		//pieces = position.getPieces();
 	}
@@ -244,7 +245,7 @@ public class Board {
 	 * 
 	 * @return the current position
 	 */
-	public PositionInterface getPosition() {
+	public Position getPosition() {
 		return currentPosition;
 	}
 	

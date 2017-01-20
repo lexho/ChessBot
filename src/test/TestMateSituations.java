@@ -19,7 +19,7 @@ import board.Board;
 import board.pieces.Piece;
 import board.position.Fen;
 import board.position.Position12x10;
-import board.position.PositionInterface;
+import board.position.Position;
 
 @RunWith(Parameterized.class)
 public class TestMateSituations {
@@ -65,7 +65,7 @@ public class TestMateSituations {
 		Board b = new Board(new Position12x10(new Fen(fenstring)));
 		b.print();
 		if(inCheck) {
-			PositionInterface pos = b.getPosition();
+			Position pos = b.getPosition();
 			List<Piece> opponentsPieces = pos.getPieces().getPieces(pos.getUnactiveColor());
 			/*for(Piece p : opponentsPieces) {
 				System.out.println(p + " " + p.getPossibleMoves());
