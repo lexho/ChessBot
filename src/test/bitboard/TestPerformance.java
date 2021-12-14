@@ -1,17 +1,24 @@
 package test.bitboard;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Random;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
+import board.Board;
 import board.Move;
+import board.pieces.Piece;
+import board.position.Fen;
+import board.position.Position;
 import board.position.bitboard.PositionBB;
 import board.position.bitboard.UndoInfo;
 
@@ -37,6 +44,13 @@ public class TestPerformance {
 		params.add(new Object[]{ 4,    197281L, initialPos});
 		params.add(new Object[]{ 5,    4865609L, initialPos});
 		params.add(new Object[]{ 6,    119060324L, initialPos});
+		
+		params.add(new Object[]{ 7,    119060324L, initialPos});
+		params.add(new Object[]{ 8,    119060324L, initialPos});
+		params.add(new Object[]{ 9,    119060324L, initialPos});
+		params.add(new Object[]{ 10,    119060324L, initialPos});
+		params.add(new Object[]{ 11,    119060324L, initialPos});
+		params.add(new Object[]{ 12,    119060324L, initialPos});
 		
 		return params;
 	}
@@ -64,6 +78,23 @@ public class TestPerformance {
 		assertEquals(expected, nodes);		
 	}
 	
+	@Test
+	public void testMoveGenerateorRandomPosition() {
+		Random random = new Random();
+		PositionBB positionRnd = new PositionBB(true);
+		List<Short> piecesW = new ArrayList<Short>();
+		
+		for(short p : Piece.piecesWwithoutPawns) {
+			piecesW.add(p);
+		}
+		int sq = random.nextInt(64);
+		int p = random.nextInt(piecesW.size());
+		int piece = piecesW.get(p);
+		piecesW.remove(p);
+		//positionRnd.setPiece(sq, piece);
+		System.out.println(positionRnd);
+	}
+	
 	/** performance test 
 	 * http://chessprogramming.wikispaces.com/Perft */
 	private long perft(PositionBB pos, int depth)
@@ -81,6 +112,28 @@ public class TestPerformance {
 	    	pos.unMakeMove(m, ui);
 	    }
 	    return nodes;
+	}
+	
+	
+	@Test
+	public void checkDetectionSpeed() {
+		String fenstring = "8/8/8/5k2/8/r2K4/8/8 w - - 0 1"; // white is in check
+		Board b = new Board(new PositionBB(new Fen(fenstring)));
+		b.print();
+		b.getPositionBB().whiteMove();
+		Position pos = b.getPosition();
+		long start = System.currentTimeMillis();
+		for(int i = 0; i < 100000; i++) {
+			pos.isInCheck(true); // white is in check?
+			pos.isInCheck(false); // black is in check?
+		}
+		long end = System.currentTimeMillis();
+		long duration = end - start;
+		duration *= 100000;
+		System.out.println("start: " + start);
+		System.out.println("end: " + end);
+		System.out.println("duration: " + duration + " iterations/s");
+		assertTrue(duration > 20000000);
 	}
 
 }

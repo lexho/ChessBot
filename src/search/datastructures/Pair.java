@@ -2,6 +2,9 @@ package search.datastructures;
 
 import java.io.Serializable;
 
+import search.Node;
+
+
 public final class Pair<F, S> implements Serializable
 {
 	private static final long serialVersionUID = 1L;
@@ -17,7 +20,7 @@ public final class Pair<F, S> implements Serializable
 	@Override
 	public String toString()
 	{
-		return String.format("pair(%s, %s)", f.toString(), s.toString());
+		return String.format("pair(\n%s, %s)", f.toString(), s.toString());
 	}
 
 	@Override
@@ -34,9 +37,10 @@ public final class Pair<F, S> implements Serializable
 	{
 		final long prime = 31;
 		long result = 1;
-		result = prime * result + ((f == null) ? 0 : f.hashCode());
-		result = prime * result + ((s == null) ? 0 : s.hashCode());
-		return result;
+		//result = prime * result + ((f == null) ? 0 : f.hashCode());
+		//result = prime * result + ((s == null) ? 0 : s.hashCode()); //TODO is this good?
+		//return result;
+		return f.hashCode();
 	}
 
 	@Override

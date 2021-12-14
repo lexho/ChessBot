@@ -93,7 +93,7 @@ public class TestSpeed {
 		time[1] = System.currentTimeMillis() - starttime;
 		
 		System.setOut(out);
-		System.out.println("bot2 time: " + time[1]);BB
+		System.out.println("bot2 time: " + time[1]);
 		System.out.println(moves);
 		
 		/* Compare search times of the bots */

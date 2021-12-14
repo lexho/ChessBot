@@ -5,12 +5,12 @@ import java.util.List;
 
 import sun.awt.SunHints.Value;
 
-public class ScoreData extends ArrayList<Integer> {
+public class ScoreData extends ArrayList<Double> {
 
 	private static final long serialVersionUID = 1L;
 
 	List<String> labels;
-	int score = 0;
+	double score = 0;
 	
 	public ScoreData() {
 		labels = new ArrayList<String>();
@@ -48,7 +48,7 @@ public class ScoreData extends ArrayList<Integer> {
 		
 		/* Compute final score */
 		score = 0;
-		for(int value : this) {
+		for(double value : this) {
 			score += value;
 		}
 		

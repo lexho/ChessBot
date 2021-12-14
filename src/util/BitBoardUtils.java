@@ -96,4 +96,14 @@ public class BitBoardUtils {
 		}
 		return result.toString();
 	}
+	
+	public static String binaryToString(long binary) {
+		StringBuilder sb = new StringBuilder();
+		for(int i = 0; i < Long.numberOfLeadingZeros(binary); i++) {
+			sb.append("0");
+			if(i == 63) return sb.toString();
+		}
+		sb.append(Long.toBinaryString(binary));
+		return sb.toString();
+	}
 }

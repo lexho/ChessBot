@@ -1,6 +1,7 @@
 package board.pieces;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import board.Move;
@@ -44,6 +45,10 @@ public class Piece {
 	public static final int BISHOP_V = 325;
 	public static final int KNIGHT_V = 275;
 	public static final int PAWN_V = 100;
+	
+	public static final List<Short> piecesW = Arrays.asList(WPAWN, WPAWN, WPAWN, WPAWN, WPAWN, WPAWN, WPAWN, WPAWN, WKNIGHT, WKNIGHT, WBISHOP, WBISHOP, WROOK, WROOK, WQUEEN, WKING);
+	public static final List<Short> piecesWwithoutPawns = Arrays.asList(WKNIGHT, WKNIGHT, WBISHOP, WBISHOP, WROOK, WROOK);
+	public static final List<Short> piecesB = Arrays.asList(BPAWN, BKNIGHT, BBISHOP, BROOK);
 	
 	/* actions */
 	protected List<Action> actions;

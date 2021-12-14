@@ -12,6 +12,8 @@ import java.io.OutputStreamWriter;
 
 import org.junit.Test;
 
+import engine.ChessBot;
+
 public class TestUCI {
 
 	@Test

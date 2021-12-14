@@ -6,25 +6,24 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 
 import org.junit.Test;
 
-import board.Board;
 import board.Move;
+import board.position.Position;
 import board.position.Position12x10;
 import board.position.bitboard.PositionBB;
 import board.position.bitboard.UndoInfo;
 import search.Node;
 import search.algorithms.AlphaBetaHashSearch;
-import search.algorithms.AlphaBetaSearchInt;
+import search.algorithms.AlphaBetaSearchDouble;
 import search.datastructures.Pair;
 import search.evalfunctions.ScoreBitBoard;
+import search.evalfunctions.ScoreBitBoardDouble;
 import search.evalfunctions.ScoreBoard;
 import search.functions.BoardFunction;
 import search.hashfunctions.ZobristHash;
-import search.hashtables.HashTableEntry;
 import search.hashtables.MainTranspositionTable;
 import search.nodes.BoardNode;
 
@@ -145,8 +144,8 @@ public class TestHashFunctions {
 		ZobristHash.init(); // init hashing function
 		
 		// AlphaBeta Search 
-		ScoreBoard scoreboard = new ScoreBitBoard(board.copy());
-		Function<Node, Integer> evalFunction = new BoardFunction(scoreboard);
+		ScoreBoard<Double> scoreboard = new ScoreBitBoardDouble(board.copy());
+		Function<Node, Double> evalFunction = new BoardFunction<Double>(scoreboard);
 		
 		List<Long> times = new ArrayList<Long>();
 		
@@ -155,10 +154,10 @@ public class TestHashFunctions {
 			MainTranspositionTable.PROBE = 0;
 			MainTranspositionTable.READ = 0;
 			//MainTranspositionTable.WRITE = 0;
-			AlphaBetaSearchInt alphabeta = new AlphaBetaHashSearch(depth, hashmap, starttime);
+			AlphaBetaSearchDouble alphabeta = new AlphaBetaHashSearch(depth, hashmap, starttime);
 			
-			Pair<Node, Integer> result = null;
-			alphabeta.setBounds(Integer.MIN_VALUE, Integer.MAX_VALUE);
+			Pair<Node, Double> result = null;
+			//alphabeta.setBounds(Integer.MIN_VALUE, Integer.MAX_VALUE);
 			result = alphabeta.search(
 					new BoardNode(board.copy()),
 					evalFunction);	
@@ -184,5 +183,111 @@ public class TestHashFunctions {
 		/*for(Map.Entry<Long, HashTableEntry> entry: hashmap.entrySet()) {
 			System.out.println(entry.hashCode());
 		}*/
+	}
+	
+	@Test
+	public void testHashTableEfficiency2() {
+		int depth = 2;
+		
+		MainTranspositionTable hashmap = new MainTranspositionTable();
+		ZobristHash.init(); // init hashing function
+		
+		PositionBB board = new PositionBB();
+		
+		// AlphaBeta Search 
+		ScoreBoard<Double> scoreboard = new ScoreBitBoardDouble(board.copy());
+		Function<Node, Double> evalFunction = new BoardFunction(scoreboard);
+
+		List<Long> times = new ArrayList<Long>();
+
+		long starttime = System.currentTimeMillis();
+		MainTranspositionTable.PROBE = 0;
+		MainTranspositionTable.READ = 0;
+		//MainTranspositionTable.WRITE = 0;
+		AlphaBetaSearchDouble alphabeta = new AlphaBetaHashSearch(depth, hashmap, starttime);
+
+		Pair<Node, Double> result = null;
+		//alphabeta.setBounds(Integer.MIN_VALUE, Integer.MAX_VALUE);
+		result = alphabeta.search(
+				new BoardNode(board.copy()),
+				evalFunction);	
+		long time = System.currentTimeMillis() - starttime;
+		times.add(time);
+		printStats(hashmap, time);
+		
+		Pair<Node, Double> alpha = new Pair<Node, Double>(null, Double.NEGATIVE_INFINITY);
+		Pair<Node, Double> beta = new Pair<Node, Double>(null, Double.POSITIVE_INFINITY);
+		
+		board = new PositionBB();
+		
+		// feed hashtable
+		//hashmap = new MainTranspositionTable();
+		/*for (Move m : board.getPossibleMoves()) {
+			Position b = board.copy();
+			b.makeMove(m);
+			BoardNode current = new BoardNode(b);
+			Pair<Node, Integer> val = new Pair<Node, Integer>(current, evalFunction.apply(current));
+			hashmap.put(current.hashCode64(), new HashTableEntry(val, depth, HashTableEntry.hashfEXACT)); 
+			
+		}*/
+
+		// search hashtable
+		starttime = System.currentTimeMillis();
+		board = new PositionBB();
+		System.out.println("HashTable Search");
+		Position b = board.copy();
+		BoardNode bn = new BoardNode(b);
+		for (Node node : bn.adjacent()) {
+			//for (Node node : node1.adjacent()) {
+				//System.out.println(node.hashCode64());
+				//((PositionBB)((BoardNode) node).getState()).printSquares();
+				//System.out.println(node.hashCode64());
+				Pair<Node, Double> resultHashTable = hashmap.ProbeHash(node, depth, alpha, beta);
+				if(resultHashTable != null) {
+					//System.out.println(resultHashTable + " ");
+					System.out.print(node.getAction() + " " + resultHashTable.s);
+					System.out.println();
+				}
+			//}
+		}
+		time = System.currentTimeMillis() - starttime;
+		System.out.println();
+		printStats(hashmap, time);
+		
+		board.makeMove(new Move("b1c3"));
+		result = alphabeta.search(
+				new BoardNode(board.copy()),
+				evalFunction);	
+		
+		// search hashtable
+		starttime = System.currentTimeMillis();
+		System.out.println("HashTable Search");
+		b = board.copy();
+		bn = new BoardNode(b);
+		for (Node node : bn.adjacent()) {
+			//for (Node node : node1.adjacent()) {
+				//System.out.println(node.hashCode64());
+				//((PositionBB)((BoardNode) node).getState()).printSquares();
+				//System.out.println(node.hashCode64());
+				Pair<Node, Double> resultHashTable = hashmap.ProbeHash(node, depth, alpha, beta);
+				if(resultHashTable != null) {
+					//System.out.println(resultHashTable + " ");
+					System.out.print(node.getAction() + " " + resultHashTable.s);
+					System.out.println();
+				}
+			//}
+		}
+		time = System.currentTimeMillis() - starttime;
+		System.out.println();
+		printStats(hashmap, time);
+	}
+	
+	private void printStats(MainTranspositionTable hashmap, long time) {
+		System.out.println("hashmap size: " + hashmap.size());
+		System.out.println("search time: " + time + " ms");
+		System.out.println("probe: " + MainTranspositionTable.PROBE);
+		System.out.println("read: " + MainTranspositionTable.READ);
+		System.out.println("write: " + MainTranspositionTable.WRITE);
+		System.out.println();
 	}
 }

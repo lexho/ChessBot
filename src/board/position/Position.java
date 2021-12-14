@@ -18,4 +18,5 @@ public interface Position {
 	public int getMoveNr();
 	public int getPieceAt(int src);
 	public int[] getSquares();
+	public void updateMaterial();
 }

@@ -5,7 +5,7 @@ import java.util.function.Function;
 
 import search.datastructures.Pair;
 
-public interface AdversarialSearch {
+public interface AdversarialSearch<V> {
 	/**
 	 * This method takes a node from the state space and an evalFunction. The
 	 * evalFunction should get called when the search terminates. Each leaf of the search-tree
@@ -19,5 +19,5 @@ public interface AdversarialSearch {
 	 * @param evalFunction the eval function that scores a leaf
 	 * @return Pair<T, Double> a pair (bestMove, score)
 	 */
-	Pair<Node, Integer> search(Node start, Function<Node, Integer> evalFunction);
+	Pair<Node, V> search(Node start, Function<Node, V> evalFunction);
 }

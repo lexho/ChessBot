@@ -75,6 +75,17 @@ public class PositionBB implements Position {
     	createStartpos();
     }
     
+    /** Initialize board to empty position. */
+    public PositionBB(boolean empty) {
+    	pieceTypeBB = new long[Piece.nPieceTypes];
+    	
+    	/* Initialize Bitboards */
+    	for (int i = 0; i < Piece.nPieceTypes; i++) {
+             pieceTypeBB[i] = 0L;
+        }
+    	whiteBB = blackBB = 0L;
+    }
+    
     public PositionBB(PositionBB pos) {
     	pieceTypeBB = new long[Piece.nPieceTypes];
     	for(int i = 0; i < Piece.nPieceTypes; i++) {
@@ -109,8 +120,12 @@ public class PositionBB implements Position {
     	this.bMtrl = pos.bMtrl;
     }
     
+    public PositionBB(String fen) {
+    	this(new Fen(fen));
+    }
+    
     public PositionBB(Fen fen) {
-		// TODO implement PositionBB byFen-constructor
+    	System.out.println("active color: " + fen.getActiveColor());
     	whiteMove = fen.getActiveColor() == 'w' ? true : false;
     	
     	pieceTypeBB = new long[Piece.nPieceTypes];
@@ -128,6 +143,7 @@ public class PositionBB implements Position {
 		List<String> rows = StringUtils.splitString(piecestr, '/');
 
 		//pieces = new PieceList(this);
+    	wMtrl = 0; bMtrl = 0; // reset material
 		for(int y = 7; y >= 0; y--) {
 			String row = rows.get(7 - y);
 			for(int x = 0, i = 0; x < 8; x++, i++) {
@@ -142,13 +158,22 @@ public class PositionBB implements Position {
 				//System.out.println("set " + piece + " to " + x + " / " + y);
 				//System.out.println("set " + p + " to " + x + " / " + y);
 				setPiece(square, piece);
-				if(piece < 7) 
-					wMtrl += Piece.getValue(piece);
-				else 
-					bMtrl += Piece.getValue(piece);
 			}
 		}
 	}
+
+    public void updateMaterial() {
+    	wMtrl = 0; bMtrl = 0; // reset material values
+    	for (int piece : squares ) {
+			if(piece < 7) {
+				//System.out.println(piece + " " + Piece.getValue(piece) + "--> w");
+				wMtrl += Piece.getValue(piece);
+			} else {
+				//System.out.println(piece + " " + Piece.getValue(piece) + "--> b");
+				bMtrl += Piece.getValue(piece);
+			}
+		}
+    }
 
 	public void updateBitBoards() {
     	createWhiteBB();
@@ -554,7 +579,7 @@ public class PositionBB implements Position {
 	    	possible.addAll(Movement.blackKnightsMoves(pos.pieceTypeBB[Piece.BKNIGHT], pos.blackBB));
     	}
     	
-	    for (Future<List<Move>> future : futures) {
+	    /*for (Future<List<Move>> future : futures) {
 	        try {
 				possible.addAll(future.get());
 			} catch (InterruptedException e) {
@@ -568,7 +593,7 @@ public class PositionBB implements Position {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-	    }
+	    }*/
 	    
     	return possible;
     }
@@ -637,7 +662,14 @@ public class PositionBB implements Position {
     public int[] getSquares() {
     	return squares;
     }
-	
+    
+    public void printSquares() {
+		for(int sq : getSquares()) {
+			System.out.print(sq + " ");
+		}
+		System.out.println();
+    }
+    
 	public int getPieceAt(int src) {
 		return squares[src];
 	}

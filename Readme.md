@@ -13,6 +13,8 @@ Install the latest (>= Java 1.8) Java Runtime Environment from https://java.com/
 ### Run ChessBot
 
 To execute ChessBot as an UCI-Engine run `java -jar ./ChessBot.jar`.
+To use ChessBot with hash table you may need to expand the default heap size uf the java virutal machine. Build hash table with `java -Xms4096M -Xmx614 -cp bin search.hashtables.MainTranspositionTable`.
+To execute ChessBot with hash table run `java -jar -Xms4096M -Xmx6144M ~/ChessBot/ChessBotBBHash.jar`
 
 ### Terms of use
 

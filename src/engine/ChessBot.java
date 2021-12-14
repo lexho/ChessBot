@@ -1,39 +1,34 @@
 package engine;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import board.Board;
 import board.Move;
 import board.NullMove;
 import board.position.Fen;
-import board.position.Position12x10;
 import board.position.Position;
 import board.position.bitboard.PositionBB;
 import exceptions.SearchFailException;
 import search.Node;
 import search.algorithms.AlphaBetaHashSearch;
-import search.algorithms.AlphaBetaSearch;
-import search.algorithms.AlphaBetaSearchInt;
+import search.algorithms.AlphaBetaSearchDouble;
 import search.algorithms.RS;
 import search.datastructures.Pair;
+import search.evalfunctions.ScoreBitBoardDouble;
 import search.evalfunctions.ScoreBoard;
-import search.evalfunctions.ScoreBoard12x10;
-import search.evalfunctions.ScoreBitBoard;
 import search.functions.BoardFunction;
+import search.functions.BoardFunctionDouble;
 import search.functions.BoardPredicate;
 import search.hashfunctions.ZobristHash;
 import search.hashtables.MainTranspositionTable;
 import search.nodes.BoardNode;
-import util.BitBoardUtils;
 
 /**
  * ChessBot is a UCI compatible chess engine
@@ -52,7 +47,7 @@ public class ChessBot {
 	public static ExecutorService executor;
 	
 	/* Optional Enhancements */
-	boolean useHashTable = true;
+	boolean useHashTable = false;
 	boolean useAspWindows = false;
 	
 	/**
@@ -86,7 +81,8 @@ public class ChessBot {
 		NR_OF_THREADS = Runtime.getRuntime().availableProcessors();
 		executor = Executors.newFixedThreadPool(4);
 		ZobristHash.init(); // init hashing function
-		hashmap = new MainTranspositionTable();
+		//hashmap = new MainTranspositionTable();
+		if(useHashTable) hashmap = MainTranspositionTable.readHashMapFromFile("/home/alex/ChessBot/assets/hashmap/hashmap.ser");
 	}
 	
 	/**
@@ -118,6 +114,14 @@ public class ChessBot {
 		}
 	}
 	
+	/** was search result a null move? */
+	boolean nullmove = true;
+	
+	/** was search result a null move? */
+	public boolean wasNullMove() {
+		return nullmove;
+	}
+	
 	/**
 	 * ask the engine to think about the current position and 
 	 * return the next move
@@ -127,21 +131,22 @@ public class ChessBot {
 		//System.out.println("active color: " + board.getActiveColor());
 		board.setActiveColor(board.getActiveColor());
 		
-		/*boolean inverted = false;
-		if(!board.whiteMove()) {
-			board.getPositionBB().flip();
-			board.getPositionBB().changePieceColors();
-			inverted = true;
-		}*/
-		
 		Move nextMove = null;
-		if(useAspWindows) nextMove = alphaBetaSearchAspWindows();
+		
 		if(!useAspWindows && !useHashTable) nextMove = alphaBetaSearchPure();
+		if(useAspWindows) nextMove = alphaBetaSearchAspWindows();
 		if(!useAspWindows && useHashTable) nextMove = alphaBetaSearchHashTable();
 
-		if(nextMove == null) nextMove = new NullMove();
-		
-		//if(inverted) nextMove.invertMove();
+		if(nextMove == null) {
+			nullmove = true;
+			nextMove = new NullMove();
+			// fallback to random move
+			/*Random rnd = new Random();
+			int r = rnd.nextInt(board.getPossibleMoves().size());
+			Move m = board.getPossibleMoves().get(r);
+			if(m == null) System.err.println("rnd move is null");
+			nextMove = m;*/
+		} else nullmove = false;
 		
 		return nextMove.toString();
 	}
@@ -192,8 +197,8 @@ public class ChessBot {
 		return nextMove;
 	}
 	
-	private AlphaBetaSearchInt alphabeta;
-	private int currentScore = 0;
+	public AlphaBetaSearchDouble alphabeta;
+	private double currentScore = 0;
 	private int[] aspwindow = {25, 25};
 	
 	/** use AlphaBeta Search with aspiration windows and a hashtable as search engine
@@ -204,27 +209,29 @@ public class ChessBot {
 		long searchtime = System.currentTimeMillis(); // current time in milliseconds
 		
 		/* AlphaBeta Search */
-		Function<Position, Integer> scoreboard = new ScoreBitBoard(board.copy());
-		Function<Node, Integer> evalFunction = new BoardFunction(scoreboard);
+		ScoreBoard<Double> scoreboard = new ScoreBitBoardDouble(board.copy());
+		Function<Node, Double> evalFunction = new BoardFunction(scoreboard);
 		
 		/* Reset aspiration window */
 		aspwindow[0] = 25;
 		aspwindow[1] = 25;
 
+		// iterative deepening
 		for(int depth = 1; depth <= depthLimit; depth++) {
 			/* Use hashmap? */
 			if(useHashTable) 
 				alphabeta = null; //new AlphaBetaHashSearch(depth, hashmap, searchtime);
 			else 
-				alphabeta = new AlphaBetaSearchInt(depth, searchtime);
+				alphabeta = new AlphaBetaSearchDouble(depth, searchtime);
 				
-			Pair<Node, Integer> result = null;
+			Pair<Node, Double> result = null;
 			int[] aspReset = {new Integer(aspwindow[0]), new Integer(aspwindow[1])};
 			boolean failed = false;
 			do {
 				/* Prune search tree at higher depths to reduce search time */
 				if(depth > 1)
 				alphabeta.setBounds(currentScore - aspwindow[0], currentScore + aspwindow[1]); // the higher alpha the more pruning, the lower beta the more pruning
+				alphabeta.setTime(time);
 				
 				//System.out.println("possible moves: " + board.getPossibleMoves());
 				//System.out.println("possible moves: " + board.copy().getPossibleMoves());
@@ -232,6 +239,7 @@ public class ChessBot {
 					result = alphabeta.search(
 						new BoardNode(board.copy()),
 						evalFunction);	
+					System.out.println("result depth " + depth + ": " + result);
 					failed = false;
 				} catch (SearchFailException e) {
 					failed = true;
@@ -243,6 +251,9 @@ public class ChessBot {
 					}
 					System.out.println("new aspiration window: " + (currentScore - aspwindow[0]) + " " + (currentScore + aspwindow[1]));
 				}
+				
+				System.out.println("cb result state: " + alphabeta.getResultState());
+				if(alphabeta.getResultState() != 0) System.exit(-1);
 				
 				/* Aspiration window approach failed --> fall back to full range search */
 				if(aspwindow[0] > 10000 || aspwindow[1] > 10000) {
@@ -256,6 +267,7 @@ public class ChessBot {
 							new BoardNode(board.copy()),
 							evalFunction);	
 					currentScore = result.s;
+					System.out.println("fallback result depth " + depth + ": " + result);
 					return result.f.getAction();
 				}
 			} while(failed);
@@ -283,18 +295,22 @@ public class ChessBot {
 		long searchtime = System.currentTimeMillis(); // current time in milliseconds
 		
 		// AlphaBeta Search 
-		ScoreBoard scoreboard = new ScoreBitBoard(board.copy());
-		Function<Node, Integer> evalFunction = new BoardFunction(scoreboard);
+		ScoreBoard<Double> scoreboard = new ScoreBitBoardDouble(board.copy());
+		Function<Node, Double> evalFunction = new BoardFunctionDouble(scoreboard);
 		
 		long starttime = System.currentTimeMillis();
 		Timer timer = new Timer();
+		// iterative deepening
+		List<Pair<Node,Double>> results = new ArrayList<Pair<Node,Double>>();
 		for(int depth = 1; depth <= depthLimit; depth++) {
+			//System.out.println("depth: " + depth);
 			alphabeta = new AlphaBetaHashSearch(depth, hashmap, starttime);
 			
-			Pair<Node, Integer> result = null;
+			Pair<Node, Double> result = null;
 			//double[] aspReset = {new Double(aspwindow[0]), new Double(aspwindow[1])};
 			//boolean failed = false;
 			alphabeta.setBounds(Integer.MIN_VALUE, Integer.MAX_VALUE);
+			alphabeta.setTime(time);
 			
 			/*executor = Executors.newFixedThreadPool(4);
 			AlphaBetaSearchInt alphabeta1 = new AlphaBetaHashSearch(depth, hashmap, starttime);
@@ -348,7 +364,10 @@ public class ChessBot {
 			result = alphabeta.search(
 					new BoardNode(board.copy()),
 					evalFunction);	
-
+			results.add(result);
+			System.out.println("bot result state iteration " + depth + ": " + alphabeta.getResultState());
+			System.out.println("result depth " + depth + ": " + result);
+			
 			class InfoMessageTask extends TimerTask {  
 				@Override
 			   public void run()
@@ -361,8 +380,7 @@ public class ChessBot {
 			};
 			timer.cancel();
 			timer = new Timer();
-			//timer.schedule(new InfoMessageTask(), 1000, 1000);
-			timer.scheduleAtFixedRate(new InfoMessageTask(), 0, 1000);
+			//timer.scheduleAtFixedRate(new InfoMessageTask(), 0, 1000);
 			
 	        /*try {
 				executor.awaitTermination(10, TimeUnit.SECONDS);
@@ -372,15 +390,38 @@ public class ChessBot {
 			}
 
 	        System.out.println("Finished all threads");*/
-			currentScore = result.s;
 
+			currentScore = result.s;
+			nextMove = result.f.getAction();
 			
-			if(result.f != null) {
-				System.out.println(result.f.getAction() + " " + result.s + " depth " + depth);
-				currentScore = result.s;
-				nextMove = result.f.getAction();
+			System.out.println("bot result state: " + alphabeta.getResultState());
+			if((alphabeta.getResultState() & 0b10000) == 16) {
+			//if(alphabeta.getResultState() == 16 ||  alphabeta.getResultState() == 32) {
+				System.out.println("fallback action");
+				// fallback to previous iteration
+				
+				int i = results.size() - 1;
+				if(i >= 0) {
+					while(i > 0 && results.get(i).f.getAction() == null)
+						--i; // back to previous iteration
+	
+					for(int j = results.size() - 1; j >= 0; --j) {
+						if(results.get(j).f.getAction() != null)
+							System.out.println(j + " " + results.get(j).f.getAction().toString());
+						else
+							System.out.println(j + " null");
+					}
+					
+					nextMove = results.get(i).f.getAction();
+					System.out.println("falling back to iteration " + (i+1));
+					System.out.println("results size: " + results.size());
+					System.out.println("nextMove: " + nextMove);
+					System.out.println("depth: " + depth);
+				}
 			}
 		}
+		
+		
 		
 		searchtime = System.currentTimeMillis() - searchtime;
         timer.cancel();
@@ -393,43 +434,77 @@ public class ChessBot {
 	 * @return best move found
 	 * */
 	private Move alphaBetaSearchPure() {
+		System.out.println("alphabeta pure");
 		Move nextMove = null;
 		long searchtime = System.currentTimeMillis(); // current time in milliseconds
 		
 		/* AlphaBeta Search */
-		//ScoreBoard scoreboard = new ScoreBoard(board.copy());
-		ScoreBitBoard scoreboard = new ScoreBitBoard(board.copy());
-		Function<Node, Integer> evalFunction = new BoardFunction(scoreboard);
+		ScoreBoard<Double> scoreboard = new ScoreBitBoardDouble(board.copy());
+		Function<Node, Double> evalFunction = new BoardFunction(scoreboard);
 		
 		long starttime = System.currentTimeMillis();
+		// iterative deepening
+		List<Pair<Node,Double>> results = new ArrayList<Pair<Node,Double>>();
 		for(int depth = 1; depth <= depthLimit; depth++) {
-			alphabeta = new AlphaBetaSearchInt(depth, starttime);
-			
-			Pair<Node, Integer> result = null;
-			double[] aspReset = {new Double(aspwindow[0]), new Double(aspwindow[1])};
-			boolean failed = false;
+
+			Pair<Node, Double> result = null;
+			alphabeta = new AlphaBetaSearchDouble(depth, starttime);
 			alphabeta.setBounds(Integer.MIN_VALUE, Integer.MAX_VALUE);
+			alphabeta.setTime(time);
+
 			result = alphabeta.search(
 					new BoardNode(board.copy()),
-					evalFunction);	
+					evalFunction);
+			results.add(result);
+			System.out.println("bot result state iteration " + depth + ": " + alphabeta.getResultState());
+			System.out.println("result depth " + depth + ": " + result);
 			currentScore = result.s;
-
 			
-			if(result.f != null) {
-				System.out.println(result.f.getAction() + " " + result.s + " depth " + depth);
-				currentScore = result.s;
-				nextMove = result.f.getAction();
+			nextMove = result.f.getAction();
+			
+			// interrupted or time is up
+			//TODO incomplete!
+			System.out.println("bot result state: " + alphabeta.getResultState());
+			// time is up --> fallback to previous iteration
+			//if((alphabeta.getResultState() & 0b10000) == 16) { 
+			if(alphabeta.getResultState() == 16 ||  alphabeta.getResultState() == 32) {
+				System.out.println("time is up! fallback action");
+				
+				int i = results.size() - 1;
+				if(i >= 0) {
+					while(i > 0 && results.get(i).f.getAction() == null)
+						--i; // back to previous iteration
+	
+					for(int j = results.size() - 1; j >= 0; --j) {
+						if(results.get(j).f.getAction() != null)
+							System.out.println(j + " " + results.get(j).f.getAction().toString());
+						else
+							System.out.println(j + " null");
+					}
+					
+					nextMove = results.get(i).f.getAction();
+					System.out.println("falling back to iteration " + (i+1));
+					System.out.println("results size: " + results.size());
+					System.out.println("nextMove: " + nextMove);
+					System.out.println("depth: " + depth);
+					
+					searchtime = System.currentTimeMillis() - searchtime;
+					
+					//printSearchStats(searchtime, scoreboard);
+					System.out.println("move: " + nextMove);
+					return nextMove;
+				}
 			}
 		}
 		
 		searchtime = System.currentTimeMillis() - searchtime;
 		
-		printSearchStats(searchtime, scoreboard);
-		
+		//printSearchStats(searchtime, scoreboard);
+		System.out.println("move: " + nextMove);
 		return nextMove;
 	}
 	
-	private void printSearchStats(long searchtime, ScoreBoard scoreboard) {
+	private void printSearchStats(long searchtime, ScoreBoard<Double> scoreboard) {
 		System.out.println("score: " + currentScore);
 		System.out.println("Possible moves: " + board.getPossibleMoves().size());
 		System.out.println("searchtime: " + searchtime / 1000 + " s");
@@ -442,7 +517,7 @@ public class ChessBot {
 	}
 	
 	/** @return current bestmove score */
-	public int getScore() {
+	public double getScore() {
 		return currentScore;
 	}
 	
@@ -465,6 +540,20 @@ public class ChessBot {
 	 * @param depth limit */
 	public void setDepthLimit(int limit) {
 		depthLimit = limit;
+	}
+	
+	int time;
+	int wtime;
+	int btime;
+
+	public void setWtime(int time) {
+		this.wtime = time;
+		this.time = wtime;
+	}
+	
+	public void setBtime(int btime) {
+		this.btime = btime;
+		this.time = (wtime + btime) / 2;
 	}
 	
 	/** Turn Debug-Mode on/off */

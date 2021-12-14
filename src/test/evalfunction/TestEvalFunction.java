@@ -20,9 +20,13 @@ import board.Board;
 import board.Move;
 import board.pieces.Piece;
 import board.position.Fen;
+import board.position.Position;
+import board.position.bitboard.Movement;
 import board.position.bitboard.PositionBB;
 import search.datastructures.ScoreData;
 import search.evalfunctions.ScoreBitBoard;
+import search.evalfunctions.ScoreBitBoardDouble;
+import search.evalfunctions.ScoreBoard;
 import test.bitboard.TestMoves;
 import util.StringUtils;
 
@@ -58,19 +62,20 @@ public class TestEvalFunction {
 	@Test
 	public void testEvalFunction() {
 		Board  board = new Board(new PositionBB());
-		ScoreBitBoard scoreboard = new ScoreBitBoard(board.copy());
+		ScoreBitBoardDouble scoreboard = new ScoreBitBoardDouble(board.copy().getPositionBB());
 		
 		boolean firstRow = true;
 		for(Move m : board.getPossibleMoves()) {
 			Board execBoard = board.copy();
 			execBoard.makeMove(m);
+			Position pos = execBoard.getPositionBB();
 			ScoreData scores = new ScoreData();
 			scores.addLabel("Material");
 			scores.addLabel("Mobility");
 			scores.addLabel("Position");
-			scores.add(scoreboard.scoreMaterial(execBoard));
-			scores.add(scoreboard.scoreMobility(execBoard));
-			scores.add(scoreboard.scorePosition(execBoard));
+			scores.add(scoreboard.scoreMaterial(pos));
+			scores.add(scoreboard.scoreMobility(pos));
+			scores.add(scoreboard.scorePosition(pos));
 			//scoreboard.applyDetailed(execBoard);
 			if(firstRow) {
 				System.out.println("Move " + scores.getLabelRowString());
@@ -97,17 +102,17 @@ public class TestEvalFunction {
 		String[] poslist = {"rnbqkbnr/pppppppp/8/8/8/8/1PPPPPPP/RNBQKBNR w KQkq - 0 2", 
 				"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKB1R w KQkq - 0 2",
 				"rn1qkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKB1R w KQkq - 0 2"};
-		int[] expectedScores = {0 - Piece.PAWN_V, 0 - Piece.KNIGHT_V, 0 - Piece.KNIGHT_V + Piece.BISHOP_V};
-		List<Integer> results = new ArrayList<Integer>();
+		double[] expectedScores = {0 - Piece.PAWN_V, 0 - Piece.KNIGHT_V, 0 - Piece.KNIGHT_V + Piece.BISHOP_V};
+		List<Double> results = new ArrayList<Double>();
 		
 		List<String> positions = new ArrayList<String>(Arrays.asList(poslist));
 		for(int i = 0; i < positions.size(); i++) {
 			PositionBB pos = new PositionBB(new Fen(positions.get(i)));
 			System.out.println(pos);
 			Board  board = new Board(pos);
-			ScoreBitBoard scoreboard = new ScoreBitBoard(board.copy());
+			ScoreBitBoardDouble scoreboard = new ScoreBitBoardDouble(board.copy().getPositionBB());
 			
-			int mtrlScore = scoreboard.scoreMaterial(board);
+			double mtrlScore = scoreboard.scoreMaterial(board.getPositionBB());
 			assertEquals(mtrlScore, expectedScores[i]);
 			results.add(mtrlScore);
 			System.out.println(mtrlScore);
@@ -123,13 +128,13 @@ public class TestEvalFunction {
 	public void testMobilityScore() {
 		//Board board = new Board(new PositionBB(new Fen("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2")));
 		Board board = new Board(new PositionBB(new Fen(fenstr)));
-		ScoreBitBoard scoreboard = new ScoreBitBoard(board.copy());
+		ScoreBitBoardDouble scoreboard = new ScoreBitBoardDouble(board.copy().getPositionBB());
 		
-		int mobScore = scoreboard.scoreMobility(board);
-		int expected = board.getPossibleMoves().size();
+		double mobScore = scoreboard.scoreMobility(board.getPositionBB());
+		double expected = board.getPossibleMoves().size();
 		board.getPositionBB().setWhiteMove(false);
 		expected -= board.getPossibleMoves().size();
-		int diff = Math.abs(expected - mobScore);
+		double diff = Math.abs(expected - mobScore);
 		
 		System.out.print("expected: " + expected + ", ");
 		System.out.print("function: " + mobScore + ", ");

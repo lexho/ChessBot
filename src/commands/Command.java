@@ -23,4 +23,8 @@ public class Command extends Thread {
 		Command.bot = bot;
 	}
 	
+	public static void stopBot() {
+		bot.stop();
+	}
+	
 }

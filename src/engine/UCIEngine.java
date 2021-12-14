@@ -1,6 +1,8 @@
 package engine;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.List;
@@ -57,6 +59,19 @@ public class UCIEngine {
 	 * @param cmd UCI command to be parsed
 	 */
 	private static void parseCommand(String cmd) {
+		boolean writeCommandToFile = false;
+		if(writeCommandToFile) {
+			FileWriter writer;
+			try {
+				writer = new FileWriter("engine.output.txt", true);
+				writer.write(cmd + "\n");
+				writer.flush();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		}
+		
 		
 		int sep = cmd.indexOf(' '); // index of separator (first space-Character)
 		
@@ -67,7 +82,7 @@ public class UCIEngine {
 		List<String> cmds = StringUtils.splitString(cmd, ' ');
 		switch(cmds.get(0)) {
 		case "uci":
-			System.out.println("id name ChessBotBB");
+			System.out.println("id name ChessBotBBCenter");
 			System.out.println("id author Alexander Hoertenhuber");
 			System.out.println("uciok");
 			break;
@@ -109,10 +124,20 @@ public class UCIEngine {
 		case "go":
 			current.interrupt();
 			current = new GoCommand();
+			if(cmds.size() > 1) {
+				if(cmds.get(1).equals("wtime")) {
+					int wtime = Integer.parseInt(cmds.get(2));
+					((GoCommand) current).setWtime(wtime);
+				}
+				if(cmds.get(3).equals("btime")) {
+					int btime = Integer.parseInt(cmds.get(4));
+				}
+			}
 			current.start();
-			break;
+			break;		
 		case "stop":
-			current.interrupt();
+			bot.stop();
+			Command.stopBot();
 			break;
 		case "ponderhit":
 			break;

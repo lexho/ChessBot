@@ -64,7 +64,8 @@ public class TestBratkoKopec {
 		ChessBot bot = new ChessBot(fenstr);
 		bot.useAspWindows(false);
 		bot.useHashTable(false);
-		bot.setDepthLimit(6);
+		bot.setDepthLimit(4);
+		bot.setWtime(15000000);
 		String bestmove_bot = bot.getNextMove();
 		String target = bestmove_bot.substring(2);
 		

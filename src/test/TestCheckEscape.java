@@ -24,6 +24,6 @@ public class TestCheckEscape {
 		Board.DEBUG = true;
 		List<Move> possible = b.getPossibleMoves();
 		System.out.println(possible);
-		assertFalse(Move.contains(possible, new Move("e8e7")));
+		assertFalse(possible.contains(new Move("e8e7")));
 	}
 }

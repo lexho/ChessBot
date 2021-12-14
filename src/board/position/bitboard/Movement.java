@@ -454,7 +454,7 @@ public class Movement {
             }
             
             squares &= squares-1;
-        }
+		}
 		return possible;
 	}
 	

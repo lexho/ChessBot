@@ -19,7 +19,7 @@ import util.BitBoardUtils;
  * called!
  * @param <V>
  */
-public class ScoreBitBoard<V> implements ScoreBoard
+public class ScoreBitBoard<V> implements ScoreBoard<Integer>
 {
 	private boolean player_id;
 	private boolean opponent_id;
@@ -61,25 +61,28 @@ public class ScoreBitBoard<V> implements ScoreBoard
 			
 			/* scoring dimensions */
 			int mtrl = scoreMaterial(board);
-			int mobility = scoreMobility(board) * 2;
-			int pos = scorePosition(board);
+			int mobility = 0; //scoreMobility(board) * 2;
+			int pos = (int) (scorePosition(board)*0.5d);
 			
 			score = mtrl + mobility + pos;
+			
 			if(player_id == BLACK) score *= -1;
-			
+			//if(player_id == WHITE) score *= -1;
+
 			//if(mtrl > 0) System.out.println("material: " + mtrl + ", mobility: " + mobility + ", position: " + pos);
-			
+			//System.out.println("score: " + score);
 			return score;
 		  } else
 		{
 			// Who is checkmate?
 			if(board.isInCheck(opponent_id)) {
-				return 100000;
+				return Integer.MAX_VALUE;
 			} else if (board.isInCheck(player_id)) {
-				return -100000;
+				return Integer.MIN_VALUE;
 			} else {
 				return 0;
 			}
+			  //return 0;
 		}
 	}
 	
@@ -89,10 +92,21 @@ public class ScoreBitBoard<V> implements ScoreBoard
 	
 	public int scoreMaterial(Position board) {
 		int score;
+
 		score = board.getPositionBB().getWhiteMaterial();
 		score -= board.getPositionBB().getBlackMaterial();
+		
+		// results differ (not anymore?) !!!
 		//System.out.println(board);
-		//System.out.println(board.getPositionBB().getWhiteMaterial() + " " + board.getPositionBB().getBlackMaterial());
+		//System.out.println("material: w: " + board.getPositionBB().getWhiteMaterial() + " b: " + board.getPositionBB().getBlackMaterial());
+		//System.out.println("score: " + score);
+		
+		/*board.updateMaterial(); // wMtrl and bMtrl do not get counted well so we have to do this manually
+		score = board.getPositionBB().getWhiteMaterial();
+		score -= board.getPositionBB().getBlackMaterial();*/
+		//System.out.println("material: w: " + board.getPositionBB().getWhiteMaterial() + " b: " + board.getPositionBB().getBlackMaterial());
+		//System.out.println("score: " + score);
+		
 		return score;
 	}
 	
